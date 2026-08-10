@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Daily Task Check — 디자인 시안 v12 (마일스톤/바텀시트/아이콘/기록구조)</title>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<style>
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; font-family:'Pretendard',-apple-system,sans-serif; background:#141513; color:#e8e8ea;
+    padding: 48px 32px 140px; -webkit-font-smoothing:antialiased;
+  }
+  .page-head{ max-width:1300px; margin:0 auto 40px; }
+  .page-head .tag{ display:inline-block; font-size:11px; font-weight:700; color:#0b0b0d; background:#e8e8ea; padding:3px 9px; border-radius:6px; margin-bottom:12px; }
+  .page-head h1{ font-size:22px; font-weight:700; margin:0 0 8px; letter-spacing:-0.01em; }
+  .page-head p{ font-size:13px; color:#a6a6ab; line-height:1.8; margin:0 0 10px; max-width:960px; }
+  .page-head b{ color:#e8e8ea; }
+
+  .group{ max-width:1300px; margin:0 auto 52px; }
+  .group-title{ font-size:14px; font-weight:700; color:#e8e8ea; margin-bottom:5px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,.12); }
+  .group-sub{ font-size:12px; color:#9d9ea2; margin: 8px 0 16px; max-width:920px; line-height:1.75; }
+  .group-sub b{ color:#e8e8ea; }
+  .row{ display:flex; gap:26px; flex-wrap:wrap; align-items:flex-start; }
+  .unit{ display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .unit .label{ font-size:11px; font-weight:600; color:#9d9ea2; text-align:center; max-width:300px; line-height:1.5; }
+
+  .frame{ width:300px; height:650px; background:#000; border-radius:38px; padding:9px; box-shadow:0 20px 44px rgba(0,0,0,.4); position:relative; }
+  .notch{ position:absolute; top:9px; left:50%; transform:translateX(-50%); width:96px; height:20px; background:#000; border-radius:11px; z-index:30; }
+  .screen{ width:100%; height:100%; border-radius:29px; overflow:hidden; position:relative; display:flex; flex-direction:column; }
+
+  .screen.light{
+    --canvas:#fbf9f5; --surface:#f4efe6; --card:#ffffff; --hair:#e8e2d6; --hair-strong:#d8cfbd;
+    --ink:#2a2826; --ink-soft:#6e6f63; --ink-faint:#9c9c8c;
+    --accent:#4d6152; --accent-strong:#3a4a3f; --accent-soft:rgba(77,97,82,0.12);
+    --ring-empty: rgba(42,40,38,.12); --on-accent:#ffffff; --danger:#a23b2e;
+    --sat:#3f6a8c; --sun:#a2504a; --mind-bg:#5b3a28; --mind-ink:#f3eadd;
+    background:var(--canvas); color:var(--ink);
+  }
+
+  .statusbar{ height:42px; flex:none; display:flex; align-items:flex-end; justify-content:space-between; padding:0 18px 6px; font-size:12px; font-weight:600; }
+  .content{ flex:1 1 auto; overflow-y:auto; overflow-x:hidden; padding:2px 15px 10px; }
+  .app-header{ padding:6px 2px 12px; position:relative; }
+  .app-header .date{ font-size:11.5px; color:var(--ink-soft); font-weight:500; margin-bottom:3px; }
+  .app-header h3{ font-size:19px; font-weight:700; margin:0; letter-spacing:-0.01em; }
+  .app-header .sub{ font-size:11px; color:var(--ink-faint); margin-top:5px; font-weight:500; }
+
+  .proj-tabs{ display:flex; gap:6px; overflow-x:auto; padding:2px 2px 10px; }
+  .proj-chip{ flex:none; padding:7px 13px; border-radius:999px; font-size:11.5px; font-weight:700; background:var(--surface); color:var(--ink-soft); }
+  .proj-chip.active{ background:var(--accent); color:var(--on-accent); }
+  .proj-chip.add{ background:transparent; border:1.4px dashed var(--hair-strong); color:var(--ink-faint); }
+
+  .chip-row{ display:flex; gap:6px; overflow-x:auto; padding:2px 2px 12px; }
+  .chip{ flex:none; padding:6px 11px; border-radius:999px; font-size:10.5px; font-weight:600; background:var(--surface); color:var(--ink-soft); }
+  .chip.active{ background:var(--accent); color:var(--on-accent); }
+
+  .mode-seg{ display:flex; background:var(--surface); border-radius:10px; padding:3px; margin-bottom:12px; }
+  .mode-seg span{ flex:1; text-align:center; padding:7px 0; font-size:11.5px; font-weight:700; color:var(--ink-soft); border-radius:8px; }
+  .mode-seg span.on{ background:var(--card); color:var(--accent); box-shadow:0 1px 2px rgba(0,0,0,.06); }
+
+  .panel{ background:var(--card); border:1px solid var(--hair); border-radius:14px; padding:13px 10px 14px; margin-bottom:12px; }
+  .panel h4{ margin:0 0 10px; font-size:11px; font-weight:700; color:var(--ink-soft); }
+  .wk-header{ display:grid; grid-template-columns:repeat(7,1fr); margin-bottom:6px; }
+  .wk-header span{ text-align:center; font-size:9px; font-weight:700; color:var(--ink-faint); }
+  .wk-header span:nth-child(6){ color:var(--sat); }
+  .wk-header span:nth-child(7){ color:var(--sun); }
+  .month-grid{ display:grid; grid-template-columns:repeat(7,1fr); row-gap:7px; }
+  .cell{ display:flex; flex-direction:column; align-items:center; gap:3px; }
+  .pct-text{ font-size:7px; font-weight:800; }
+  .pct-text.on-fill{ fill: var(--on-accent); }
+  .pct-text.on-empty{ fill: var(--ink); }
+  .daynum{ font-size:7.5px; font-weight:600; color:var(--ink-faint); }
+  .daynum.today{ font-weight:800; color:var(--accent); }
+  .daynum.other{ color:var(--ink-faint); opacity:.4; }
+  .legend2{ display:flex; align-items:center; gap:12px; margin-top:11px; padding-top:11px; border-top:1px solid var(--hair); flex-wrap:wrap; }
+  .legend2 .li{ display:flex; align-items:center; gap:5px; font-size:9.5px; color:var(--ink-soft); font-weight:600; white-space:nowrap; }
+
+  .task-list{ display:flex; flex-direction:column; margin-top:2px; }
+  .task-row{ display:flex; align-items:center; gap:11px; padding:12px 4px; border-bottom:1px solid var(--hair); }
+  .task-row:last-child{ border-bottom:none; }
+  .task-icon{ width:30px; height:30px; border-radius:9px; background:var(--surface); display:flex; align-items:center; justify-content:center; flex:none; }
+  .task-icon img{ width:16px; height:16px; opacity:.65; }
+  .task-main{ flex:1; min-width:0; }
+  .task-name{ font-size:13.5px; font-weight:600; }
+  .task-name.done{ color:var(--ink-faint); text-decoration:line-through; }
+  .task-meta{ font-size:10px; color:var(--ink-faint); margin-top:3px; font-weight:500; }
+  .chk{ width:22px; height:22px; flex:none; border-radius:999px; border:1.6px solid var(--hair-strong); }
+  .chk.done{ border-color:transparent; background:var(--accent); position:relative; }
+  .chk.done::after{ content:""; position:absolute; left:50%; top:50%; width:5.5px; height:9px; border-right:2px solid var(--on-accent); border-bottom:2px solid var(--on-accent); transform:translate(-50%,-58%) rotate(45deg); }
+
+  .bottom-nav{ flex:none; display:flex; border-top:1px solid var(--hair); padding:8px 4px 16px; background:var(--canvas); }
+  .nav-item{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; font-size:8.5px; color:var(--ink-faint); font-weight:600; }
+  .nav-item svg{ width:18px; height:18px; }
+  .nav-item.active{ color:var(--accent); font-weight:700; }
+
+  .ms{ position:relative; }
+  .ms-item{ position:relative; }
+  .ms-item::before{ content:""; position:absolute; left:15px; top:32px; bottom:-2px; width:1.6px; background:var(--hair-strong); }
+  .ms-item:last-child::before{ display:none; }
+  .ms-row{ display:flex; gap:10px; padding: 11px 4px; }
+  .ms-node{ width:23px;height:23px;border-radius:50%; flex:none; display:flex;align-items:center;justify-content:center; font-size:10.5px; font-weight:700; border:1.6px solid var(--hair-strong); color:var(--ink-faint); background:var(--canvas); margin-top:1px; position:relative; z-index:2; }
+  .ms-item.done .ms-node{ background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
+  .ms-item.active .ms-node{ border-color:var(--accent); color:var(--accent); }
+  .ms-title{ font-size:13px; font-weight:700; }
+  .ms-item.active .ms-title{ color: var(--accent); }
+  .ms-sub{ font-size:10px; color:var(--ink-faint); font-weight:500; margin-top:3px; }
+  .status-pill{ display:inline-block; font-size:9px; font-weight:700; padding:2px 7px; border-radius:6px; margin-top:6px; background:var(--surface); color:var(--ink-faint); }
+  .status-pill.on{ background: var(--accent-soft); color: var(--accent); }
+  .ms-add{ display:flex; align-items:center; gap:8px; padding:10px 4px 4px 32px; font-size:11.5px; font-weight:600; color:var(--ink-faint); }
+
+  .field-label{ font-size:11px; font-weight:700; color:var(--ink-soft); margin:14px 4px 8px; }
+  .field-label:first-child{ margin-top:2px; }
+  .text-input{ background:var(--card); border:1.4px solid var(--hair-strong); border-radius:11px; padding:11px 13px; font-size:14px; font-weight:600; color:var(--ink); }
+  .icon-grid{ display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-top:8px; }
+  .icon-opt{ aspect-ratio:1; border-radius:10px; background:var(--surface); display:flex; align-items:center; justify-content:center; border:1.6px solid transparent; }
+  .icon-opt img{ width:16px; height:16px; opacity:.7; }
+  .icon-opt.sel{ border-color:var(--accent); background:var(--accent-soft); }
+  .icon-opt.sel img{ opacity:1; filter:sepia(1) saturate(3) hue-rotate(70deg) brightness(.7); }
+  .note{ font-size:10px; color:var(--ink-faint); line-height:1.6; margin-top:8px; font-weight:500; }
+
+  .sheet-backdrop{ position:absolute; inset:0; background:rgba(20,18,15,.42); z-index:40; }
+  .sheet{ position:absolute; left:0; right:0; bottom:0; height:80%; background:var(--canvas); border-radius:22px 22px 0 0; z-index:50; box-shadow:0 -10px 30px rgba(0,0,0,.18); display:flex; flex-direction:column; padding: 10px 16px 18px; overflow-y:auto; }
+  .sheet-handle{ width:36px; height:4px; border-radius:3px; background:var(--hair-strong); margin:2px auto 10px; flex:none; }
+  .sheet-header{ display:flex; align-items:center; justify-content:space-between; padding:2px 0 12px; flex:none; }
+  .sheet-header .t{ font-size:15px; font-weight:700; }
+  .sheet-header .back{ width:26px; height:26px; color:var(--ink-soft); display:flex; align-items:center; }
+  .sheet-header .save{ font-size:12.5px; font-weight:700; color:var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <div class="tag">v12 · 마일스톤 이음선 / 바텀시트 2종 / 라벨 단순화 / 실제 아이콘 / 기록 구조 개편</div>
+  <h1>Daily Task Check — 디자인 시안 v12</h1>
+  <p>순서: <b>①마일스톤 이음선 복원 → ②프로젝트 생성 바텀시트 → ③마일스톤 추가 바텀시트 → ④오늘 탭 라벨 단순화 → ⑤아이콘 20종(실제 Lucide) → ⑥미래 예약 개수 표시 → ⑦기록 탭 구조 개편</b></p>
+</div>
+
+<div class="group">
+  <div class="group-title">① 마일스톤 이음선 복원</div>
+  <div class="row">
+    <div class="unit"><div class="label">단계 사이를 세로선으로 연결 (v9까지 있던 걸 v10~11에서 실수로 빠뜨렸습니다)</div>
+      <div class="frame"><div class="notch"></div><div class="screen light">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content">
+          <div class="app-header"><h3>프로젝트</h3></div>
+          <div class="proj-tabs"><div class="proj-chip active">토익 900점</div><div class="proj-chip">이직 준비</div><div class="proj-chip add">+ 새 프로젝트</div></div>
+          <div class="app-header" style="padding-top:0;"><div class="sub">7/20 시작</div></div>
+          <div class="ms">
+            <div class="ms-item done"><div class="ms-row"><div class="ms-node">✓</div><div><div class="ms-title">단어 · 리스닝 습관 잡기</div><div class="ms-sub">메모 2개</div><span class="status-pill">완료 · 7/28</span></div></div></div>
+            <div class="ms-item active"><div class="ms-row"><div class="ms-node">2</div><div><div class="ms-title">실전 문제 풀이 매일 1세트</div><div class="ms-sub">8/1 시작</div><span class="status-pill on">진행 중</span></div></div></div>
+            <div class="ms-item"><div class="ms-row"><div class="ms-node">3</div><div><div class="ms-title">모의고사로 중간 점검</div><div class="ms-sub">9월 예정</div><span class="status-pill">예정</span></div></div></div>
+          </div>
+          <div class="ms-add">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            다음 단계 추가
+          </div>
+        </div>
+        <div class="bottom-nav" id="nav-proj"></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">② 프로젝트 생성 — 바텀시트</div>
+  <div class="row">
+    <div class="unit"><div class="label">"+ 새 프로젝트" 탭 → 바텀시트</div>
+      <div class="frame"><div class="notch"></div><div class="screen light" style="position:relative;">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content"><div class="app-header"><h3>프로젝트</h3></div><div class="proj-tabs"><div class="proj-chip active">토익 900점</div><div class="proj-chip">이직 준비</div></div></div>
+        <div class="sheet-backdrop"></div>
+        <div class="sheet" style="height:58%;">
+          <div class="sheet-handle"></div>
+          <div class="sheet-header">
+            <div class="back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+            <div class="t">새 프로젝트</div>
+            <div class="save">저장</div>
+          </div>
+          <div class="field-label">이름</div>
+          <div class="text-input">예: 이사 준비</div>
+          <div class="field-label">시작일</div>
+          <div class="text-input">2026. 8. 4.</div>
+          <div class="note">시작일 이후의 단계들을 순서대로 추가하게 됩니다.</div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">③ 마일스톤 추가 — 바텀시트 (①의 "다음 단계 추가"에서 진입)</div>
+  <div class="row">
+    <div class="unit"><div class="label">눈에 띄지 않는 텍스트형 추가 버튼 → 탭하면 바텀시트</div>
+      <div class="frame"><div class="notch"></div><div class="screen light" style="position:relative;">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content">
+          <div class="app-header"><h3>프로젝트</h3></div>
+          <div class="proj-tabs"><div class="proj-chip active">토익 900점</div><div class="proj-chip">이직 준비</div></div>
+        </div>
+        <div class="sheet-backdrop"></div>
+        <div class="sheet" style="height:58%;">
+          <div class="sheet-handle"></div>
+          <div class="sheet-header">
+            <div class="back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+            <div class="t">다음 단계 추가</div>
+            <div class="save">저장</div>
+          </div>
+          <div class="field-label">단계 이름</div>
+          <div class="text-input">예: 모의고사로 중간 점검</div>
+          <div class="field-label">예정 시작일</div>
+          <div class="text-input">9월 초 (선택)</div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">④ 오늘 탭 — 라벨 단순화 (색 제거)</div>
+  <div class="group-sub">색이 있는 태그 배지를 없애고, 다른 메타 정보(반복 주기)와 같은 톤의 <b>일반 텍스트</b>로만 표기했습니다. 시각적으로 한 단계 조용해졌습니다.</div>
+  <div class="row">
+    <div class="unit"><div class="label">색 배지 → 무채색 텍스트</div>
+      <div class="frame"><div class="notch"></div><div class="screen light">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content">
+          <div class="app-header"><div class="date">8월 4일 화요일</div><h3>오늘의 할 일</h3><div class="sub">이번 주 5 / 7일 완료</div></div>
+          <div class="task-list" id="today-simple"></div>
+        </div>
+        <div class="bottom-nav" id="nav-today"></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">⑤ 아이콘 20종 — 실제 오픈소스(Lucide) 아이콘으로 교체</div>
+  <div class="group-sub">직접 그린 것 대신 <b>Lucide</b>(ISC 라이선스, 오픈소스) 아이콘을 그대로 불러와 썼습니다. 할 일 전용 아이콘이 아니어도 되게 범위를 넓혔습니다(별·해·달·구름 등도 포함).</div>
+  <div class="row">
+    <div class="unit"><div class="label">할 일 추가 시트의 아이콘 선택 그리드</div>
+      <div class="frame"><div class="notch"></div><div class="screen light" style="position:relative;">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content"><div class="app-header"><h3>오늘의 할 일</h3></div></div>
+        <div class="sheet-backdrop"></div>
+        <div class="sheet" style="height:66%;">
+          <div class="sheet-handle"></div>
+          <div class="sheet-header"><div class="back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></div><div class="t">새 할 일 추가</div><div class="save">저장</div></div>
+          <div class="field-label">이름</div>
+          <div class="text-input">예: 명상 10분</div>
+          <div class="field-label">아이콘 (20종)</div>
+          <div class="icon-grid" id="icon-grid20"></div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">⑥ 기록 — 미래 날짜에 예약된 항목은 개수로 표시</div>
+  <div class="group-sub">아직 오지 않은 날이라도 그날 예약해 둔 "오늘만" 항목이 있으면, 아무 표시도 없는 빈 점선 대신 <b>개수만 담은 원</b>으로 "뭔가 예정돼 있다"는 걸 보여줍니다. 완료율 링(초록)과 헷갈리지 않도록 무채색으로 구분했습니다.</div>
+  <div class="row">
+    <div class="unit"><div class="label">8/6에 예약 항목 2개, 8/9에 1개</div>
+      <div class="frame"><div class="notch"></div><div class="screen light">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content">
+          <div class="app-header"><div class="date">기록</div><h3>전체 보기</h3></div>
+          <div class="panel"><h4>2026년 8월</h4>
+            <div class="wk-header"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span></div>
+            <div class="month-grid" id="g6"></div>
+            <div class="legend2">
+              <div class="li"><svg width="13" height="13"><circle cx="6.5" cy="6.5" r="5.3" fill="none" stroke="var(--ink-faint)" stroke-width="1.2" stroke-dasharray="2 2" opacity=".5"/></svg>예정 없음</div>
+              <div class="li"><svg width="13" height="13"><circle cx="6.5" cy="6.5" r="5.3" fill="none" stroke="var(--hair-strong)" stroke-width="1.6"/></svg>예약된 항목 있음(숫자)</div>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-nav" id="nav-record"></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">⑦ 기록 탭 — 전체 / 프로젝트별 / 항목별 3단 구조</div>
+  <div class="group-sub">상단에 3단 세그먼트를 추가했습니다. "전체"와 "항목별"은 기존과 같고, 이번에 <b>"프로젝트별"</b>이 새로 생겨 그 프로젝트에 연결된 항목들만 모아 계산한 완료율을 볼 수 있습니다.</div>
+  <div class="row">
+    <div class="unit"><div class="label">프로젝트별 → "토익 900점"에 연결된 항목만 집계</div>
+      <div class="frame"><div class="notch"></div><div class="screen light">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content">
+          <div class="app-header"><div class="date">기록</div><h3>토익 900점</h3></div>
+          <div class="mode-seg"><span>전체</span><span class="on">프로젝트별</span><span>항목별</span></div>
+          <div class="chip-row"><div class="chip active">토익 900점</div><div class="chip">이직 준비</div></div>
+          <div class="panel"><h4>2026년 8월</h4>
+            <div class="wk-header"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span></div>
+            <div class="month-grid" id="g7"></div>
+          </div>
+          <div class="note">"토익 900점"에 연결된 항목(영어 단어·모의 문제)만 분모로 계산됩니다.</div>
+        </div>
+        <div class="bottom-nav" id="nav-record2"></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const NAV = [
+    {k:'오늘', i:'M4 12.5 9 17l11-11'},
+    {k:'기록', i:'grid'},
+    {k:'마음가짐', i:'M20.5 3.5c-6 0-12 3-15 10-1 2.3-2 5-2 7 2 0 4.7-1 7-2 7-3 10-9 10-15Z|M8 16l9-9'},
+    {k:'프로젝트', i:'M6 21V4l11 4-11 4'},
+    {k:'설정', i:'gear'}
+  ];
+  function navSvg(item){
+    if(item.i==='grid') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="3.5" width="6" height="6" rx="1.3"/><rect x="14.5" y="3.5" width="6" height="6" rx="1.3"/><rect x="3.5" y="14.5" width="6" height="6" rx="1.3"/><rect x="14.5" y="14.5" width="6" height="6" rx="1.3"/></svg>';
+    if(item.i==='gear') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1Z"/></svg>';
+    const paths = item.i.split('|').map(p=>`<path d="${p}"/>`).join('');
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+  }
+  function renderNav(id, activeKey){
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.innerHTML = NAV.map(item => `<div class="nav-item ${item.k===activeKey?'active':''}">${navSvg(item)}<span>${item.k}</span></div>`).join('');
+  }
+  renderNav('nav-proj','프로젝트'); renderNav('nav-today','오늘'); renderNav('nav-record','기록'); renderNav('nav-record2','기록');
+
+  const LUCIDE = ['dumbbell','book-open','pencil','droplet','moon','flower-2','apple','footprints','music','paintbrush','coffee','heart','star','sun','cloud-rain','leaf','target','calendar','alarm-clock','smile'];
+  function lucideImg(name, extraClass){
+    return `<img class="${extraClass||''}" src="https://unpkg.com/lucide-static@latest/icons/${name}.svg" alt="${name}" />`;
+  }
+
+  const TASKS = [
+    {icon:'dumbbell', name:'운동 30분', meta:'매일 · 7일 연속', done:true, proj:null},
+    {icon:'book-open', name:'영어 단어 20개', meta:'매일 · 토익 900점', done:true, proj:'a'},
+    {icon:'pencil', name:'일기 쓰기', meta:'매일', done:false, proj:null},
+    {icon:'droplet', name:'물 2L 마시기', meta:'매일', done:false, proj:null},
+    {icon:'book-open', name:'모의 문제 1세트', meta:'매일 · 토익 900점', done:false, proj:'a'},
+    {icon:'smile', name:'모의 면접 스크립트 읽기', meta:'매일 · 이직 준비', done:false, proj:'b'},
+  ];
+  const todaySimpleEl = document.getElementById('today-simple');
+  if(todaySimpleEl){
+    todaySimpleEl.innerHTML = TASKS.map(t => `
+      <div class="task-row">
+        <div class="task-icon">${lucideImg(t.icon)}</div>
+        <div class="task-main"><div class="task-name ${t.done?'done':''}">${t.name}</div><div class="task-meta">${t.meta}</div></div>
+        <div class="chk ${t.done?'done':''}"></div>
+      </div>`).join('');
+  }
+
+  const iconGrid20 = document.getElementById('icon-grid20');
+  if(iconGrid20){
+    iconGrid20.innerHTML = LUCIDE.map((k,i)=>`<div class="icon-opt ${i===13?'sel':''}">${lucideImg(k)}</div>`).join('');
+  }
+
+  function renderGrid(containerId, list){
+    const el = document.getElementById(containerId);
+    if(!el) return;
+    const size = 25, R = 10.5, C = 2*Math.PI*R;
+    list.forEach(d=>{
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      let svg = '';
+      if(d.m !== 'cur'){
+        svg = `<svg width="${size}" height="${size}"></svg>`;
+      } else if(d.count){
+        svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${R}" fill="none" stroke="var(--hair-strong)" stroke-width="1.6"/><text x="${size/2}" y="${size/2+2.6}" text-anchor="middle" class="pct-text on-empty">${d.count}</text></svg>`;
+      } else if(d.future){
+        svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${R}" fill="none" stroke="var(--ink-faint)" stroke-width="1.3" stroke-dasharray="2 2" opacity="0.45"/></svg>`;
+      } else if(d.p >= 100){
+        svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${R}" fill="var(--accent)"/><text x="${size/2}" y="${size/2+2.6}" text-anchor="middle" class="pct-text on-fill">100</text></svg>`;
+      } else {
+        const dash = (d.p/100)*C;
+        svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+          <circle cx="${size/2}" cy="${size/2}" r="${R}" fill="none" stroke="var(--ring-empty)" stroke-width="2.2"/>
+          ${d.p>0 ? `<circle cx="${size/2}" cy="${size/2}" r="${R}" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="${dash} ${C}" transform="rotate(-90 ${size/2} ${size/2})"/>` : ''}
+          <text x="${size/2}" y="${size/2+2.6}" text-anchor="middle" class="pct-text on-empty">${d.p}</text>
+        </svg>`;
+      }
+      const daynum = document.createElement('div');
+      daynum.className = 'daynum' + (d.today? ' today' : '') + (d.m!=='cur' ? ' other' : '');
+      daynum.textContent = d.n;
+      cell.innerHTML = svg;
+      cell.appendChild(daynum);
+      el.appendChild(cell);
+    });
+  }
+  const cells6 = [
+    {n:27,m:'prev'},{n:28,m:'prev'},{n:29,m:'prev'},{n:30,m:'prev'},{n:31,m:'prev'},{n:1,m:'cur',p:75},{n:2,m:'cur',p:25},
+    {n:3,m:'cur',p:100},{n:4,m:'cur',p:40,today:true},{n:5,m:'cur',future:true},{n:6,m:'cur',count:2},{n:7,m:'cur',future:true},{n:8,m:'cur',future:true},{n:9,m:'cur',count:1},
+    {n:10,m:'cur',future:true},{n:11,m:'cur',future:true},{n:12,m:'cur',future:true},{n:13,m:'cur',future:true},{n:14,m:'cur',future:true}
+  ];
+  const cells7 = [
+    {n:27,m:'prev'},{n:28,m:'prev'},{n:29,m:'prev'},{n:30,m:'prev'},{n:31,m:'prev'},{n:1,m:'cur',p:60},{n:2,m:'cur',p:0},
+    {n:3,m:'cur',p:100},{n:4,m:'cur',p:50,today:true},{n:5,m:'cur',future:true},{n:6,m:'cur',future:true},{n:7,m:'cur',future:true},{n:8,m:'cur',future:true},{n:9,m:'cur',future:true}
+  ];
+  renderGrid('g6', cells6);
+  renderGrid('g7', cells7);
+</script>
+
+</body>
+</html>

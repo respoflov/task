@@ -1,0 +1,38 @@
+import { CheckCircle2, LayoutGrid, Leaf, Flag, Settings2 } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
+import { useT, type TKey } from "@/lib/i18n"
+
+export type TabKey = "today" | "record" | "mindset" | "project" | "settings"
+
+const TABS: { key: TabKey; labelKey: TKey; icon: LucideIcon }[] = [
+  { key: "today", labelKey: "nav_today", icon: CheckCircle2 },
+  { key: "record", labelKey: "nav_record", icon: LayoutGrid },
+  { key: "mindset", labelKey: "nav_mindset", icon: Leaf },
+  { key: "project", labelKey: "nav_project", icon: Flag },
+  { key: "settings", labelKey: "nav_settings", icon: Settings2 },
+]
+
+export function BottomNav({ active, onChange }: { active: TabKey; onChange: (t: TabKey) => void }) {
+  const t = useT()
+  return (
+    <nav className="flex shrink-0 border-t border-border bg-background px-1 pb-[max(16px,env(safe-area-inset-bottom))] pt-2">
+      {TABS.map((tab) => {
+        const isActive = tab.key === active
+        const Icon = tab.icon
+        return (
+          <button
+            key={tab.key}
+            type="button"
+            onClick={() => onChange(tab.key)}
+            className={`flex flex-1 flex-col items-center gap-1 py-1 text-[10px] font-semibold ${
+              isActive ? "text-primary" : "text-ink-faint"
+            }`}
+          >
+            <Icon size={20} strokeWidth={1.8} />
+            <span>{t(tab.labelKey)}</span>
+          </button>
+        )
+      })}
+    </nav>
+  )
+}

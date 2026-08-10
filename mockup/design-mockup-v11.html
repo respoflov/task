@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Daily Task Check — 디자인 시안 v11 (다중 프로젝트/아이콘/문구 + 버그수정)</title>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<style>
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; font-family:'Pretendard',-apple-system,sans-serif; background:#141513; color:#e8e8ea;
+    padding: 48px 32px 140px; -webkit-font-smoothing:antialiased;
+  }
+  .page-head{ max-width:1300px; margin:0 auto 40px; }
+  .page-head .tag{ display:inline-block; font-size:11px; font-weight:700; color:#0b0b0d; background:#e8e8ea; padding:3px 9px; border-radius:6px; margin-bottom:12px; }
+  .page-head h1{ font-size:22px; font-weight:700; margin:0 0 8px; letter-spacing:-0.01em; }
+  .page-head p{ font-size:13px; color:#a6a6ab; line-height:1.8; margin:0 0 10px; max-width:960px; }
+  .page-head b{ color:#e8e8ea; }
+  .checklist{ max-width:960px; display:flex; flex-direction:column; gap:5px; margin-top:12px; }
+  .checklist .it{ font-size:12.5px; color:#c9c9cd; line-height:1.7; display:flex; gap:8px; }
+  .checklist .it b{ color:#f2f2f4; min-width:16px; }
+
+  .group{ max-width:1300px; margin:0 auto 52px; }
+  .group-title{ font-size:14px; font-weight:700; color:#e8e8ea; margin-bottom:5px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,.12); }
+  .group-sub{ font-size:12px; color:#9d9ea2; margin: 8px 0 16px; max-width:920px; line-height:1.75; }
+  .group-sub b{ color:#e8e8ea; }
+  .row{ display:flex; gap:26px; flex-wrap:wrap; align-items:flex-start; }
+  .unit{ display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .unit .label{ font-size:11px; font-weight:600; color:#9d9ea2; text-align:center; max-width:300px; line-height:1.5; }
+
+  .diag-box{ max-width:920px; background:#1d1e1f; border:1px solid #2a2a2c; border-radius:12px; padding:16px 18px; font-size:12.5px; color:#c9c9cd; line-height:1.85; margin:14px 0 22px; }
+  .diag-box b{ color:#f2f2f4; }
+
+  .zoom-pair{ display:flex; gap:20px; align-items:center; margin-bottom:20px; }
+  .zoom-card{ background:#fbf9f5; border-radius:14px; padding:18px; display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .zoom-card .l{ font-size:11px; font-weight:700; color:#2a2826; }
+
+  .logo-tile{ display:flex; flex-direction:column; align-items:center; gap:9px; background:#fbf9f5; border-radius:18px; padding:20px 16px; width:132px; }
+  .logo-tile .tname{ font-size:11px; font-weight:700; color:#2a2826; text-align:center; }
+  .logo-tile.frameless{ background:#e9e4d8; }
+
+  .frame{ width:300px; height:650px; background:#000; border-radius:38px; padding:9px; box-shadow:0 20px 44px rgba(0,0,0,.4); position:relative; }
+  .notch{ position:absolute; top:9px; left:50%; transform:translateX(-50%); width:96px; height:20px; background:#000; border-radius:11px; z-index:30; }
+  .screen{ width:100%; height:100%; border-radius:29px; overflow:hidden; position:relative; display:flex; flex-direction:column; }
+
+  .screen.light{
+    --canvas:#fbf9f5; --surface:#f4efe6; --card:#ffffff; --hair:#e8e2d6; --hair-strong:#d8cfbd;
+    --ink:#2a2826; --ink-soft:#6e6f63; --ink-faint:#9c9c8c;
+    --accent:#4d6152; --accent-strong:#3a4a3f; --accent-soft:rgba(77,97,82,0.12);
+    --ring-empty: rgba(42,40,38,.12); --on-accent:#ffffff; --danger:#a23b2e;
+    --sat:#3f6a8c; --sun:#a2504a; --mind-bg:#5b3a28; --mind-ink:#f3eadd;
+    --tagA:#8a6a2e; --tagA-soft:rgba(138,106,46,.12);
+    --tagB:#8c4a5a; --tagB-soft:rgba(140,74,90,.12);
+    background:var(--canvas); color:var(--ink);
+  }
+  .screen.dark{
+    --canvas:#121212; --surface:#1b1b1b; --card:#1e1e1e; --hair:rgba(255,255,255,.08); --hair-strong:rgba(255,255,255,.16);
+    --ink:#efefef; --ink-soft:#b3b3b3; --ink-faint:#7a7a7a;
+    --accent:#8ca290; --accent-strong:#7a9280; --accent-soft:rgba(140,162,144,0.16);
+    --ring-empty: rgba(255,255,255,.14); --on-accent:#12180f; --danger:#d17a6f;
+    --sat:#7fa6c9; --sun:#d17a6f; --mind-bg:#4a3428; --mind-ink:#f3eadd;
+    --tagA:#c2a35f; --tagA-soft:rgba(194,163,95,.16);
+    --tagB:#c98a9a; --tagB-soft:rgba(201,138,154,.16);
+    background:var(--canvas); color:var(--ink);
+  }
+
+  .statusbar{ height:42px; flex:none; display:flex; align-items:flex-end; justify-content:space-between; padding:0 18px 6px; font-size:12px; font-weight:600; }
+  .content{ flex:1 1 auto; overflow-y:auto; overflow-x:hidden; padding:2px 15px 10px; }
+  .app-header{ padding:6px 2px 12px; position:relative; }
+  .app-header .date{ font-size:11.5px; color:var(--ink-soft); font-weight:500; margin-bottom:3px; }
+  .app-header h3{ font-size:19px; font-weight:700; margin:0; letter-spacing:-0.01em; }
+  .app-header .sub{ font-size:11px; color:var(--ink-faint); margin-top:5px; font-weight:500; }
+  .back-btn{ position:absolute; top:4px; left:-4px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; color:var(--ink-soft); }
+  .header-action{ position:absolute; top:8px; right:0; font-size:12px; font-weight:700; color:var(--accent); }
+
+  .proj-tabs{ display:flex; gap:6px; overflow-x:auto; padding:2px 2px 14px; }
+  .proj-chip{ flex:none; padding:7px 13px; border-radius:999px; font-size:11.5px; font-weight:700; background:var(--surface); color:var(--ink-soft); }
+  .proj-chip.active{ background:var(--accent); color:var(--on-accent); }
+  .proj-chip.add{ background:transparent; border:1.4px dashed var(--hair-strong); color:var(--ink-faint); }
+
+  .chip-row{ display:flex; gap:6px; overflow-x:auto; padding:2px 2px 12px; }
+  .chip{ flex:none; padding:6px 11px; border-radius:999px; font-size:10.5px; font-weight:600; background:var(--surface); color:var(--ink-soft); }
+  .chip.active{ background:var(--accent); color:var(--on-accent); }
+
+  .panel{ background:var(--card); border:1px solid var(--hair); border-radius:14px; padding:13px 10px 14px; margin-bottom:12px; }
+  .panel h4{ margin:0 0 10px; font-size:11px; font-weight:700; color:var(--ink-soft); }
+  .wk-header{ display:grid; grid-template-columns:repeat(7,1fr); margin-bottom:6px; }
+  .wk-header span{ text-align:center; font-size:9px; font-weight:700; color:var(--ink-faint); }
+  .wk-header span:nth-child(6){ color:var(--sat); }
+  .wk-header span:nth-child(7){ color:var(--sun); }
+  .month-grid{ display:grid; grid-template-columns:repeat(7,1fr); row-gap:7px; }
+  .cell{ display:flex; flex-direction:column; align-items:center; gap:3px; }
+  .pct-text{ font-size:7px; font-weight:800; }
+  .pct-text.on-fill{ fill: var(--on-accent); }
+  .pct-text.on-empty{ fill: var(--ink); }
+  .daynum{ font-size:7.5px; font-weight:600; color:var(--ink-faint); }
+  .daynum.today{ font-weight:800; color:var(--accent); }
+  .daynum.other{ color:var(--ink-faint); opacity:.4; }
+
+  .task-list{ display:flex; flex-direction:column; margin-top:2px; }
+  .task-row{ display:flex; align-items:center; gap:11px; padding:12px 4px; border-bottom:1px solid var(--hair); }
+  .task-row:last-child{ border-bottom:none; }
+  .task-icon{ width:30px; height:30px; border-radius:9px; background:var(--surface); display:flex; align-items:center; justify-content:center; flex:none; }
+  .task-icon svg{ width:16px; height:16px; color:var(--ink-soft); }
+  .task-main{ flex:1; min-width:0; }
+  .task-name{ font-size:13.5px; font-weight:600; }
+  .task-name.done{ color:var(--ink-faint); text-decoration:line-through; }
+  .task-meta{ font-size:10px; color:var(--ink-faint); margin-top:3px; font-weight:500; display:flex; align-items:center; gap:5px; }
+  .ptag{ font-size:9px; font-weight:700; padding:1.5px 6px; border-radius:5px; }
+  .ptag.a{ background:var(--tagA-soft); color:var(--tagA); }
+  .ptag.b{ background:var(--tagB-soft); color:var(--tagB); }
+  .chk{ width:22px; height:22px; flex:none; border-radius:999px; border:1.6px solid var(--hair-strong); }
+  .chk.done{ border-color:transparent; background:var(--accent); position:relative; }
+  .chk.done::after{ content:""; position:absolute; left:50%; top:50%; width:5.5px; height:9px; border-right:2px solid var(--on-accent); border-bottom:2px solid var(--on-accent); transform:translate(-50%,-58%) rotate(45deg); }
+  .section-div{ display:flex; align-items:center; gap:8px; margin:16px 2px 4px; }
+  .section-div span{ font-size:10.5px; font-weight:700; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.03em; }
+  .section-div::after{ content:""; flex:1; height:1px; background:var(--hair); }
+  .add-inline{ display:flex; align-items:center; gap:10px; padding:11px 4px; color:var(--ink-faint); font-size:12.5px; font-weight:600; }
+  .add-inline .plus{ width:26px;height:26px;border-radius:50%;border:1.4px dashed var(--hair-strong);display:flex;align-items:center;justify-content:center;font-size:14px; }
+
+  .bottom-nav{ flex:none; display:flex; border-top:1px solid var(--hair); padding:8px 4px 16px; background:var(--canvas); }
+  .nav-item{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; font-size:8.5px; color:var(--ink-faint); font-weight:600; }
+  .nav-item svg{ width:18px; height:18px; }
+  .nav-item.active{ color:var(--accent); font-weight:700; }
+
+  .ms-row{ display:flex; gap:10px; padding: 11px 4px; }
+  .ms-node{ width:23px;height:23px;border-radius:50%; flex:none; display:flex;align-items:center;justify-content:center; font-size:10.5px; font-weight:700; border:1.6px solid var(--hair-strong); color:var(--ink-faint); background:var(--canvas); margin-top:1px; }
+  .ms-item.done .ms-node{ background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
+  .ms-item.active .ms-node{ border-color:var(--accent); color:var(--accent); }
+  .ms-title{ font-size:13px; font-weight:700; }
+  .ms-item.active .ms-title{ color: var(--accent); }
+  .ms-sub{ font-size:10px; color:var(--ink-faint); font-weight:500; margin-top:3px; }
+  .status-pill{ display:inline-block; font-size:9px; font-weight:700; padding:2px 7px; border-radius:6px; margin-top:6px; background:var(--surface); color:var(--ink-faint); }
+  .status-pill.on{ background: var(--accent-soft); color: var(--accent); }
+
+  .sec-label{ font-size:10.5px; font-weight:700; color:var(--ink-faint); margin: 15px 4px 7px; text-transform:uppercase; letter-spacing:.03em; }
+  .sec-label:first-of-type{ margin-top:2px; }
+  .sgroup{ background:var(--card); border:1px solid var(--hair); border-radius:13px; overflow:hidden; }
+  .srow{ display:flex; align-items:center; gap:10px; padding:11px 12px; border-bottom:1px solid var(--hair); min-height:20px; }
+  .srow:last-child{ border-bottom:none; }
+  .srow .sicon{ width:26px;height:26px;border-radius:8px;background:var(--surface);display:flex;align-items:center;justify-content:center;flex:none; }
+  .srow .sicon svg{ width:14px;height:14px;color:var(--ink-soft); }
+  .srow .stext{ flex:1; }
+  .srow .slabel{ font-size:12.5px; font-weight:600; }
+  .srow .spreview{ font-size:10px; color:var(--ink-faint); font-weight:500; margin-top:2px; }
+  .srow .schev{ color:var(--ink-faint); font-size:11px; }
+  .seg{ display:flex; background:var(--surface); border-radius:8px; padding:2px; }
+  .seg span{ padding:4px 8px; font-size:10px; font-weight:600; color:var(--ink-faint); border-radius:6px; }
+  .seg span.on{ background:var(--card); color:var(--ink); }
+  .quote-row{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-bottom:1px solid var(--hair); }
+  .quote-row:last-child{ border-bottom:none; }
+  .quote-row .qtext{ flex:1; font-size:11.5px; font-weight:600; color:var(--ink); line-height:1.5; }
+  .quote-row .qdel{ color:var(--danger); font-size:11px; font-weight:700; }
+
+  .field-label{ font-size:11px; font-weight:700; color:var(--ink-soft); margin:14px 4px 8px; }
+  .field-label:first-child{ margin-top:2px; }
+  .text-input{ background:var(--card); border:1.4px solid var(--hair-strong); border-radius:11px; padding:11px 13px; font-size:14px; font-weight:600; color:var(--ink); }
+  .seg2{ display:flex; gap:6px; }
+  .seg-btn{ flex:1; text-align:center; padding:8px 0; border-radius:10px; font-size:11px; font-weight:700; background:var(--surface); color:var(--ink-soft); border:1.4px solid transparent; }
+  .seg-btn.on{ background:var(--accent-soft); color:var(--accent); border-color:var(--accent); }
+  .icon-grid{ display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-top:8px; }
+  .icon-opt{ aspect-ratio:1; border-radius:10px; background:var(--surface); display:flex; align-items:center; justify-content:center; border:1.6px solid transparent; }
+  .icon-opt svg{ width:16px; height:16px; color:var(--ink-soft); }
+  .icon-opt.sel{ border-color:var(--accent); background:var(--accent-soft); }
+  .icon-opt.sel svg{ color:var(--accent); }
+  .proj-assign{ display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+  .note{ font-size:10px; color:var(--ink-faint); line-height:1.6; margin-top:8px; font-weight:500; }
+
+  .sheet-backdrop{ position:absolute; inset:0; background:rgba(20,18,15,.42); z-index:40; }
+  .sheet{ position:absolute; left:0; right:0; bottom:0; height:82%; background:var(--canvas); border-radius:22px 22px 0 0; z-index:50; box-shadow:0 -10px 30px rgba(0,0,0,.18); display:flex; flex-direction:column; padding: 10px 16px 18px; overflow-y:auto; }
+  .sheet-handle{ width:36px; height:4px; border-radius:3px; background:var(--hair-strong); margin:2px auto 10px; flex:none; }
+  .sheet-header{ display:flex; align-items:center; justify-content:space-between; padding:2px 0 12px; flex:none; }
+  .sheet-header .t{ font-size:15px; font-weight:700; }
+  .sheet-header .back{ width:26px; height:26px; color:var(--ink-soft); display:flex; align-items:center; }
+  .sheet-header .save{ font-size:12.5px; font-weight:700; color:var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <div class="tag">v11 · 다중 프로젝트 / 아이콘·문구 다양화 / 버그 수정</div>
+  <h1>Daily Task Check — 디자인 시안 v11</h1>
+  <p>요청 항목이 많아 구조를 <b>①로고 추가안 → ②버그 진단·수정 → ③~⑨ 기능 확장 화면 → ⑩~⑪ Claude 제안</b> 순으로 나눴습니다.</p>
+</div>
+
+<div class="group">
+  <div class="group-title">① 로고 — 추가 시안 2종 + 프레임형/단독형 비교</div>
+  <div class="group-sub">A안·D안은 폐기했습니다. C안(데이 마크)과 B안(체크 리프)에 더해, 새 방향 2개(E·F)를 추가했습니다. 각각 <b>둥근 사각 틀 안</b> 버전과 <b>틀 없이 마크만</b> 쓰는 버전을 나란히 뒀습니다 — 스플래시에선 틀 있는 쪽이 안정적이고, 파비콘·다크모드 상단바처럼 아주 작은 자리에는 틀 없는 쪽이 더 잘 읽히는 경향이 있어 함께 검토하시는 걸 추천드립니다.</div>
+  <div class="row">
+    <div class="logo-tile"><svg width="48" height="48" viewBox="0 0 56 56"><rect x="2" y="2" width="52" height="52" rx="16" fill="#eef1ec" stroke="#4d6152" stroke-width="1.4"/><rect x="16" y="15" width="24" height="24" rx="6" fill="none" stroke="#4d6152" stroke-width="2.6"/><circle cx="34" cy="33" r="6.5" fill="#4d6152"/><path d="M31.3 33l1.9 1.9 3.5-3.9" stroke="#eef1ec" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="tname">C · 데이 마크<br/>(틀 있음)</div></div>
+    <div class="logo-tile frameless"><svg width="48" height="48" viewBox="0 0 56 56"><rect x="16" y="15" width="24" height="24" rx="6" fill="none" stroke="#4d6152" stroke-width="2.6"/><circle cx="34" cy="33" r="6.5" fill="#4d6152"/><path d="M31.3 33l1.9 1.9 3.5-3.9" stroke="#e9e4d8" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><div class="tname">C · 데이 마크<br/>(틀 없음)</div></div>
+
+    <div class="logo-tile"><svg width="48" height="48" viewBox="0 0 56 56"><rect x="2" y="2" width="52" height="52" rx="16" fill="#eef1ec" stroke="#4d6152" stroke-width="1.4"/><path d="M20 32c0-8 4-13 9-16-1 6 1 10 5 12-2 6-8 9-14 4z" fill="#4d6152"/><path d="M20 34l8-8" stroke="#4d6152" stroke-width="2.4" stroke-linecap="round"/></svg><div class="tname">B · 체크 리프<br/>(틀 있음)</div></div>
+    <div class="logo-tile frameless"><svg width="48" height="48" viewBox="0 0 56 56"><path d="M20 32c0-8 4-13 9-16-1 6 1 10 5 12-2 6-8 9-14 4z" fill="#4d6152"/><path d="M20 34l8-8" stroke="#e9e4d8" stroke-width="2.4" stroke-linecap="round"/></svg><div class="tname">B · 체크 리프<br/>(틀 없음)</div></div>
+
+    <div class="logo-tile"><svg width="48" height="48" viewBox="0 0 56 56"><rect x="2" y="2" width="52" height="52" rx="16" fill="#eef1ec" stroke="#4d6152" stroke-width="1.4"/><circle cx="17" cy="36" r="2.6" fill="#4d6152" opacity=".45"/><circle cx="25" cy="29" r="3.4" fill="#4d6152" opacity=".7"/><circle cx="35" cy="20" r="5.2" fill="#4d6152"/><path d="M32.6 20l1.7 1.7 3.2-3.6" stroke="#eef1ec" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 36l7-7M25 29l7-7" stroke="#4d6152" stroke-width="1.3" opacity=".5"/></svg><div class="tname">E · 연속선(신규)<br/>(틀 있음)</div></div>
+    <div class="logo-tile frameless"><svg width="48" height="48" viewBox="0 0 56 56"><circle cx="17" cy="36" r="2.6" fill="#4d6152" opacity=".45"/><circle cx="25" cy="29" r="3.4" fill="#4d6152" opacity=".7"/><circle cx="35" cy="20" r="5.2" fill="#4d6152"/><path d="M32.6 20l1.7 1.7 3.2-3.6" stroke="#e9e4d8" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 36l7-7M25 29l7-7" stroke="#4d6152" stroke-width="1.3" opacity=".5"/></svg><div class="tname">E · 연속선(신규)<br/>(틀 없음)</div></div>
+
+    <div class="logo-tile"><svg width="48" height="48" viewBox="0 0 56 56"><rect x="2" y="2" width="52" height="52" rx="16" fill="#eef1ec" stroke="#4d6152" stroke-width="1.4"/><path d="M17 22c3-6 10-9 17-6-4 2-6 5-6 9 5-1 9 1 11 5-8 4-16 2-19-3-3 3-3 7-1 10-6-1-9-8-2-15z" fill="none" stroke="#4d6152" stroke-width="2.2" stroke-linejoin="round"/></svg><div class="tname">F · 한 획 스트로크(신규)<br/>(틀 있음)</div></div>
+    <div class="logo-tile frameless"><svg width="48" height="48" viewBox="0 0 56 56"><path d="M17 22c3-6 10-9 17-6-4 2-6 5-6 9 5-1 9 1 11 5-8 4-16 2-19-3-3 3-3 7-1 10-6-1-9-8-2-15z" fill="none" stroke="#4d6152" stroke-width="2.2" stroke-linejoin="round"/></svg><div class="tname">F · 한 획 스트로크(신규)<br/>(틀 없음)</div></div>
+  </div>
+  <div class="group-sub" style="margin-top:16px;">이후 화면에는 우선 <b>C안(틀 있음)</b>을 넣었습니다 — B/C/E/F 중 최종 방향과 틀 유무를 알려주시면 바로 교체하겠습니다.</div>
+</div>
+
+<div class="group">
+  <div class="group-title">② 버그 진단 — "8/4 테두리가 이상해 보인 이유"</div>
+  <div class="diag-box">
+    <b>원인</b>: 캡처하신 8/4 셀은 "완료율 링"(40%짜리 초록 호) 위에, "오늘"임을 표시하려고 반지름을 살짝 더 키운 <b>회색 테두리 링을 하나 더</b> 겹쳐 그렸습니다.
+    두 원의 반지름 차이가 2px밖에 안 되고, 크기가 25px로 작다 보니 이 두 링이 서로 부딪혀서 <b>이중 테두리처럼 깨져 보이는 것</b>이었습니다.
+    <br/><b>수정</b>: "오늘"이라는 신호는 이미 <b>날짜 숫자를 굵게+초록색</b>으로 표시하고 있어서 중복이었습니다. 그래서 <b>바깥쪽 테두리 링을 완전히 제거</b>하고, 오늘 표시는 날짜 숫자 강조 하나로만 남겼습니다.
+  </div>
+  <div class="zoom-pair">
+    <div class="zoom-card">
+      <svg width="90" height="90" viewBox="0 0 60 60"><circle cx="30" cy="30" r="22" fill="none" stroke="rgba(42,40,38,.12)" stroke-width="4.5"/><circle cx="30" cy="30" r="22" fill="none" stroke="#4d6152" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="55.3 138.2" transform="rotate(-90 30 30)"/><circle cx="30" cy="30" r="26" fill="none" stroke="#8a8a82" stroke-width="2"/><text x="30" y="35" text-anchor="middle" font-size="15" font-weight="800" fill="#2a2826">40</text></svg>
+      <div class="l">수정 전 — 이중 테두리로 깨져 보임</div>
+    </div>
+    <div class="zoom-card">
+      <svg width="90" height="90" viewBox="0 0 60 60"><circle cx="30" cy="30" r="22" fill="none" stroke="rgba(42,40,38,.12)" stroke-width="4.5"/><circle cx="30" cy="30" r="22" fill="none" stroke="#4d6152" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="55.3 138.2" transform="rotate(-90 30 30)"/><text x="30" y="35" text-anchor="middle" font-size="15" font-weight="800" fill="#2a2826">40</text></svg>
+      <div class="l">수정 후 — 링 하나만, 깔끔함</div>
+    </div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">③ 다크모드 — 초록 틴트 제거, 중립 블랙으로</div>
+  <div class="row">
+    <div class="unit"><div class="label">배경을 순수 블랙 계열로, 액센트만 초록 유지</div>
+      <div class="frame"><div class="notch"></div><div class="screen dark">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content">
+          <div class="app-header"><div class="date">기록</div><h3>전체 보기</h3></div>
+          <div class="chip-row"><div class="chip active">전체</div><div class="chip">운동 30분</div></div>
+          <div class="panel"><h4>2026년 8월</h4>
+            <div class="wk-header"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span></div>
+            <div class="month-grid" id="gdark"></div>
+          </div>
+        </div>
+        <div class="bottom-nav" id="nav-dark"></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">④ 프로젝트 — 여러 개로 확장 (제목 아래 가로 탭)</div>
+  <div class="row">
+    <div class="unit"><div class="label">프로젝트 전환 탭 + "+ 새 프로젝트"</div>
+      <div class="frame"><div class="notch"></div><div class="screen light">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content">
+          <div class="app-header"><h3>프로젝트</h3></div>
+          <div class="proj-tabs">
+            <div class="proj-chip active">토익 900점</div>
+            <div class="proj-chip">이직 준비</div>
+            <div class="proj-chip add">+ 새 프로젝트</div>
+          </div>
+          <div class="app-header" style="padding-top:0;"><div class="sub">7/20 시작</div></div>
+          <div class="ms-item done"><div class="ms-row"><div class="ms-node">✓</div><div><div class="ms-title">단어 · 리스닝 습관 잡기</div><div class="ms-sub">메모 2개</div><span class="status-pill">완료 · 7/28</span></div></div></div>
+          <div class="ms-item active"><div class="ms-row"><div class="ms-node">2</div><div><div class="ms-title">실전 문제 풀이 매일 1세트</div><div class="ms-sub">8/1 시작</div><span class="status-pill on">진행 중</span></div></div></div>
+          <div class="ms-item"><div class="ms-row"><div class="ms-node">3</div><div><div class="ms-title">모의고사로 중간 점검</div><div class="ms-sub">9월 예정</div><span class="status-pill">예정</span></div></div></div>
+        </div>
+        <div class="bottom-nav" id="nav-proj"></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">⑤ 오늘 탭 — 프로젝트가 2개 이상이면 항목마다 라벨 표시</div>
+  <div class="group-sub">프로젝트가 하나뿐일 땐 라벨을 안 보여줘 지금처럼 단순하게 유지되고, <b>2개 이상부터</b> 자동으로 각 항목 아래에 소속 프로젝트 태그가 붙습니다. 히트맵 색과는 별개로, 이 태그 색은 프로젝트 구분용으로만 씁니다.</div>
+  <div class="row">
+    <div class="unit"><div class="label">토익(노랑 계열) · 이직 준비(로즈 계열) · 일반(태그 없음)</div>
+      <div class="frame"><div class="notch"></div><div class="screen light">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content">
+          <div class="app-header"><div class="date">8월 4일 화요일</div><h3>오늘의 할 일</h3><div class="sub">이번 주 5 / 7일 완료</div></div>
+          <div class="task-list" id="today-tagged"></div>
+        </div>
+        <div class="bottom-nav" id="nav-today"></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">⑥ 할 일 추가 — 선화 아이콘 선택 + 프로젝트 연결</div>
+  <div class="row">
+    <div class="unit"><div class="label">아이콘 12종 중 선택, 나중에 언제든 변경 가능 · 프로젝트 2개 이상일 때만 연결 칩 표시</div>
+      <div class="frame"><div class="notch"></div><div class="screen light" style="position:relative;">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content"><div class="app-header"><h3>오늘의 할 일</h3></div></div>
+        <div class="sheet-backdrop"></div>
+        <div class="sheet">
+          <div class="sheet-handle"></div>
+          <div class="sheet-header">
+            <div class="back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+            <div class="t">새 할 일 추가</div>
+            <div class="save">저장</div>
+          </div>
+          <div class="field-label">이름</div>
+          <div class="text-input">예: 스트레칭</div>
+          <div class="field-label">아이콘</div>
+          <div class="icon-grid" id="icon-grid"></div>
+          <div class="field-label">반복</div>
+          <div class="seg2"><div class="seg-btn on">매일</div><div class="seg-btn">요일 선택</div><div class="seg-btn">오늘만</div></div>
+          <div class="field-label">연결할 프로젝트 <span style="font-weight:500;color:var(--ink-faint);">(선택)</span></div>
+          <div class="proj-assign">
+            <div class="chip">일반(없음)</div>
+            <div class="chip active">토익 900점</div>
+            <div class="chip">이직 준비</div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">⑦ 마음가짐 — 문구 여러 개 관리 + 랜덤/순차</div>
+  <div class="row">
+    <div class="unit"><div class="label">설정 → 마음가짐 문구 관리</div>
+      <div class="frame"><div class="notch"></div><div class="screen light">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content">
+          <div class="app-header">
+            <div class="back-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></div>
+            <h3 style="text-align:center;">마음가짐 문구</h3>
+            <div class="header-action">+ 추가</div>
+          </div>
+          <div class="sec-label">표시 방식</div>
+          <div class="sgroup" style="margin-bottom:14px;">
+            <div class="srow"><div class="stext"><div class="slabel">문구가 나오는 순서</div></div><div class="seg"><span class="on">랜덤</span><span>순차</span></div></div>
+          </div>
+          <div class="sec-label">문구 목록 (3개)</div>
+          <div class="sgroup">
+            <div class="quote-row"><div class="qtext">완벽하지 않아도 괜찮다. 하루를 건너뛰어도 다음 날 다시 시작하면 된다.</div><div class="qdel">삭제</div></div>
+            <div class="quote-row"><div class="qtext">오늘 못 했다고 어제까지의 기록이 사라지는 건 아니다.</div><div class="qdel">삭제</div></div>
+            <div class="quote-row"><div class="qtext">작게 시작해도 계속하는 쪽이 이긴다.</div><div class="qdel">삭제</div></div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">⑧ Claude 제안 — "오늘만" 할 일 + 미래 예약 할 일</div>
+  <div class="group-sub">
+    "고정 할 일"과는 성격이 다른 두 가지를 하나의 구조로 묶어 제안합니다. <b>오늘만</b>은 반복 없이 그날 하루만 존재하는 할 일이고,
+    <b>미래 예약</b>은 앞으로 있을 날짜에 미리 적어두면 그 날짜가 되었을 때 오늘 탭에 자동으로 나타나는 방식입니다.
+    ⑥번 바텀시트의 "반복" 선택지에 <b>"오늘만"</b>을 추가해뒀고, "오늘만"을 고르면 <b>날짜를 오늘이 아닌 미래로도 지정</b>할 수 있게 하면 두 기능을 같은 입력 흐름으로 처리할 수 있습니다.
+    오늘 탭에서는 고정 할 일과 구분되도록 <b>"오늘만" 섹션을 아래에 따로</b> 둡니다.
+  </div>
+  <div class="row">
+    <div class="unit"><div class="label">고정 할 일 아래 "오늘만" 섹션 — 반복 스트릭이 없어 메타 표시도 다름</div>
+      <div class="frame"><div class="notch"></div><div class="screen light">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content">
+          <div class="app-header"><div class="date">8월 4일 화요일</div><h3>오늘의 할 일</h3><div class="sub">이번 주 5 / 7일 완료</div></div>
+          <div class="task-list" id="today-fixed-only"></div>
+          <div class="section-div"><span>오늘만</span></div>
+          <div class="task-list">
+            <div class="task-row"><div class="task-icon" style="background:transparent;border:1.4px dashed var(--hair-strong);"></div><div class="task-main"><div class="task-name">치과 예약 전화</div></div><div class="chk"></div></div>
+            <div class="task-row"><div class="task-icon" style="background:transparent;border:1.4px dashed var(--hair-strong);"></div><div class="task-main"><div class="task-name">택배 반품 접수</div></div><div class="chk done"></div></div>
+            <div class="add-inline"><div class="plus">+</div>오늘 할 일 추가 (미래 날짜로도 예약 가능)</div>
+          </div>
+        </div>
+        <div class="bottom-nav" id="nav-today2"></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">⑨ Claude의 추가 제안 (텍스트 — 방향만 확인해주시면 다음 라운드에 시안으로)</div>
+  <div class="checklist">
+    <div class="it"><b>1</b>프로젝트가 2개 이상이면 <b>기록 탭에도 프로젝트 필터</b>를 추가하면 자연스러울 것 같습니다. 지금은 "전체/항목별"만 있는데, "프로젝트별로 묶어서 보기"가 추가되면 완결됩니다.</div>
+    <div class="it"><b>2</b>오늘 탭 항목이 많아지고 프로젝트별 라벨까지 붙으면, <b>프로젝트별로 섹션을 나눠 보여주는 옵션</b>(설정에서 켜고 끄기)이 있으면 리스트가 길어져도 안 헷갈릴 것 같습니다.</div>
+    <div class="it"><b>3</b>"오늘만" 할 일이 쌓이면 <b>지난 날짜에 완료 못 하고 넘어간 항목</b>이 자동으로 사라지는지, 아니면 "미완료"로 계속 남는지 정책이 필요합니다 — 고정 할 일과 달리 "오늘만"은 하루 지나면 의미가 없어지는 경우가 많아서요.</div>
+    <div class="it"><b>4</b>이전에 논의했던 <b>리마인더(알림)</b>는 아직 정해지지 않았습니다. 기기별 웹푸시 지원이 갈리니, 지원 안 되는 기기에서는 "기기 알람 앱으로 대신 설정하는 법"을 안내하는 정도로 시작하는 걸 제안합니다.</div>
+    <div class="it"><b>5</b>고정 할 일 관리(편집 모드)에도 이제 아이콘·프로젝트 연결을 <b>나중에 수정</b>할 수 있는 진입점이 필요합니다 — 지금은 추가할 때만 설정 가능한 흐름이라, 관리 화면에서도 항목을 탭하면 같은 시트가 "수정 모드"로 열리게 하는 걸 제안합니다.</div>
+  </div>
+</div>
+
+<script>
+  const NAV = [
+    {k:'오늘', i:'M4 12.5 9 17l11-11'},
+    {k:'기록', i:'grid'},
+    {k:'마음가짐', i:'M20.5 3.5c-6 0-12 3-15 10-1 2.3-2 5-2 7 2 0 4.7-1 7-2 7-3 10-9 10-15Z|M8 16l9-9'},
+    {k:'프로젝트', i:'M6 21V4l11 4-11 4'},
+    {k:'설정', i:'gear'}
+  ];
+  function navSvg(item){
+    if(item.i==='grid') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="3.5" width="6" height="6" rx="1.3"/><rect x="14.5" y="3.5" width="6" height="6" rx="1.3"/><rect x="3.5" y="14.5" width="6" height="6" rx="1.3"/><rect x="14.5" y="14.5" width="6" height="6" rx="1.3"/></svg>';
+    if(item.i==='gear') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1Z"/></svg>';
+    const paths = item.i.split('|').map(p=>`<path d="${p}"/>`).join('');
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+  }
+  function renderNav(id, activeKey){
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.innerHTML = NAV.map(item => `<div class="nav-item ${item.k===activeKey?'active':''}">${navSvg(item)}<span>${item.k}</span></div>`).join('');
+  }
+  renderNav('nav-dark','기록'); renderNav('nav-proj','프로젝트'); renderNav('nav-today','오늘'); renderNav('nav-today2','오늘');
+
+  const ICONS = {
+    dumbbell:'M2 12h2M20 12h2M6 8v8M18 8v8M9 12h6M6 9a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9zM15 9a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V9z',
+    book:'M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4H6.5A2.5 2.5 0 0 0 4 6.5v13z|M4 19.5A2.5 2.5 0 0 0 6.5 22H20',
+    pencil:'M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z',
+    droplet:'M12 3s6 6.6 6 11a6 6 0 0 1-12 0c0-4.4 6-11 6-11z',
+    moon:'M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z',
+    lotus:'M12 21c-4-1-7-4-7-8 2 1 4 2 7 2s5-1 7-2c0 4-3 7-7 8z|M12 15c0-5 2-9 0-13-2 4 0 8 0 13z',
+    apple:'M12 8c-3 0-5 2.5-5 6s2 7 4 7 1.5-1 2-1 1 1 2 1c1.5 0 4-3 4-6 0-2-1-3-2.5-3.5|M12 8c0-2 1-3 2-4',
+    footprints:'M8 5a2.5 2.5 0 0 1 2.5 2.5c0 2-2 3-2 5.5S10 17 10 19a2 2 0 1 1-4 0c0-1.5.5-3 .5-5S5 12 5 9.5A2.5 2.5 0 0 1 8 5z',
+    music:'M9 18V5l11-2v13|M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM20 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z',
+    brush:'M9 15l-4 4M15 9c2-2 6-5 6-5s-3 4-5 6l-6 6-3-3z',
+    code:'M8 6l-5 6 5 6M16 6l5 6-5 6',
+    coin:'M12 21c5 0 9-4 9-9s-4-9-9-9-9 4-9 9 4 9 9 9z|M12 8v8M9.5 9.5c0-1 1-1.5 2.5-1.5s2.5.7 2.5 1.7-1 1.3-2.5 1.8-2.5.8-2.5 1.8S10.8 15 12 15s2.5-.5 2.5-1.5',
+    chat:'M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z',
+    stretch:'M12 3v6M9 5l3 4 3-4M6 21l4-8h4l4 8M10 13l-2 2M14 13l2 2',
+    check:'M20 6L9 17l-5-5'
+  };
+  function iconSvg(key, cls){
+    const paths = ICONS[key].split('|').map(p=>`<path d="${p}"/>`).join('');
+    return `<svg class="${cls||''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+  }
+
+  const TASKS = [
+    {icon:'dumbbell', name:'운동 30분', meta:'매일 · 7일 연속', done:true, tag:null},
+    {icon:'book', name:'영어 단어 20개', meta:'매일', done:true, tag:'a'},
+    {icon:'pencil', name:'일기 쓰기', meta:'매일', done:false, tag:null},
+    {icon:'droplet', name:'물 2L 마시기', meta:'매일', done:false, tag:null},
+    {icon:'book', name:'모의 문제 1세트', meta:'매일', done:false, tag:'a'},
+    {icon:'chat', name:'모의 면접 스크립트 읽기', meta:'매일', done:false, tag:'b'},
+  ];
+  function renderTasks(id, withTag){
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.innerHTML = TASKS.map(t => `
+      <div class="task-row">
+        <div class="task-icon">${iconSvg(t.icon)}</div>
+        <div class="task-main">
+          <div class="task-name ${t.done?'done':''}">${t.name}</div>
+          <div class="task-meta">${t.meta}${withTag && t.tag ? `<span class="ptag ${t.tag}">${t.tag==='a'?'토익 900점':'이직 준비'}</span>` : ''}</div>
+        </div>
+        <div class="chk ${t.done?'done':''}"></div>
+      </div>`).join('');
+  }
+  renderTasks('today-tagged', true);
+  renderTasks('today-fixed-only', false);
+
+  const iconGridEl = document.getElementById('icon-grid');
+  if(iconGridEl){
+    const opts = ['dumbbell','book','pencil','droplet','moon','lotus','apple','footprints','music','brush','stretch','coin'];
+    iconGridEl.innerHTML = opts.map((k,i)=>`<div class="icon-opt ${i===7?'sel':''}">${iconSvg(k)}</div>`).join('');
+  }
+
+  const cellsDark = [
+    {n:27,m:'prev'},{n:28,m:'prev'},{n:29,m:'prev'},{n:30,m:'prev'},{n:31,m:'prev'},{n:1,m:'cur',p:75},{n:2,m:'cur',p:25},
+    {n:3,m:'cur',p:100},{n:4,m:'cur',p:40,today:true},{n:5,m:'cur',future:true},{n:6,m:'cur',future:true},{n:7,m:'cur',future:true},{n:8,m:'cur',future:true},{n:9,m:'cur',future:true},
+    {n:10,m:'cur',future:true},{n:11,m:'cur',future:true},{n:12,m:'cur',future:true},{n:13,m:'cur',future:true},{n:14,m:'cur',future:true},{n:15,m:'cur',future:true},{n:16,m:'cur',future:true},
+    {n:17,m:'cur',future:true},{n:18,m:'cur',future:true},{n:19,m:'cur',future:true},{n:20,m:'cur',future:true},{n:21,m:'cur',future:true}
+  ];
+  function renderGrid(containerId, list){
+    const el = document.getElementById(containerId);
+    if(!el) return;
+    const size = 25, R = 10.5, C = 2*Math.PI*R;
+    list.forEach(d=>{
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      let svg = '';
+      if(d.m !== 'cur'){
+        svg = `<svg width="${size}" height="${size}"></svg>`;
+      } else if(d.future){
+        svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${R}" fill="none" stroke="var(--ink-faint)" stroke-width="1.3" stroke-dasharray="2 2" opacity="0.45"/></svg>`;
+      } else if(d.p >= 100){
+        svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${R}" fill="var(--accent)"/><text x="${size/2}" y="${size/2+2.6}" text-anchor="middle" class="pct-text on-fill">100</text></svg>`;
+      } else {
+        const dash = (d.p/100)*C;
+        svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+          <circle cx="${size/2}" cy="${size/2}" r="${R}" fill="none" stroke="var(--ring-empty)" stroke-width="2.2"/>
+          ${d.p>0 ? `<circle cx="${size/2}" cy="${size/2}" r="${R}" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="${dash} ${C}" transform="rotate(-90 ${size/2} ${size/2})"/>` : ''}
+          <text x="${size/2}" y="${size/2+2.6}" text-anchor="middle" class="pct-text on-empty">${d.p}</text>
+        </svg>`;
+      }
+      const daynum = document.createElement('div');
+      daynum.className = 'daynum' + (d.today? ' today' : '') + (d.m!=='cur' ? ' other' : '');
+      daynum.textContent = d.n;
+      cell.innerHTML = svg;
+      cell.appendChild(daynum);
+      el.appendChild(cell);
+    });
+  }
+  renderGrid('gdark', cellsDark);
+</script>
+
+</body>
+</html>

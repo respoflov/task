@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Daily Task Check — 디자인 시안 v10 (컬러/로고/설정 전면 개편)</title>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<style>
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; font-family:'Pretendard',-apple-system,sans-serif; background:#141513; color:#e8e8ea;
+    padding: 48px 32px 140px; -webkit-font-smoothing:antialiased;
+  }
+  .page-head{ max-width:1300px; margin:0 auto 40px; }
+  .page-head .tag{ display:inline-block; font-size:11px; font-weight:700; color:#0b0b0d; background:#e8e8ea; padding:3px 9px; border-radius:6px; margin-bottom:12px; }
+  .page-head h1{ font-size:22px; font-weight:700; margin:0 0 8px; letter-spacing:-0.01em; }
+  .page-head p{ font-size:13px; color:#a6a6ab; line-height:1.8; margin:0 0 10px; max-width:960px; }
+  .page-head b{ color:#e8e8ea; }
+  .checklist{ max-width:960px; display:flex; flex-direction:column; gap:5px; margin-top:12px; }
+  .checklist .it{ font-size:12.5px; color:#c9c9cd; line-height:1.7; display:flex; gap:8px; }
+  .checklist .it b{ color:#f2f2f4; min-width:16px; }
+
+  .group{ max-width:1300px; margin:0 auto 52px; }
+  .group-title{ font-size:14px; font-weight:700; color:#e8e8ea; margin-bottom:5px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,.12); }
+  .group-sub{ font-size:12px; color:#9d9ea2; margin: 8px 0 16px; max-width:900px; line-height:1.7; }
+  .row{ display:flex; gap:28px; flex-wrap:wrap; align-items:flex-start; }
+  .unit{ display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .unit .label{ font-size:11px; font-weight:600; color:#9d9ea2; text-align:center; max-width:300px; line-height:1.5; }
+
+  /* color swatch compare */
+  .swatch-row{ display:flex; gap:24px; align-items:center; flex-wrap:wrap; }
+  .sw-card{ display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .sw-chip{ width:74px; height:74px; border-radius:16px; }
+  .sw-card .l{ font-size:11px; font-weight:700; color:#c9c9cd; }
+  .sw-card .h{ font-size:10px; font-family:monospace; color:#77787c; }
+  .arrow{ font-size:20px; color:#5c5c60; }
+  .token-table{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; margin-top:20px; max-width:940px; }
+  .tok{ background:#1d1e1f; border:1px solid #2a2a2c; border-radius:10px; padding:10px; }
+  .tok .dot{ width:20px;height:20px;border-radius:6px; margin-bottom:8px; }
+  .tok .n{ font-size:10.5px; font-weight:700; color:#e8e8ea; }
+  .tok .h{ font-size:9.5px; font-family:monospace; color:#84858a; margin-top:2px; }
+
+  /* logo tiles */
+  .logo-tile{ display:flex; flex-direction:column; align-items:center; gap:10px; background:#fbf9f5; border-radius:20px; padding:26px 20px; width:150px; }
+  .logo-tile .tname{ font-size:11.5px; font-weight:700; color:#2a2826; }
+  .logo-tile .tdesc{ font-size:10px; color:#766f66; text-align:center; line-height:1.5; }
+
+  .frame{ width:300px; height:650px; background:#000; border-radius:38px; padding:9px; box-shadow:0 20px 44px rgba(0,0,0,.4); position:relative; }
+  .notch{ position:absolute; top:9px; left:50%; transform:translateX(-50%); width:96px; height:20px; background:#000; border-radius:11px; z-index:30; }
+  .screen{ width:100%; height:100%; border-radius:29px; overflow:hidden; position:relative; display:flex; flex-direction:column; }
+
+  .screen.light{
+    --canvas:#fbf9f5; --surface:#f4efe6; --card:#ffffff; --hair:#e8e2d6; --hair-strong:#d8cfbd;
+    --ink:#2a2826; --ink-soft:#6e6f63; --ink-faint:#9c9c8c;
+    --accent:#4d6152; --accent-strong:#3a4a3f; --accent-soft:rgba(77,97,82,0.12);
+    --ring-empty: rgba(42,40,38,.12); --on-accent:#ffffff; --danger:#a23b2e;
+    --sat:#3f6a8c; --sun:#a2504a;
+    --mind-bg:#5b3a28; --mind-ink:#f3eadd;
+    background:var(--canvas); color:var(--ink);
+  }
+  .screen.dark{
+    --canvas:#1d1f1b; --surface:#262820; --card:#292b23; --hair:rgba(255,255,255,.09); --hair-strong:rgba(255,255,255,.17);
+    --ink:#efeee6; --ink-soft:#b7b8ac; --ink-faint:#7c7d71;
+    --accent:#8ca290; --accent-strong:#7a9280; --accent-soft:rgba(140,162,144,0.16);
+    --ring-empty: rgba(255,255,255,.14); --on-accent:#17231c; --danger:#d17a6f;
+    --sat:#7fa6c9; --sun:#d17a6f;
+    --mind-bg:#7a4a36; --mind-ink:#f3eadd;
+    background:var(--canvas); color:var(--ink);
+  }
+
+  .statusbar{ height:42px; flex:none; display:flex; align-items:flex-end; justify-content:space-between; padding:0 18px 6px; font-size:12px; font-weight:600; }
+  .content{ flex:1 1 auto; overflow-y:auto; overflow-x:hidden; padding:2px 15px 10px; }
+  .app-header{ padding:6px 2px 12px; position:relative; }
+  .app-header .date{ font-size:11.5px; color:var(--ink-soft); font-weight:500; margin-bottom:3px; }
+  .app-header h3{ font-size:19px; font-weight:700; margin:0; letter-spacing:-0.01em; }
+  .app-header .sub{ font-size:11px; color:var(--ink-faint); margin-top:5px; font-weight:500; }
+  .back-btn{ position:absolute; top:4px; left:-4px; width:28px; height:28px; display:flex; align-items:center; justify-content:center; color:var(--ink-soft); }
+  .header-action{ position:absolute; top:8px; right:0; font-size:12px; font-weight:700; color:var(--accent); }
+
+  .chip-row{ display:flex; gap:6px; overflow-x:auto; padding:2px 2px 12px; }
+  .chip{ flex:none; padding:6px 11px; border-radius:999px; font-size:10.5px; font-weight:600; background:var(--surface); color:var(--ink-soft); }
+  .chip.active{ background:var(--accent); color:var(--on-accent); }
+
+  .panel{ background:var(--card); border:1px solid var(--hair); border-radius:14px; padding:13px 10px 14px; margin-bottom:12px; }
+  .panel h4{ margin:0 0 10px; font-size:11px; font-weight:700; color:var(--ink-soft); }
+
+  .wk-header{ display:grid; grid-template-columns:repeat(7,1fr); margin-bottom:6px; }
+  .wk-header span{ text-align:center; font-size:9px; font-weight:700; color:var(--ink-faint); }
+  .wk-header span:nth-child(6){ color:var(--sat); }
+  .wk-header span:nth-child(7){ color:var(--sun); }
+  .month-grid{ display:grid; grid-template-columns:repeat(7,1fr); row-gap:7px; }
+  .cell{ display:flex; flex-direction:column; align-items:center; gap:3px; }
+  .pct-text{ font-size:7px; font-weight:800; }
+  .pct-text.on-fill{ fill: var(--on-accent); }
+  .pct-text.on-empty{ fill: var(--ink); }
+  .daynum{ font-size:7.5px; font-weight:600; color:var(--ink-faint); }
+  .daynum.today{ font-weight:800; color:var(--accent); }
+  .daynum.other{ color:var(--ink-faint); opacity:.4; }
+  .legend2{ display:flex; align-items:center; gap:14px; margin-top:11px; padding-top:11px; border-top:1px solid var(--hair); flex-wrap:wrap; }
+  .legend2 .li{ display:flex; align-items:center; gap:5px; font-size:9.5px; color:var(--ink-soft); font-weight:600; white-space:nowrap; }
+
+  .icon{ width:16px; height:16px; flex:none; color:var(--ink-soft); }
+  .icon.on{ color:var(--accent); }
+
+  .task-list{ display:flex; flex-direction:column; margin-top:2px; }
+  .task-row{ display:flex; align-items:center; gap:11px; padding:12px 4px; border-bottom:1px solid var(--hair); }
+  .task-row:last-child{ border-bottom:none; }
+  .task-icon{ width:30px; height:30px; border-radius:9px; background:var(--surface); display:flex; align-items:center; justify-content:center; flex:none; }
+  .task-icon svg{ width:16px; height:16px; color:var(--ink-soft); }
+  .task-main{ flex:1; min-width:0; }
+  .task-name{ font-size:13.5px; font-weight:600; }
+  .task-name.done{ color:var(--ink-faint); text-decoration:line-through; }
+  .task-meta{ font-size:10px; color:var(--ink-faint); margin-top:2px; font-weight:500; }
+  .chk{ width:22px; height:22px; flex:none; border-radius:999px; border:1.6px solid var(--hair-strong); }
+  .chk.done{ border-color:transparent; background:var(--accent); position:relative; }
+  .chk.done::after{ content:""; position:absolute; left:50%; top:50%; width:5.5px; height:9px; border-right:2px solid var(--on-accent); border-bottom:2px solid var(--on-accent); transform:translate(-50%,-58%) rotate(45deg); }
+
+  .bottom-nav{ flex:none; display:flex; border-top:1px solid var(--hair); padding:8px 4px 16px; background:var(--canvas); }
+  .nav-item{ flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; font-size:8.5px; color:var(--ink-faint); font-weight:600; }
+  .nav-item svg{ width:18px; height:18px; }
+  .nav-item.active{ color:var(--accent); font-weight:700; }
+
+  .sec-label{ font-size:10.5px; font-weight:700; color:var(--ink-faint); margin: 15px 4px 7px; text-transform:uppercase; letter-spacing:.03em; }
+  .sec-label:first-of-type{ margin-top:2px; }
+  .sgroup{ background:var(--card); border:1px solid var(--hair); border-radius:13px; overflow:hidden; }
+  .srow{ display:flex; align-items:center; gap:10px; padding:11px 12px; border-bottom:1px solid var(--hair); min-height:20px; }
+  .srow:last-child{ border-bottom:none; }
+  .srow .sicon{ width:26px;height:26px;border-radius:8px;background:var(--surface);display:flex;align-items:center;justify-content:center;flex:none; }
+  .srow .sicon svg{ width:14px;height:14px;color:var(--ink-soft); }
+  .srow .stext{ flex:1; }
+  .srow .slabel{ font-size:12.5px; font-weight:600; }
+  .srow .spreview{ font-size:10px; color:var(--ink-faint); font-weight:500; margin-top:2px; }
+  .srow .sval{ font-size:11.5px; color:var(--ink-faint); font-weight:500; }
+  .srow .schev{ color:var(--ink-faint); font-size:11px; }
+  .srow.danger .slabel{ color:var(--danger); }
+  .srow.danger .sicon svg{ color:var(--danger); }
+  .seg{ display:flex; background:var(--surface); border-radius:8px; padding:2px; }
+  .seg span{ padding:4px 8px; font-size:10px; font-weight:600; color:var(--ink-faint); border-radius:6px; }
+  .seg span.on{ background:var(--card); color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.06); }
+  .respo-mini{ text-align:center; font-size:8.5px; font-weight:600; letter-spacing:.28em; text-indent:.28em; color:var(--ink-faint); opacity:.45; margin: 20px 0 4px; }
+
+  .mind-tab-card{ background:var(--mind-bg); border-radius:18px; padding:30px 20px; margin-top:6px; text-align:center; min-height:300px; display:flex; flex-direction:column; justify-content:center; }
+  .mind-tab-card .q{ font-family:Georgia,serif; font-size:34px; color:var(--mind-ink); opacity:.65; margin-bottom:6px; font-weight:700; }
+  .mind-tab-card .txt{ font-size:16.5px; font-weight:700; line-height:1.7; color:var(--mind-ink); letter-spacing:-0.01em; }
+  .mind-tab-card .foot{ margin-top:20px; font-size:10px; color:var(--mind-ink); opacity:.55; font-weight:600; }
+  .mind-edit-link{ text-align:center; margin-top:14px; font-size:11.5px; font-weight:700; color:var(--accent); display:flex; align-items:center; justify-content:center; gap:5px; }
+
+  .splash-screen{ align-items:center; justify-content:center; display:flex; flex-direction:column; position:relative; }
+  .splash-word{ margin-top:16px; font-size:13px; font-weight:700; letter-spacing:.14em; color: var(--ink-soft); }
+  .respoflov{ position:absolute; left:0; right:0; bottom: 30px; text-align:center; font-size:9.5px; font-weight:600; letter-spacing:.32em; text-indent:.32em; color: var(--ink-faint); opacity:.55; }
+
+  .ms-row{ display:flex; gap:10px; padding: 11px 4px; }
+  .ms-node{ width:23px;height:23px;border-radius:50%; flex:none; display:flex;align-items:center;justify-content:center; font-size:10.5px; font-weight:700; border:1.6px solid var(--hair-strong); color:var(--ink-faint); background:var(--canvas); margin-top:1px; }
+  .ms-item.done .ms-node{ background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
+  .ms-item.active .ms-node{ border-color:var(--accent); color:var(--accent); }
+  .ms-title{ font-size:13px; font-weight:700; display:flex; align-items:center; gap:6px; }
+  .ms-item.active .ms-title{ color: var(--accent); }
+  .ms-sub{ font-size:10px; color:var(--ink-faint); font-weight:500; margin-top:3px; display:flex; align-items:center; gap:4px; }
+  .status-pill{ display:inline-block; font-size:9px; font-weight:700; padding:2px 7px; border-radius:6px; margin-top:6px; background:var(--surface); color:var(--ink-faint); }
+  .status-pill.on{ background: var(--accent-soft); color: var(--accent); }
+  .notes{ margin: 2px 0 10px 34px; padding-left:13px; border-left:1.4px solid var(--hair); display:flex; flex-direction:column; gap:9px; }
+  .note-date{ font-weight:700; color:var(--ink-soft); font-size:11px; margin-bottom:2px; }
+  .note-text{ color:var(--ink); line-height:1.5; font-weight:500; font-size:11px; }
+  .note-add{ font-size:11px; font-weight:700; color:var(--accent); margin-top:2px; }
+  .complete-btn{ font-size:11px; font-weight:700; color:var(--on-accent); background:var(--accent); display:inline-flex; align-items:center; gap:5px; padding:6px 11px; border-radius:8px; margin-top:8px; }
+
+  .field-label{ font-size:11px; font-weight:700; color:var(--ink-soft); margin:14px 4px 8px; }
+  .field-label:first-child{ margin-top:2px; }
+  .text-input{ background:var(--card); border:1.4px solid var(--hair-strong); border-radius:11px; padding:11px 13px; font-size:14px; font-weight:600; color:var(--ink); }
+  .seg2{ display:flex; gap:8px; }
+  .seg-btn{ flex:1; text-align:center; padding:9px 0; border-radius:10px; font-size:12px; font-weight:700; background:var(--surface); color:var(--ink-soft); border:1.4px solid transparent; }
+  .seg-btn.on{ background:var(--accent-soft); color:var(--accent); border-color:var(--accent); }
+  .day-chips{ display:flex; gap:5px; margin-top:10px; }
+  .day-chip{ flex:1; text-align:center; padding:8px 0; border-radius:9px; font-size:11px; font-weight:700; background:var(--surface); color:var(--ink-faint); }
+  .day-chip.on{ background:var(--accent); color:var(--on-accent); }
+
+  .note{ font-size:10px; color:var(--ink-faint); line-height:1.6; margin-top:8px; font-weight:500; }
+
+  /* bottom sheet */
+  .sheet-backdrop{ position:absolute; inset:0; background:rgba(20,18,15,.42); z-index:40; }
+  .sheet{ position:absolute; left:0; right:0; bottom:0; height:72%; background:var(--canvas); border-radius:22px 22px 0 0; z-index:50; box-shadow:0 -10px 30px rgba(0,0,0,.18); display:flex; flex-direction:column; padding: 10px 16px 18px; }
+  .sheet-handle{ width:36px; height:4px; border-radius:3px; background:var(--hair-strong); margin:2px auto 10px; }
+  .sheet-header{ display:flex; align-items:center; justify-content:space-between; padding:2px 0 12px; }
+  .sheet-header .t{ font-size:15px; font-weight:700; }
+  .sheet-header .back{ width:26px; height:26px; color:var(--ink-soft); display:flex; align-items:center; }
+  .sheet-header .save{ font-size:12.5px; font-weight:700; color:var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <div class="tag">v10 · 컬러/로고/설정 전면 개편</div>
+  <h1>Daily Task Check — 디자인 시안 v10</h1>
+  <p>요청하신 항목을 구조적으로 나눠 진행했습니다. 순서대로: <b>①색상 팔레트 교체</b> → <b>②로고 4종 제안</b> → <b>③~⑩ 전 화면 재구성</b>(하단 탭바·선화 아이콘 추가, 빠졌던 화면 보강, 바텀시트 전환 등)입니다.</p>
+  <div class="checklist">
+    <div class="it"><b>·</b>포인트 컬러를 남색 계열 → <b>#4D6152(모스 그린)</b>로 교체, 연동 색상(연한 배경톤·다크모드 액센트 등)도 함께 조정</div>
+    <div class="it"><b>·</b>마음가짐 팝업의 "특별한 색"도 재검토 — 초록이 일상색이 되었으니, 그와 대비되는 <b>따뜻한 테라코타</b>로 교체해 "하루 중 다른 공기"라는 원래 의도를 유지</div>
+    <div class="it"><b>·</b>로고 4종 제안, 전 화면에 하단 탭바 고정, 선화 아이콘(오픈소스 아이콘 세트 기준, 실제 구현 시 Lucide 등으로 교체 권장) 추가</div>
+    <div class="it"><b>·</b>기록·항목별 완료 표시를 색 채움 원 → <b>원 안 체크 아이콘</b>으로 변경</div>
+    <div class="it"><b>·</b>설정 화면 복원, 마음가짐 탭(팝업이 아닌 상시 화면) · 진입 화면 보강</div>
+    <div class="it"><b>·</b>할 일 추가를 풀스크린 → <b>아래에서 올라오는 바텀시트</b>로 전환 (뒤로가기·저장 버튼 유지)</div>
+    <div class="it"><b>·</b>고정 할 일을 도중에 추가해도 <b>그 항목이 생기기 전 날짜의 완료율에는 영향 없음</b> — 기록 탭에 예시로 반영</div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">① 포인트 컬러 교체</div>
+  <div class="swatch-row">
+    <div class="sw-card"><div class="sw-chip" style="background:#1b1938;"></div><div class="l">기존</div><div class="h">#1B1938</div></div>
+    <div class="arrow">→</div>
+    <div class="sw-card"><div class="sw-chip" style="background:#4d6152;"></div><div class="l">신규 (요청값)</div><div class="h">#4D6152</div></div>
+  </div>
+  <div class="group-sub">
+    아이보리 종이 바탕과 잘 어울리고 "저널·꾸준함"의 톤과도 맞아 요청하신 값을 그대로 채택했습니다. 조정 없이 사용해도 미감적으로 무리가 없다고 판단했습니다.
+    다만 이 색이 <b>일상적으로 계속 보이는 색</b>이 되면서, 원래 남색 대비용으로 썼던 마음가짐 팝업의 짙은 청록은 초록과 톤이 가까워 "특별한 순간"이라는 느낌이 옅어집니다.
+    그래서 마음가짐 팝업만 <b>따뜻한 테라코타</b>로 바꿔 매일 쓰는 초록과 확실히 구분되는 색 전환을 유지했습니다.
+  </div>
+  <div class="token-table">
+    <div class="tok"><div class="dot" style="background:#4d6152;"></div><div class="n">액센트 (라이트)</div><div class="h">#4D6152</div></div>
+    <div class="tok"><div class="dot" style="background:#8ca290;"></div><div class="n">액센트 (다크)</div><div class="h">#8CA290</div></div>
+    <div class="tok"><div class="dot" style="background:#3a4a3f;"></div><div class="n">액센트 강조/눌림</div><div class="h">#3A4A3F</div></div>
+    <div class="tok"><div class="dot" style="background:#5b3a28;"></div><div class="n">마음가짐 배경(신규)</div><div class="h">#5B3A28</div></div>
+    <div class="tok"><div class="dot" style="background:#a23b2e;"></div><div class="n">위험(삭제 등, 유지)</div><div class="h">#A23B2E</div></div>
+    <div class="tok"><div class="dot" style="background:#3f6a8c;"></div><div class="n">토요일(유지)</div><div class="h">#3F6A8C</div></div>
+    <div class="tok"><div class="dot" style="background:#a2504a;"></div><div class="n">일요일(유지)</div><div class="h">#A2504A</div></div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">② 로고 시안 4종</div>
+  <div class="group-sub">모두 벡터 하나로 그린 미니멀 마크입니다. 어떤 게 앱과 가장 잘 맞는지, 혹은 다른 방향을 더 보고 싶으신지 알려주세요.</div>
+  <div class="row">
+    <div class="logo-tile">
+      <svg width="56" height="56" viewBox="0 0 56 56"><rect x="2" y="2" width="52" height="52" rx="16" fill="#eef1ec" stroke="#4d6152" stroke-width="1.4"/><path d="M17 29l7.5 7.5L39 20" stroke="#4d6152" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="tname">A · 심플 체크</div>
+      <div class="tdesc">가장 직관적. "할 일 체크"를 바로 읽을 수 있음</div>
+    </div>
+    <div class="logo-tile">
+      <svg width="56" height="56" viewBox="0 0 56 56"><rect x="2" y="2" width="52" height="52" rx="16" fill="#eef1ec" stroke="#4d6152" stroke-width="1.4"/><path d="M20 32c0-8 4-13 9-16-1 6 1 10 5 12-2 6-8 9-14 4z" fill="#4d6152"/><path d="M20 34l8-8" stroke="#4d6152" stroke-width="2.4" stroke-linecap="round"/></svg>
+      <div class="tname">B · 체크 리프</div>
+      <div class="tdesc">체크 표시의 꼬리를 잎사귀로 — "꾸준함=성장"의 은유</div>
+    </div>
+    <div class="logo-tile">
+      <svg width="56" height="56" viewBox="0 0 56 56"><rect x="2" y="2" width="52" height="52" rx="16" fill="#eef1ec" stroke="#4d6152" stroke-width="1.4"/><rect x="16" y="15" width="24" height="24" rx="6" fill="none" stroke="#4d6152" stroke-width="2.6"/><circle cx="34" cy="33" r="6.5" fill="#4d6152"/><path d="M31.3 33l1.9 1.9 3.5-3.9" stroke="#eef1ec" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="tname">C · 데이 마크</div>
+      <div class="tdesc">달력 한 칸에 도장 찍힌 모습 — 기록·히트맵 컨셉과 직결</div>
+    </div>
+    <div class="logo-tile">
+      <svg width="56" height="56" viewBox="0 0 56 56"><rect x="2" y="2" width="52" height="52" rx="16" fill="#eef1ec" stroke="#4d6152" stroke-width="1.4"/><path d="M28 14c7 3 11 8 11 15a11 11 0 0 1-22 0c0-7 4-12 11-15z" fill="none" stroke="#4d6152" stroke-width="2.2"/><path d="M22.5 29.5l4 4 8-9" stroke="#4d6152" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="tname">D · 잉크 스탬프</div>
+      <div class="tdesc">손으로 찍은 듯한 방울 안에 체크 — "저널" 톤과 가장 잘 맞음</div>
+    </div>
+  </div>
+  <div class="group-sub" style="margin-top:18px;">이후 화면들에는 우선 <b>A안(심플 체크)</b>을 기본값으로 넣었습니다 — 방향을 다시 알려주시면 스플래시 로고만 바로 교체됩니다.</div>
+</div>
+
+<div class="group">
+  <div class="group-title">③ 진입 화면(스플래시)</div>
+  <div class="row">
+    <div class="unit"><div class="label">A안 로고 적용</div>
+      <div class="frame"><div class="notch"></div><div class="screen light splash-screen">
+        <svg width="64" height="64" viewBox="0 0 56 56"><rect x="2" y="2" width="52" height="52" rx="16" fill="#eef1ec" stroke="#4d6152" stroke-width="1.4"/><path d="M17 29l7.5 7.5L39 20" stroke="#4d6152" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="splash-word">TASK CHECK</div>
+        <div class="respoflov">RESPOFLOV</div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">④ 설정 (복원)</div>
+  <div class="row">
+    <div class="unit"><div class="label">테마·언어·마음가짐 편집·데이터·정보 + 선화 아이콘</div>
+      <div class="frame"><div class="notch"></div><div class="screen light">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content">
+          <div class="app-header"><h3>설정</h3></div>
+          <div class="sec-label">화면</div>
+          <div class="sgroup">
+            <div class="srow"><div class="sicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></div><div class="stext"><div class="slabel">테마</div></div><div class="seg"><span>라이트</span><span class="on">시스템</span><span>다크</span></div></div>
+            <div class="srow"><div class="sicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18z"/></svg></div><div class="stext"><div class="slabel">언어</div></div><div class="seg"><span class="on">한국어</span><span>日本語</span><span>English</span></div></div>
+          </div>
+
+          <div class="sec-label">마음가짐</div>
+          <div class="sgroup">
+            <div class="srow"><div class="sicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 3.5c-6 0-12 3-15 10-1 2.3-2 5-2 7 2 0 4.7-1 7-2 7-3 10-9 10-15Z"/><path d="M8 16l9-9"/></svg></div><div class="stext"><div class="slabel">문구 편집</div><div class="spreview">"완벽하지 않아도 괜찮다..."</div></div><div class="schev">›</div></div>
+          </div>
+
+          <div class="sec-label">데이터</div>
+          <div class="sgroup">
+            <div class="srow"><div class="sicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></div><div class="stext"><div class="slabel">데이터 내보내기</div></div><div class="schev">›</div></div>
+            <div class="srow"><div class="sicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9m0 0l-4 4m4-4l4 4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></div><div class="stext"><div class="slabel">데이터 가져오기</div></div><div class="schev">›</div></div>
+            <div class="srow danger"><div class="sicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></div><div class="stext"><div class="slabel">전체 초기화</div></div><div class="schev">›</div></div>
+          </div>
+
+          <div class="sec-label">정보</div>
+          <div class="sgroup">
+            <div class="srow"><div class="sicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></div><div class="stext"><div class="slabel">설치 방법</div></div><div class="schev">›</div></div>
+            <div class="srow"><div class="sicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3.5v5c0 5-3.4 8.9-8 10.5-4.6-1.6-8-5.5-8-10.5v-5L12 2z"/></svg></div><div class="stext"><div class="slabel">오픈소스 라이선스</div><div class="spreview">Pretendard · Lucide Icons</div></div><div class="schev">›</div></div>
+            <div class="srow"><div class="sicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v5h1"/></svg></div><div class="stext"><div class="slabel">버전</div></div><div class="sval">1.0.0</div></div>
+          </div>
+          <div class="respo-mini">RESPOFLOV</div>
+        </div>
+        <div class="bottom-nav" id="nav-settings"></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">⑤ 마음가짐 탭 (팝업이 아닌 상시 화면)</div>
+  <div class="group-sub">앱을 처음 열 때만 뜨는 팝업과 별개로, 하단 탭에서 언제든 다시 볼 수 있는 화면입니다. 색은 팝업과 같은 테라코타를 씁니다.</div>
+  <div class="row">
+    <div class="unit"><div class="label">하단 탭 "마음가짐" 진입 화면</div>
+      <div class="frame"><div class="notch"></div><div class="screen light">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content">
+          <div class="app-header"><div class="date">마음가짐</div></div>
+          <div class="mind-tab-card">
+            <div class="q">"</div>
+            <div class="txt">완벽하지 않아도 괜찮다.<br/>하루를 건너뛰어도<br/>다음 날 다시 시작하면 된다.</div>
+            <div class="foot">마지막 수정 · 2026.07.28</div>
+          </div>
+          <div class="mind-edit-link">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            설정에서 문구 수정하기
+          </div>
+        </div>
+        <div class="bottom-nav" id="nav-mind"></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">⑥ 오늘 탭</div>
+  <div class="row">
+    <div class="unit"><div class="label">항목별 선화 아이콘 + 새 컬러</div>
+      <div class="frame"><div class="notch"></div><div class="screen light">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content">
+          <div class="app-header"><div class="date">8월 4일 화요일</div><h3>오늘의 할 일</h3><div class="sub">이번 주 5 / 7일 완료</div></div>
+          <div class="task-list" id="today-list"></div>
+        </div>
+        <div class="bottom-nav" id="nav-today"></div>
+      </div></div>
+    </div>
+
+    <div class="unit"><div class="label">다크모드</div>
+      <div class="frame"><div class="notch"></div><div class="screen dark">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content">
+          <div class="app-header"><div class="date">8월 4일 화요일</div><h3>오늘의 할 일</h3><div class="sub">이번 주 5 / 7일 완료</div></div>
+          <div class="task-list" id="today-list-dark"></div>
+        </div>
+        <div class="bottom-nav" id="nav-today-dark"></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">⑦ 기록 — 전체 보기 (항목 도중 추가 시 이전 날짜 계산 제외)</div>
+  <div class="group-sub">
+    "물 2L 마시기"는 8월 3일에 새로 추가한 항목이라고 가정했습니다. 8/1~8/2는 그 항목이 아직 없었으니 <b>분모(전체 항목 수)에서 빠져서</b> 4개 기준으로 계산되고,
+    8/3부터는 5개 기준으로 계산됩니다 — 새 항목을 늦게 추가해도 예전 날짜의 퍼센트가 갑자기 낮아지지 않습니다.
+  </div>
+  <div class="row">
+    <div class="unit"><div class="label">1일(3/4=75%) · 2일(1/4=25%) · 3일부터 물 2L 포함(5개 기준)</div>
+      <div class="frame"><div class="notch"></div><div class="screen light">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content">
+          <div class="app-header"><div class="date">기록</div><h3>전체 보기</h3></div>
+          <div class="chip-row"><div class="chip active">전체</div><div class="chip">운동 30분</div><div class="chip">물 2L</div></div>
+          <div class="panel">
+            <h4>2026년 8월</h4>
+            <div class="wk-header"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span></div>
+            <div class="month-grid" id="g7"></div>
+            <div class="legend2">
+              <div class="li"><svg width="13" height="13"><circle cx="6.5" cy="6.5" r="5.3" fill="none" stroke="var(--ring-empty)" stroke-width="2.2"/></svg>0%</div>
+              <div class="li"><svg width="13" height="13"><circle cx="6.5" cy="6.5" r="5.3" fill="var(--accent)"/></svg>100% 전부 완료</div>
+            </div>
+          </div>
+          <div class="note">8/1·8/2는 물 2L을 뺀 4개 항목 기준, 8/3부터는 5개 항목 기준으로 계산됩니다.</div>
+        </div>
+        <div class="bottom-nav" id="nav-record"></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">⑧ 기록 — 항목별(단일 항목) — 원 안 체크 아이콘으로 수정</div>
+  <div class="row">
+    <div class="unit"><div class="label">색 채움 원 → 체크 아이콘</div>
+      <div class="frame"><div class="notch"></div><div class="screen light">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content">
+          <div class="app-header"><div class="date">기록</div><h3>운동 30분</h3></div>
+          <div class="chip-row"><div class="chip">전체</div><div class="chip active">운동 30분</div><div class="chip">영어 단어</div></div>
+          <div class="panel">
+            <h4>2026년 8월</h4>
+            <div class="wk-header"><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span><span>일</span></div>
+            <div class="month-grid" id="g8"></div>
+            <div class="legend2">
+              <div class="li"><svg width="13" height="13"><circle cx="6.5" cy="6.5" r="5.3" fill="none" stroke="var(--ring-empty)" stroke-width="2.2"/></svg>안 함</div>
+              <div class="li"><svg width="13" height="13"><circle cx="6.5" cy="6.5" r="5.3" fill="var(--accent)"/><path d="M4 6.5l1.6 1.6L9 4.8" stroke="white" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>완료</div>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-nav" id="nav-record2"></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">⑨ 프로젝트</div>
+  <div class="row">
+    <div class="unit"><div class="label">선화 아이콘 + 새 컬러 + 완료 버튼</div>
+      <div class="frame"><div class="notch"></div><div class="screen light">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content">
+          <div class="app-header"><div class="date">프로젝트</div><h3>토익 900점 만들기</h3><div class="sub">7/20 시작</div></div>
+          <div class="ms-item done"><div class="ms-row"><div class="ms-node">✓</div><div><div class="ms-title">단어 · 리스닝 습관 잡기</div><div class="ms-sub">메모 2개 ▾</div><span class="status-pill">완료 · 7/28</span></div></div></div>
+          <div class="ms-item active">
+            <div class="ms-row"><div class="ms-node">2</div><div><div class="ms-title">실전 문제 풀이 매일 1세트</div><div class="ms-sub"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>8/1 시작 · 메모 2개 ▴</div><span class="status-pill on">진행 중</span></div></div>
+            <div class="notes">
+              <div><div class="note-date">8월 1일</div><div class="note-text">첫 세트 풀어봄. 리스닝이 특히 약함.</div></div>
+              <div><div class="note-date">8월 3일</div><div class="note-text">오답 노트 정리 시작.</div></div>
+              <div class="note-add">+ 오늘 메모 추가</div>
+              <div class="complete-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>이 단계를 완료로 표시</div>
+            </div>
+          </div>
+          <div class="ms-item"><div class="ms-row"><div class="ms-node">3</div><div><div class="ms-title">모의고사로 중간 점검</div><div class="ms-sub">9월 예정</div><span class="status-pill">예정</span></div></div></div>
+        </div>
+        <div class="bottom-nav" id="nav-project"></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">⑩ 할 일 추가 — 바텀시트로 전환</div>
+  <div class="group-sub">풀스크린 대신 아래에서 올라오는 시트입니다. 손잡이를 아래로 밀면 닫히고(=취소), 상단에 뒤로가기·저장 버튼은 그대로 있습니다.</div>
+  <div class="row">
+    <div class="unit"><div class="label">오늘 화면 위로 시트가 떠 있는 상태</div>
+      <div class="frame"><div class="notch"></div><div class="screen light" style="position:relative;">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content">
+          <div class="app-header"><div class="date">8월 4일 화요일</div><h3>오늘의 할 일</h3></div>
+          <div class="task-list" id="today-list-behind"></div>
+        </div>
+        <div class="bottom-nav" id="nav-today-behind"></div>
+
+        <div class="sheet-backdrop"></div>
+        <div class="sheet">
+          <div class="sheet-handle"></div>
+          <div class="sheet-header">
+            <div class="back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+            <div class="t">새 할 일 추가</div>
+            <div class="save">저장</div>
+          </div>
+          <div class="field-label">이름</div>
+          <div class="text-input">예: 물 2L 마시기</div>
+          <div class="field-label">반복</div>
+          <div class="seg2"><div class="seg-btn on">매일</div><div class="seg-btn">요일 선택</div></div>
+          <div class="note">아래로 쓸어내리면 저장하지 않고 닫혀요 (취소와 동일).</div>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const NAV = [
+    {k:'오늘', i:'M4 12.5 9 17l11-11'},
+    {k:'기록', i:'grid'},
+    {k:'마음가짐', i:'M20.5 3.5c-6 0-12 3-15 10-1 2.3-2 5-2 7 2 0 4.7-1 7-2 7-3 10-9 10-15Z|M8 16l9-9'},
+    {k:'프로젝트', i:'M6 21V4l11 4-11 4'},
+    {k:'설정', i:'gear'}
+  ];
+  function navSvg(item){
+    if(item.i==='grid') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="3.5" width="6" height="6" rx="1.3"/><rect x="14.5" y="3.5" width="6" height="6" rx="1.3"/><rect x="3.5" y="14.5" width="6" height="6" rx="1.3"/><rect x="14.5" y="14.5" width="6" height="6" rx="1.3"/></svg>';
+    if(item.i==='gear') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.55V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1Z"/></svg>';
+    const paths = item.i.split('|').map(p=>`<path d="${p}"/>`).join('');
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+  }
+  function renderNav(id, activeKey){
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.innerHTML = NAV.map(item => `<div class="nav-item ${item.k===activeKey?'active':''}">${navSvg(item)}<span>${item.k}</span></div>`).join('');
+  }
+  ['nav-settings','nav-mind','nav-today','nav-today-dark','nav-record','nav-record2','nav-project','nav-today-behind'].forEach(id=>{
+    const map = {'nav-settings':'설정','nav-mind':'마음가짐','nav-today':'오늘','nav-today-dark':'오늘','nav-record':'기록','nav-record2':'기록','nav-project':'프로젝트','nav-today-behind':'오늘'};
+    renderNav(id, map[id]);
+  });
+
+  const ICONS = {
+    dumbbell: 'M2 12h2M20 12h2M6 8v8M18 8v8M6 12H4M20 12h-2M9 12h6M6 9a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9zM15 9a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1V9z',
+    book: 'M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4H6.5A2.5 2.5 0 0 0 4 6.5v13z|M4 19.5A2.5 2.5 0 0 0 6.5 22H20',
+    pencil: 'M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z',
+    droplet: 'M12 3s6 6.6 6 11a6 6 0 0 1-12 0c0-4.4 6-11 6-11z',
+    readbook: 'M4 5v14M20 5v14M4 5c2-1 6-1 8 1 2-2 6-2 8-1M4 19c2-1 6-1 8 1 2-2 6-2 8-1'
+  };
+  function iconSvg(pathkey){
+    const paths = ICONS[pathkey].split('|').map(p=>`<path d="${p}"/>`).join('');
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`;
+  }
+  const TASKS = [
+    {icon:'dumbbell', name:'운동 30분', meta:'매일 · 7일 연속', done:true},
+    {icon:'book', name:'영어 단어 20개', meta:'매일', done:true},
+    {icon:'pencil', name:'일기 쓰기', meta:'매일', done:false},
+    {icon:'droplet', name:'물 2L 마시기', meta:'매일', done:false},
+    {icon:'readbook', name:'독서 10페이지', meta:'매일 · 3일 연속', done:true},
+  ];
+  function renderTasks(id){
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.innerHTML = TASKS.map(t => `
+      <div class="task-row">
+        <div class="task-icon">${iconSvg(t.icon)}</div>
+        <div class="task-main"><div class="task-name ${t.done?'done':''}">${t.name}</div><div class="task-meta">${t.meta}</div></div>
+        <div class="chk ${t.done?'done':''}"></div>
+      </div>`).join('');
+  }
+  ['today-list','today-list-dark','today-list-behind'].forEach(renderTasks);
+
+  // calendar grids (Aug 2026, Mon-start, Aug1=Sat)
+  const cellsBase = [
+    {n:27,m:'prev'},{n:28,m:'prev'},{n:29,m:'prev'},{n:30,m:'prev'},{n:31,m:'prev'},{n:1,m:'cur',p:75},{n:2,m:'cur',p:25},
+    {n:3,m:'cur',p:100},{n:4,m:'cur',p:40,today:true},{n:5,m:'cur',future:true},{n:6,m:'cur',future:true},{n:7,m:'cur',future:true},{n:8,m:'cur',future:true},{n:9,m:'cur',future:true},
+    {n:10,m:'cur',future:true},{n:11,m:'cur',future:true},{n:12,m:'cur',future:true},{n:13,m:'cur',future:true},{n:14,m:'cur',future:true},{n:15,m:'cur',future:true},{n:16,m:'cur',future:true},
+    {n:17,m:'cur',future:true},{n:18,m:'cur',future:true},{n:19,m:'cur',future:true},{n:20,m:'cur',future:true},{n:21,m:'cur',future:true},{n:22,m:'cur',future:true},{n:23,m:'cur',future:true},
+    {n:24,m:'cur',future:true},{n:25,m:'cur',future:true},{n:26,m:'cur',future:true},{n:27,m:'cur',future:true},{n:28,m:'cur',future:true},{n:29,m:'cur',future:true},{n:30,m:'cur',future:true},
+    {n:31,m:'cur',future:true},{n:1,m:'next'},{n:2,m:'next'},{n:3,m:'next'},{n:4,m:'next'},{n:5,m:'next'},{n:6,m:'next'}
+  ];
+
+  function renderGrid(containerId, list, mode){
+    const el = document.getElementById(containerId);
+    if(!el) return;
+    const size = 25, R = 10.5, C = 2*Math.PI*R;
+    list.forEach(d=>{
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      let svg = '';
+      if(d.m !== 'cur'){
+        svg = `<svg width="${size}" height="${size}"></svg>`;
+      } else if(d.future){
+        svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+          <circle cx="${size/2}" cy="${size/2}" r="${R}" fill="none" stroke="var(--ink-faint)" stroke-width="1.3" stroke-dasharray="2 2" opacity="0.45"/>
+        </svg>`;
+      } else if(mode==='binary'){
+        svg = d.p>=100
+          ? `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${R}" fill="var(--accent)"/><path d="M8 12.5l3 3 6-7" stroke="var(--on-accent)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+          : `<svg width="${size}" height="${size}"><circle cx="${size/2}" cy="${size/2}" r="${R}" fill="none" stroke="var(--ring-empty)" stroke-width="2.2"/></svg>`;
+      } else if(d.p >= 100){
+        svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+          <circle cx="${size/2}" cy="${size/2}" r="${R}" fill="var(--accent)" ${d.today? 'stroke="var(--ink-soft)" stroke-width="1.6"' : ''}/>
+          <text x="${size/2}" y="${size/2+2.6}" text-anchor="middle" class="pct-text on-fill">100</text>
+        </svg>`;
+      } else {
+        const dash = (d.p/100)*C;
+        svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+          <circle cx="${size/2}" cy="${size/2}" r="${R}" fill="none" stroke="var(--ring-empty)" stroke-width="2.2"/>
+          ${d.p>0 ? `<circle cx="${size/2}" cy="${size/2}" r="${R}" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="${dash} ${C}" transform="rotate(-90 ${size/2} ${size/2})"/>` : ''}
+          ${d.today ? `<circle cx="${size/2}" cy="${size/2}" r="${R+2.2}" fill="none" stroke="var(--ink-soft)" stroke-width="1"/>` : ''}
+          <text x="${size/2}" y="${size/2+2.6}" text-anchor="middle" class="pct-text on-empty">${d.p}</text>
+        </svg>`;
+      }
+      const daynum = document.createElement('div');
+      daynum.className = 'daynum' + (d.today? ' today' : '') + (d.m!=='cur' ? ' other' : '');
+      daynum.textContent = d.n;
+      cell.innerHTML = svg;
+      cell.appendChild(daynum);
+      el.appendChild(cell);
+    });
+  }
+  renderGrid('g7', cellsBase);
+  renderGrid('g8', cellsBase, 'binary');
+</script>
+
+</body>
+</html>

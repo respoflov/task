@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Daily Task Check — 디자인 시안 v7 (비율 채움 + 퍼센트 + 다크모드)</title>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<style>
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; font-family:'Pretendard',-apple-system,sans-serif; background:#151517; color:#e8e8ea;
+    padding: 48px 32px 120px; -webkit-font-smoothing:antialiased;
+  }
+  .page-head{ max-width:1300px; margin:0 auto 40px; }
+  .page-head .tag{ display:inline-block; font-size:11px; font-weight:700; color:#0b0b0d; background:#e8e8ea; padding:3px 9px; border-radius:6px; margin-bottom:12px; }
+  .page-head h1{ font-size:22px; font-weight:700; margin:0 0 8px; letter-spacing:-0.01em; }
+  .page-head p{ font-size:13px; color:#a6a6ab; line-height:1.8; margin:0; max-width:940px; }
+  .page-head b{ color:#e8e8ea; }
+
+  .group{ max-width:1300px; margin:0 auto 52px; }
+  .group-title{ font-size:14px; font-weight:700; color:#e8e8ea; margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,.12); }
+  .row{ display:flex; gap:28px; flex-wrap:wrap; }
+  .unit{ display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .unit .label{ font-size:11px; font-weight:600; color:#9d9ea2; text-align:center; }
+
+  .frame{ width:300px; height:650px; background:#000; border-radius:38px; padding:9px; box-shadow:0 20px 44px rgba(0,0,0,.4); position:relative; }
+  .notch{ position:absolute; top:9px; left:50%; transform:translateX(-50%); width:96px; height:20px; background:#000; border-radius:11px; z-index:30; }
+  .screen{ width:100%; height:100%; border-radius:29px; overflow:hidden; position:relative; display:flex; flex-direction:column; }
+
+  .screen.light{
+    --canvas:#fbf9f5; --surface:#f4efe6; --card:#ffffff; --hair:#e8e2d6; --hair-strong:#d8cfbd;
+    --ink:#2a2826; --ink-soft:#766f66; --ink-faint:#a39b8c;
+    --accent:#1b1938; --ring-empty: rgba(42,40,38,.13); --on-accent:#ffffff;
+    background:var(--canvas); color:var(--ink);
+  }
+  .screen.dark{
+    --canvas:#201c18; --surface:#2a241f; --card:#2c2721; --hair:rgba(255,255,255,.09); --hair-strong:rgba(255,255,255,.17);
+    --ink:#f1ece3; --ink-soft:#b9b0a2; --ink-faint:#7e7568;
+    --accent:#4b4f9e; --ring-empty: rgba(255,255,255,.14); --on-accent:#ffffff;
+    background:var(--canvas); color:var(--ink);
+  }
+
+  .statusbar{ height:42px; flex:none; display:flex; align-items:flex-end; justify-content:space-between; padding:0 20px 6px; font-size:12px; font-weight:600; }
+  .content{ flex:1 1 auto; overflow-y:auto; padding:2px 16px 10px; }
+  .app-header{ padding:6px 2px 14px; }
+  .app-header .date{ font-size:11.5px; color:var(--ink-soft); font-weight:500; margin-bottom:3px; }
+  .app-header h3{ font-size:20px; font-weight:700; margin:0; letter-spacing:-0.01em; }
+
+  .chip-row{ display:flex; gap:6px; overflow-x:auto; padding:2px 2px 14px; }
+  .chip{ flex:none; padding:6px 12px; border-radius:999px; font-size:11px; font-weight:600; background:var(--surface); color:var(--ink-soft); }
+  .chip.active{ background:var(--accent); color:var(--on-accent); }
+
+  .panel{ background:var(--card); border:1px solid var(--hair); border-radius:15px; padding:15px 12px 16px; margin-bottom:12px; }
+  .panel h4{ margin:0 0 12px; font-size:11.5px; font-weight:700; color:var(--ink-soft); }
+
+  .month-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:9px 0; }
+  .cell{ display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .pct-text{ font-size:8px; font-weight:800; }
+  .pct-text.on-fill{ fill: var(--on-accent); }
+  .pct-text.on-empty{ fill: var(--ink); }
+  .daynum{ font-size:8px; font-weight:600; color:var(--ink-faint); }
+  .daynum.today{ font-weight:800; color:var(--ink); }
+
+  .legend2{ display:flex; flex-direction:column; gap:7px; margin-top:12px; padding-top:12px; border-top:1px solid var(--hair); }
+  .legend2 .li{ display:flex; align-items:center; gap:8px; font-size:10.5px; color:var(--ink-soft); font-weight:600; }
+
+  .detail-card{ background: var(--surface); border-radius:12px; padding:12px 13px; margin-top:12px; }
+  .detail-card .ddate{ font-size:11.5px; font-weight:700; color:var(--ink); margin-bottom:8px; display:flex; align-items:center; gap:8px; justify-content:space-between; }
+  .detail-card .badge{ font-size:9.5px; font-weight:700; color:var(--accent); background:rgba(120,120,180,0.14); padding:2px 7px; border-radius:6px; }
+  .detail-row{ display:flex; align-items:center; gap:8px; font-size:11.5px; font-weight:600; color:var(--ink-soft); padding:4px 0; }
+  .detail-row .tick{ width:14px; height:14px; border-radius:50%; background:var(--accent); flex:none; position:relative; }
+  .detail-row .tick::after{ content:""; position:absolute; left:50%; top:48%; width:4px; height:7px; border-right:1.5px solid #fff; border-bottom:1.5px solid #fff; transform:translate(-50%,-58%) rotate(45deg); }
+  .detail-row.off{ color:var(--ink-faint); font-weight:500; }
+  .detail-row .tick.off{ background:transparent; border:1.4px solid var(--hair-strong); }
+  .detail-row .tick.off::after{ display:none; }
+
+  .note{ font-size:10.5px; color:var(--ink-faint); line-height:1.6; margin-top:8px; font-weight:500; }
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <div class="tag">v7 · 비율 채움(확정) + 원 안 퍼센트 + 다크모드</div>
+  <h1>기록 탭 — 비율 링 + 퍼센트 숫자, 라이트/다크 함께</h1>
+  <p>
+    말씀하신 대로 "비율 채움" 방식으로 확정하고, <b>원 안에 완료 비율(%)</b>을 숫자로 넣었습니다.
+    <b>다 채워진 원(100%)은 흰 글자</b>, 그 외(링만 채워진 상태)는 <b>그 테마의 잉크색(라이트=짙은색 / 다크=밝은색)</b>으로
+    바탕과 대비되게 했습니다 — 즉 "글자 색이 그 순간 원 안 배경과 대비되게"라는 규칙을 라이트·다크 모두에 동일하게 적용한 것입니다.
+    테마는 설정 탭에서 라이트/다크를 고르므로, 두 모드 다 실제로 쓰일 화면이라 나란히 보여드립니다.
+  </p>
+</div>
+
+<div class="group">
+  <div class="group-title">① 기록 — 전체 보기</div>
+  <div class="row">
+
+    <div class="unit"><div class="label">라이트</div>
+      <div class="frame"><div class="notch"></div><div class="screen light">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content">
+          <div class="app-header"><div class="date">기록</div><h3>전체 보기</h3></div>
+          <div class="chip-row"><div class="chip active">전체</div><div class="chip">운동 30분</div><div class="chip">영어 단어</div></div>
+          <div class="panel"><h4>2026년 8월</h4>
+            <div class="month-grid" id="grid-light-1"></div>
+            <div class="legend2">
+              <div class="li"><svg width="16" height="16"><circle cx="8" cy="8" r="6.5" fill="none" stroke="var(--ring-empty)" stroke-width="2.6"/></svg>0%</div>
+              <div class="li"><svg width="16" height="16"><circle cx="8" cy="8" r="6.5" fill="var(--accent)"/></svg>100% (전부 완료)</div>
+            </div>
+          </div>
+          <div class="note">부분 완료는 링 + 어두운 숫자, 전부 완료는 꽉 찬 원 + 흰 숫자.</div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="unit"><div class="label">다크</div>
+      <div class="frame"><div class="notch"></div><div class="screen dark">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content">
+          <div class="app-header"><div class="date">기록</div><h3>전체 보기</h3></div>
+          <div class="chip-row"><div class="chip active">전체</div><div class="chip">운동 30분</div><div class="chip">영어 단어</div></div>
+          <div class="panel"><h4>2026년 8월</h4>
+            <div class="month-grid" id="grid-dark-1"></div>
+            <div class="legend2">
+              <div class="li"><svg width="16" height="16"><circle cx="8" cy="8" r="6.5" fill="none" stroke="var(--ring-empty)" stroke-width="2.6"/></svg>0%</div>
+              <div class="li"><svg width="16" height="16"><circle cx="8" cy="8" r="6.5" fill="var(--accent)"/></svg>100% (전부 완료)</div>
+            </div>
+          </div>
+          <div class="note">같은 규칙, 다크에서는 링 색·바탕·글자만 반전됩니다.</div>
+        </div>
+      </div></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="group">
+  <div class="group-title">② 날짜 탭 시 상세</div>
+  <div class="row">
+
+    <div class="unit"><div class="label">라이트</div>
+      <div class="frame"><div class="notch"></div><div class="screen light">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content">
+          <div class="app-header"><div class="date">기록</div><h3>전체 보기</h3></div>
+          <div class="chip-row"><div class="chip active">전체</div><div class="chip">운동 30분</div></div>
+          <div class="panel"><h4>2026년 8월</h4>
+            <div class="month-grid" id="grid-light-2"></div>
+            <div class="detail-card">
+              <div class="ddate">8월 4일 (화)<span class="badge">2 / 5 완료 · 40%</span></div>
+              <div class="detail-row"><div class="tick"></div>운동 30분</div>
+              <div class="detail-row"><div class="tick"></div>영어 단어 20개</div>
+              <div class="detail-row off"><div class="tick off"></div>일기 쓰기</div>
+              <div class="detail-row off"><div class="tick off"></div>물 2L 마시기</div>
+              <div class="detail-row off"><div class="tick off"></div>독서 10페이지</div>
+            </div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="unit"><div class="label">다크</div>
+      <div class="frame"><div class="notch"></div><div class="screen dark">
+        <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+        <div class="content">
+          <div class="app-header"><div class="date">기록</div><h3>전체 보기</h3></div>
+          <div class="chip-row"><div class="chip active">전체</div><div class="chip">운동 30분</div></div>
+          <div class="panel"><h4>2026년 8월</h4>
+            <div class="month-grid" id="grid-dark-2"></div>
+            <div class="detail-card">
+              <div class="ddate">8월 4일 (화)<span class="badge">2 / 5 완료 · 40%</span></div>
+              <div class="detail-row"><div class="tick"></div>운동 30분</div>
+              <div class="detail-row"><div class="tick"></div>영어 단어 20개</div>
+              <div class="detail-row off"><div class="tick off"></div>일기 쓰기</div>
+              <div class="detail-row off"><div class="tick off"></div>물 2L 마시기</div>
+              <div class="detail-row off"><div class="tick off"></div>독서 10페이지</div>
+            </div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const days = [
+    {n:1, p:0}, {n:2, p:20}, {n:3, p:0}, {n:4, p:40, today:true}, {n:5, p:100}, {n:6, p:0}, {n:7, p:20},
+    {n:8, p:60}, {n:9, p:40}, {n:10, p:0}, {n:11, p:0}, {n:12, p:20}, {n:13, p:0}, {n:14, p:100}
+  ];
+  const daysSelected = [
+    {n:1, p:0}, {n:2, p:20}, {n:3, p:0}, {n:4, p:40, today:true, selected:true}, {n:5, p:100}, {n:6, p:0}, {n:7, p:20}
+  ];
+
+  function renderGrid(containerId, list, accentVar){
+    const el = document.getElementById(containerId);
+    const R = 15, C = 2*Math.PI*R;
+    list.forEach(d=>{
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      const size = 34;
+      let inner;
+      if(d.p >= 100){
+        inner = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+          <circle cx="${size/2}" cy="${size/2}" r="${R}" fill="var(--accent)" ${d.selected? 'stroke="var(--ink-soft)" stroke-width="2"' : ''}/>
+          <text x="${size/2}" y="${size/2+3}" text-anchor="middle" class="pct-text on-fill">100</text>
+        </svg>`;
+      } else {
+        const dash = (d.p/100)*C;
+        inner = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+          <circle cx="${size/2}" cy="${size/2}" r="${R}" fill="none" stroke="var(--ring-empty)" stroke-width="3"/>
+          ${d.p>0 ? `<circle cx="${size/2}" cy="${size/2}" r="${R}" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-dasharray="${dash} ${C}" transform="rotate(-90 ${size/2} ${size/2})"/>` : ''}
+          ${d.selected ? `<circle cx="${size/2}" cy="${size/2}" r="${R+3}" fill="none" stroke="var(--ink-soft)" stroke-width="1.4"/>` : ''}
+          <text x="${size/2}" y="${size/2+3}" text-anchor="middle" class="pct-text on-empty">${d.p}</text>
+        </svg>`;
+      }
+      const daynum = document.createElement('div');
+      daynum.className = 'daynum' + (d.today? ' today' : '');
+      daynum.textContent = d.n;
+      cell.innerHTML = inner;
+      cell.appendChild(daynum);
+      el.appendChild(cell);
+    });
+  }
+
+  renderGrid('grid-light-1', days);
+  renderGrid('grid-dark-1', days);
+  renderGrid('grid-light-2', daysSelected);
+  renderGrid('grid-dark-2', daysSelected);
+</script>
+
+</body>
+</html>

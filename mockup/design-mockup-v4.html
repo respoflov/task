@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Daily Task Check — 디자인 시안 v4 (기록 탭만 재설계)</title>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<style>
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; font-family:'Pretendard',-apple-system,sans-serif; background:#1c1c1e; color:#e8e8ea;
+    padding: 48px 32px 120px; -webkit-font-smoothing:antialiased;
+  }
+  .page-head{ max-width:1300px; margin:0 auto 40px; }
+  .page-head .tag{ display:inline-block; font-size:11px; font-weight:700; color:#0b0b0d; background:#e8e8ea; padding:3px 9px; border-radius:6px; margin-bottom:12px; }
+  .page-head h1{ font-size:22px; font-weight:700; margin:0 0 8px; letter-spacing:-0.01em; }
+  .page-head p{ font-size:13px; color:#a6a6ab; line-height:1.8; margin:0; max-width:920px; }
+  .page-head b{ color:#e8e8ea; }
+
+  .row{ display:flex; gap:32px; flex-wrap:wrap; max-width:1300px; margin:0 auto; }
+  .unit{ display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .unit .label{ font-size:11.5px; font-weight:600; color:#9d9ea2; text-align:center; line-height:1.6; max-width:320px; }
+
+  .frame{ width:318px; height:690px; background:#000; border-radius:40px; padding:10px; box-shadow:0 20px 44px rgba(0,0,0,.4); position:relative; }
+  .notch{ position:absolute; top:10px; left:50%; transform:translateX(-50%); width:100px; height:22px; background:#000; border-radius:12px; z-index:30; }
+  .screen{
+    --canvas:#fbf9f5; --surface:#f4efe6; --card:#ffffff; --hair:#e8e2d6; --hair-strong:#d8cfbd;
+    --ink:#2a2826; --ink-soft:#766f66; --ink-faint:#a39b8c; --accent:#1b1938; --on-accent:#fff;
+    width:100%; height:100%; border-radius:30px; overflow:hidden; position:relative;
+    display:flex; flex-direction:column; background:var(--canvas); color:var(--ink);
+  }
+  .statusbar{ height:44px; flex:none; display:flex; align-items:flex-end; justify-content:space-between; padding:0 22px 6px; font-size:12px; font-weight:600; }
+  .content{ flex:1 1 auto; overflow-y:auto; padding:2px 18px 10px; }
+  .app-header{ padding:6px 2px 14px; }
+  .app-header .date{ font-size:12px; color:var(--ink-soft); font-weight:500; margin-bottom:3px; }
+  .app-header h3{ font-size:21px; font-weight:700; margin:0; letter-spacing:-0.01em; }
+
+  .chip-row{ display:flex; gap:7px; overflow-x:auto; padding:2px 2px 16px; }
+  .chip{ flex:none; padding:7px 12px; border-radius:999px; font-size:11.5px; font-weight:600; background:var(--surface); color:var(--ink-soft); display:flex; align-items:center; gap:6px; }
+  .chip.active{ background:var(--accent); color:var(--on-accent); }
+  .chip .swatch{ width:8px; height:8px; border-radius:50%; }
+
+  .panel{ background:var(--card); border:1px solid var(--hair); border-radius:16px; padding:16px 14px 18px; margin-bottom:14px; }
+  .panel h4{ margin:0 0 12px; font-size:12px; font-weight:700; color:var(--ink-soft); }
+  .week-strip{ display:flex; justify-content:space-between; }
+  .day-cell{ display:flex; flex-direction:column; align-items:center; gap:7px; }
+  .day-cell .dlabel{ font-size:10px; color:var(--ink-faint); font-weight:600; }
+
+  .dot{ width:20px; height:20px; border-radius:50%; background:rgba(42,40,38,.07); }
+  .dot.flat{ background: var(--task-color, var(--accent)); }
+
+  .month-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:9px 0; }
+  .cell-wrap{ display:flex; align-items:center; justify-content:center; height:22px; position:relative; }
+  .blend-wrap{ position:relative; width:22px; height:22px; }
+  .blob{ position:absolute; width:15px; height:15px; border-radius:50%; opacity:.82; mix-blend-mode:multiply; }
+  .daynum{ font-size:8px; font-weight:700; color:var(--ink-faint); position:absolute; bottom:-11px; left:50%; transform:translateX(-50%); }
+
+  .legend{ display:flex; flex-wrap:wrap; gap:10px 14px; margin-top:16px; padding-top:14px; border-top:1px solid var(--hair); }
+  .legend-item{ display:flex; align-items:center; gap:6px; font-size:11px; color:var(--ink-soft); font-weight:600; }
+  .legend-item .swatch{ width:9px; height:9px; border-radius:50%; }
+
+  .note{ font-size:11px; color:var(--ink-faint); line-height:1.6; margin-top:10px; font-weight:500; }
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <div class="tag">v4 · 기록 탭만 재설계 (다른 화면은 v3 그대로)</div>
+  <h1>Daily Task Check — 기록 탭 리디자인</h1>
+  <p>
+    이전 그라데이션 방울은 같은 색인데도 얼룩덜룩해 보이는 게 문제였습니다. <b>완전히 평평한 단색</b>으로 바꾸고,
+    <b>할 일마다 고유 색</b>을 부여했습니다. 항목 하나만 볼 때는 그 항목의 색으로 표시되고(①),
+    "전체"를 보면 그날 완료한 항목들의 색이 잉크처럼 겹쳐 번지는 방식으로 하루의 밀도를 한눈에 봅니다(②).
+    todo mate의 클로버 배지 아이콘 자체는 가져오지 않고, "항목별 색 + 겹침" 아이디어만 저희 저널 톤에 맞게 재해석했습니다.
+  </p>
+</div>
+
+<div class="row">
+
+  <div class="unit"><div class="label">① 기록 — 항목별 (단일 항목 선택)<br/><span style="opacity:.65">그라데이션 없이 그 항목 고유색으로 단색 표시</span></div>
+    <div class="frame"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="content">
+        <div class="app-header"><div class="date">기록</div><h3>운동 30분</h3></div>
+        <div class="chip-row">
+          <div class="chip active"><span class="swatch" style="background:#fff;"></span>운동 30분</div>
+          <div class="chip"><span class="swatch" style="background:#5F7A5E;"></span>영어 단어</div>
+          <div class="chip"><span class="swatch" style="background:#C89B3C;"></span>일기</div>
+          <div class="chip"><span class="swatch" style="background:#4C6A8C;"></span>물 2L</div>
+          <div class="chip"><span class="swatch" style="background:#B0637A;"></span>독서</div>
+        </div>
+        <div class="panel"><h4>이번 주</h4>
+          <div class="week-strip">
+            <div class="day-cell"><div class="dlabel">월</div><div class="dot flat" style="--task-color:#B5623F;"></div></div>
+            <div class="day-cell"><div class="dlabel">화</div><div class="dot flat" style="--task-color:#B5623F;"></div></div>
+            <div class="day-cell"><div class="dlabel">수</div><div class="dot"></div></div>
+            <div class="day-cell"><div class="dlabel">목</div><div class="dot"></div></div>
+            <div class="day-cell"><div class="dlabel">금</div><div class="dot"></div></div>
+            <div class="day-cell"><div class="dlabel">토</div><div class="dot"></div></div>
+            <div class="day-cell"><div class="dlabel">일</div><div class="dot"></div></div>
+          </div>
+        </div>
+        <div class="panel"><h4>2026년 8월</h4>
+          <div class="month-grid">
+            <div class="dot flat" style="--task-color:#B5623F;"></div><div class="dot flat" style="--task-color:#B5623F;"></div><div class="dot"></div><div class="dot flat" style="--task-color:#B5623F;"></div><div class="dot flat" style="--task-color:#B5623F;"></div><div class="dot"></div><div class="dot flat" style="--task-color:#B5623F;"></div>
+            <div class="dot flat" style="--task-color:#B5623F;"></div><div class="dot flat" style="--task-color:#B5623F;"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+          </div>
+        </div>
+        <div class="note">색은 "운동 30분"에 배정된 테라코타 하나만 씁니다. 항목을 바꾸면 위 칩의 스와치 색과 점 색이 함께 바뀝니다.</div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="unit"><div class="label">② 기록 — 전체 보기<br/><span style="opacity:.65">그날 완료한 항목 색이 잉크처럼 겹쳐 보임 · 항목이 많을수록 진하고 다채로움</span></div>
+    <div class="frame"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="content">
+        <div class="app-header"><div class="date">기록</div><h3>전체 보기</h3></div>
+        <div class="chip-row">
+          <div class="chip active">전체</div>
+          <div class="chip"><span class="swatch" style="background:#B5623F;"></span>운동 30분</div>
+          <div class="chip"><span class="swatch" style="background:#5F7A5E;"></span>영어 단어</div>
+          <div class="chip"><span class="swatch" style="background:#C89B3C;"></span>일기</div>
+        </div>
+        <div class="panel"><h4>2026년 8월</h4>
+          <div class="month-grid">
+            <!-- day1: none -->
+            <div class="cell-wrap"><div class="dot"></div></div>
+            <!-- day2: 1 task (terracotta) -->
+            <div class="cell-wrap"><div class="dot flat" style="--task-color:#B5623F;"></div></div>
+            <!-- day3: none -->
+            <div class="cell-wrap"><div class="dot"></div></div>
+            <!-- day4: 2 tasks overlap terracotta+sage -->
+            <div class="cell-wrap"><div class="blend-wrap">
+              <div class="blob" style="background:#B5623F; left:0; top:3px;"></div>
+              <div class="blob" style="background:#5F7A5E; left:6px; top:3px;"></div>
+            </div></div>
+            <!-- day5: 3 tasks overlap -->
+            <div class="cell-wrap"><div class="blend-wrap">
+              <div class="blob" style="background:#B5623F; left:1px; top:0;"></div>
+              <div class="blob" style="background:#5F7A5E; left:7px; top:1px;"></div>
+              <div class="blob" style="background:#C89B3C; left:4px; top:7px;"></div>
+            </div></div>
+            <!-- day6: none -->
+            <div class="cell-wrap"><div class="dot"></div></div>
+            <!-- day7: 1 task mustard -->
+            <div class="cell-wrap"><div class="dot flat" style="--task-color:#C89B3C;"></div></div>
+
+            <!-- week2 -->
+            <div class="cell-wrap"><div class="blend-wrap">
+              <div class="blob" style="background:#B5623F; left:0; top:3px;"></div>
+              <div class="blob" style="background:#4C6A8C; left:6px; top:3px;"></div>
+            </div></div>
+            <div class="cell-wrap"><div class="blend-wrap">
+              <div class="blob" style="background:#B5623F; left:1px; top:0;"></div>
+              <div class="blob" style="background:#5F7A5E; left:7px; top:1px;"></div>
+              <div class="blob" style="background:#B0637A; left:4px; top:7px;"></div>
+            </div></div>
+            <div class="cell-wrap"><div class="dot"></div></div>
+            <div class="cell-wrap"><div class="dot"></div></div>
+            <div class="cell-wrap"><div class="dot"></div></div>
+            <div class="cell-wrap"><div class="dot"></div></div>
+            <div class="cell-wrap"><div class="dot"></div></div>
+          </div>
+          <div class="legend">
+            <div class="legend-item"><span class="swatch" style="background:#B5623F;"></span>운동</div>
+            <div class="legend-item"><span class="swatch" style="background:#5F7A5E;"></span>영어</div>
+            <div class="legend-item"><span class="swatch" style="background:#C89B3C;"></span>일기</div>
+            <div class="legend-item"><span class="swatch" style="background:#4C6A8C;"></span>물</div>
+            <div class="legend-item"><span class="swatch" style="background:#B0637A;"></span>독서</div>
+          </div>
+        </div>
+        <div class="note">겹치는 부분은 색이 자연스럽게 섞여(잉크 혼색) 보입니다. 날짜를 탭하면 그날 완료한 항목 이름을 목록으로 보여줄 수 있습니다.</div>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+
+</body>
+</html>
