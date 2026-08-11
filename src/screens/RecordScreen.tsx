@@ -47,9 +47,11 @@ export function RecordScreen() {
     <div className="h-full overflow-y-auto px-4 pb-4 pt-1">
       <div className="py-1.5 pb-3 text-[11.5px] font-medium text-ink-soft">{t("record_title")}</div>
       <h1 className="mb-3 text-[19px] font-bold tracking-tight">
-        {mode === "item" && selectedTask ? selectedTask.name : mode === "project" && projectId
-          ? data.projects.find((p) => p.id === projectId)?.name
-          : t("record_all_title")}
+        {mode === "item" && selectedTask
+          ? selectedTask.name + (selectedTask.deletedAt ? t("record_item_deleted_suffix") : "")
+          : mode === "project" && projectId
+            ? data.projects.find((p) => p.id === projectId)?.name
+            : t("record_all_title")}
       </h1>
 
       <div className="mb-3 flex rounded-[10px] bg-secondary p-[3px]">
@@ -114,9 +116,10 @@ export function RecordScreen() {
               }}
               className={`shrink-0 rounded-full px-3 py-1.5 text-[10.5px] font-bold ${
                 taskId === task.id ? "bg-primary text-primary-foreground" : "bg-secondary text-ink-soft"
-              }`}
+              } ${task.deletedAt ? "opacity-60" : ""}`}
             >
               {task.name}
+              {task.deletedAt ? t("record_item_deleted_suffix") : ""}
             </button>
           ))}
         </div>

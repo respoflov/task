@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { BottomSheet } from "./BottomSheet"
+import { IconPicker } from "./IconPicker"
 import { useAppData } from "@/context/AppDataContext"
-import { TASK_ICON_KEYS, NONE_ICON, getTaskIcon } from "@/lib/icons"
+import { TASK_ICON_KEYS } from "@/lib/icons"
 import type { RepeatRule } from "@/lib/types"
 import { todayStr, WEEKDAY_HEADER } from "@/lib/date"
 import { useT, useLang } from "@/lib/i18n"
@@ -9,23 +10,38 @@ import { useT, useLang } from "@/lib/i18n"
 // WEEKDAY_HEADER는 월요일 시작(0=월..6=일) — Date#getDay() 값(0=일..6=토)으로 매핑한다.
 const WEEKDAY_VALUES = [1, 2, 3, 4, 5, 6, 0]
 
-export function TaskAddSheet({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+export function TaskAddSheet({
+  open,
+  onOpenChange,
+  defaultMode = "daily",
+}: {
+  open: boolean
+  onOpenChange: (v: boolean) => void
+  defaultMode?: "daily" | "weekdays" | "once"
+}) {
   const { data, addTask } = useAppData()
   const t = useT()
   const lang = useLang()
   const [name, setName] = useState("")
   const [icon, setIcon] = useState(TASK_ICON_KEYS[0])
-  const [mode, setMode] = useState<"daily" | "weekdays" | "once">("daily")
+  const [mode, setMode] = useState<"daily" | "weekdays" | "once">(defaultMode)
   const [selectedDays, setSelectedDays] = useState<number[]>([])
   const [projectId, setProjectId] = useState<string | null>(null)
 
   const reset = () => {
     setName("")
     setIcon(TASK_ICON_KEYS[0])
-    setMode("daily")
+    setMode(defaultMode)
     setSelectedDays([])
     setProjectId(null)
   }
+
+  // 시트가 열릴 때마다 defaultMode를 기준으로 초기화한다 — 같은 시트 인스턴스를
+  // "할 일 추가"/"오늘만 추가" 두 버튼이 서로 다른 defaultMode로 공유해서 열기 때문.
+  useEffect(() => {
+    if (open) reset()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
 
   const handleSave = () => {
     if (!name.trim()) return
@@ -61,33 +77,7 @@ export function TaskAddSheet({ open, onOpenChange }: { open: boolean; onOpenChan
       />
 
       <div className="mb-2 mt-4 text-[11px] font-bold text-ink-soft">{t("task_add_icon_label")}</div>
-      <div className="grid grid-cols-6 gap-2">
-        {TASK_ICON_KEYS.map((key) => {
-          const selected = key === icon
-          const isNone = key === NONE_ICON
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setIcon(key)}
-              aria-label={isNone ? "no icon" : key}
-              className={`flex aspect-square items-center justify-center rounded-[10px] border-[1.6px] ${
-                selected
-                  ? "border-primary bg-accent"
-                  : isNone
-                    ? "border-dashed border-input bg-transparent"
-                    : "border-transparent bg-secondary"
-              }`}
-            >
-              {!isNone &&
-                (() => {
-                  const Icon = getTaskIcon(key)
-                  return <Icon size={16} strokeWidth={1.7} className={selected ? "text-primary" : "text-ink-soft"} />
-                })()}
-            </button>
-          )
-        })}
-      </div>
+      <IconPicker value={icon} onChange={setIcon} />
 
       <div className="mb-2 mt-4 text-[11px] font-bold text-ink-soft">{t("task_add_repeat_label")}</div>
       <div className="flex gap-1.5">

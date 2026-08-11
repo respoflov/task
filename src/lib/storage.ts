@@ -21,7 +21,20 @@ export function emptyData(): AppData {
       mindsetOrder: "random",
       lastMindsetShownDate: null,
       lastSequentialIndex: -1,
+      todaySectionOrder: ["recurring", "adhoc"],
     },
+  }
+}
+
+// 이전 버전 데이터(로컬 저장소 또는 가져오기 파일 모두)에는 없던 필드를 기본값으로 보강한다.
+// settings는 키 단위로 부분 병합, tasks는 항목별로 누락 필드를 채운다.
+export function normalizeData(partial: Partial<AppData>): AppData {
+  const base = emptyData()
+  return {
+    ...base,
+    ...partial,
+    tasks: (partial.tasks ?? base.tasks).map((t) => ({ ...t, deletedAt: t.deletedAt ?? null })),
+    settings: { ...base.settings, ...partial.settings },
   }
 }
 
@@ -30,7 +43,7 @@ export function loadData(): AppData {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return emptyData()
     const parsed = JSON.parse(raw) as Partial<AppData>
-    return { ...emptyData(), ...parsed }
+    return normalizeData(parsed)
   } catch {
     return emptyData()
   }

@@ -24,17 +24,34 @@ const dict = {
 
   // today
   today_title: { ko: "오늘의 할 일", ja: "今日のタスク", en: "Today's Tasks" },
-  today_manage_banner: {
-    ko: "항목을 삭제하면 지금까지 쌓인 기록도 함께 사라집니다. 되돌릴 수 없습니다.",
-    ja: "項目を削除すると、これまでの記録も一緒に消えます。元に戻せません。",
-    en: "Deleting an item also removes all of its history. This can't be undone.",
-  },
   today_empty: { ko: "아직 등록한 할 일이 없습니다.", ja: "まだ登録したタスクがありません。", en: "No tasks added yet." },
-  today_add_fixed: { ko: "고정 할 일 추가", ja: "固定タスクを追加", en: "Add fixed task" },
+  today_add_task: { ko: "할 일 추가", ja: "タスクを追加", en: "Add task" },
+  today_section_recurring: { ko: "고정 할 일", ja: "固定タスク", en: "Fixed tasks" },
   today_adhoc_section: { ko: "오늘만", ja: "今日だけ", en: "Just today" },
+  today_adhoc_empty: {
+    ko: "아직 오늘만 할 일이 없습니다.",
+    ja: "まだ今日だけのタスクがありません。",
+    en: "No one-time tasks yet.",
+  },
+  today_add_adhoc_aria: {
+    ko: "오늘만 할 일 추가",
+    ja: "今日だけのタスクを追加",
+    en: "Add a one-time task",
+  },
+  today_reorder_aria: { ko: "순서 변경", ja: "並び替え", en: "Reorder" },
+  today_change_icon_aria: { ko: "아이콘 변경", ja: "アイコンを変更", en: "Change icon" },
+  today_change_icon_title: { ko: "아이콘 변경", ja: "アイコンを変更", en: "Change icon" },
+  today_delete_confirm_title: {
+    ko: "할 일을 삭제하시겠습니까?",
+    ja: "タスクを削除しますか？",
+    en: "Delete this task?",
+  },
+  today_delete_confirm_body: {
+    ko: '"{name}" 항목이 오늘부터 목록에서 사라집니다. 이전 기록은 그대로 남습니다.',
+    ja: "「{name}」が今日から一覧から消えます。これまでの記録はそのまま残ります。",
+    en: '"{name}" will be removed from today onward. Its past history stays intact.',
+  },
   today_summary: { ko: "오늘 {total}개 중 {done}개 완료", ja: "今日 {total}件中 {done}件完了", en: "{done} of {total} done today" },
-  today_manage_aria: { ko: "관리", ja: "管理", en: "Manage" },
-  today_delete_aria: { ko: "삭제", ja: "削除", en: "Delete" },
   today_done_aria: { ko: "완료로 표시", ja: "完了にする", en: "Mark done" },
   today_undone_aria: { ko: "완료 취소", ja: "完了を取り消す", en: "Undo done" },
 
@@ -56,7 +73,8 @@ const dict = {
   record_all_title: { ko: "전체 보기", ja: "すべて表示", en: "Overview" },
   record_mode_all: { ko: "전체", ja: "すべて", en: "All" },
   record_mode_project: { ko: "프로젝트별", ja: "プロジェクト別", en: "By project" },
-  record_mode_item: { ko: "항목별", ja: "項目別", en: "By task" },
+  record_mode_item: { ko: "고정 항목별", ja: "固定項目別", en: "By fixed task" },
+  record_item_deleted_suffix: { ko: " (삭제됨)", ja: "（削除済み）", en: " (deleted)" },
   record_no_projects: { ko: "등록된 프로젝트가 없습니다.", ja: "登録されたプロジェクトがありません。", en: "No projects yet." },
   record_no_tasks: { ko: "등록된 할 일이 없습니다.", ja: "登録されたタスクがありません。", en: "No tasks yet." },
   record_legend_0: { ko: "0%", ja: "0%", en: "0%" },
@@ -175,7 +193,31 @@ const dict = {
   },
   settings_section_info: { ko: "정보", ja: "情報", en: "Info" },
   settings_install: { ko: "설치 방법", ja: "インストール方法", en: "How to install" },
+  settings_install_ios_label: { ko: "아이폰", ja: "iPhone", en: "iPhone" },
+  settings_install_ios_body: {
+    ko: "공유 버튼(↑)을 눌러 \"홈 화면에 추가\"를 선택하세요.",
+    ja: "共有ボタン（↑）をタップして「ホーム画面に追加」を選んでください。",
+    en: 'Tap the Share button (↑), then choose "Add to Home Screen".',
+  },
+  settings_install_android_label: { ko: "안드로이드", ja: "Android", en: "Android" },
+  settings_install_android_body: {
+    ko: "메뉴(⋮)를 눌러 \"홈 화면에 추가\"를 선택하세요.",
+    ja: "メニュー（⋮）をタップして「ホーム画面に追加」を選んでください。",
+    en: 'Tap the menu (⋮), then choose "Add to Home Screen".',
+  },
   settings_license: { ko: "오픈소스 라이선스", ja: "オープンソースライセンス", en: "Open-source licenses" },
+  settings_license_pretendard_desc: { ko: "한글 UI 폰트", ja: "韓国語UIフォント", en: "Korean UI font" },
+  settings_license_lucide_desc: { ko: "아이콘", ja: "アイコン", en: "Icons" },
+  settings_license_tabler_desc: {
+    ko: "아이콘 (농구공 1종)",
+    ja: "アイコン（バスケットボール1種）",
+    en: "Icons (1 basketball icon)",
+  },
+  settings_license_vaul_desc: {
+    ko: "바텀시트 드래그 동작",
+    ja: "ボトムシートのドラッグ操作",
+    en: "Bottom sheet drag gesture",
+  },
   settings_version: { ko: "버전", ja: "バージョン", en: "Version" },
 
   // mindset quote settings

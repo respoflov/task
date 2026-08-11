@@ -19,11 +19,15 @@ export function SettingsScreen() {
   const { data, updateSettings, exportData, importData, resetAllData } = useAppData()
   const t = useT()
   const [quoteView, setQuoteView] = useState(false)
+  const [installView, setInstallView] = useState(false)
+  const [licenseView, setLicenseView] = useState(false)
   const [confirmReset, setConfirmReset] = useState(false)
   const [importMsg, setImportMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   if (quoteView) return <MindsetQuoteSettings onBack={() => setQuoteView(false)} />
+  if (installView) return <InstallGuide onBack={() => setInstallView(false)} />
+  if (licenseView) return <LicenseList onBack={() => setLicenseView(false)} />
 
   return (
     <div className="h-full overflow-y-auto px-4 pb-6 pt-1">
@@ -141,8 +145,13 @@ export function SettingsScreen() {
 
       <SectionLabel>{t("settings_section_info")}</SectionLabel>
       <Group>
-        <ClickRow icon={Smartphone} label={t("settings_install")} onClick={() => {}} />
-        <ClickRow icon={ShieldCheck} label={t("settings_license")} preview="Pretendard · Lucide Icons · Tabler Icons · vaul" onClick={() => {}} />
+        <ClickRow icon={Smartphone} label={t("settings_install")} onClick={() => setInstallView(true)} />
+        <ClickRow
+          icon={ShieldCheck}
+          label={t("settings_license")}
+          preview="Pretendard · Lucide Icons · Tabler Icons · vaul"
+          onClick={() => setLicenseView(true)}
+        />
         <Row icon={Info} label={t("settings_version")} right={<span className="text-[11.5px] font-medium text-ink-faint">{__APP_VERSION__}</span>} />
       </Group>
 
@@ -227,6 +236,76 @@ function MindsetQuoteSettings({ onBack }: { onBack: () => void }) {
           {t("common_add")}
         </button>
       </div>
+    </div>
+  )
+}
+
+function InstallGuide({ onBack }: { onBack: () => void }) {
+  const t = useT()
+  return (
+    <div className="flex h-full flex-col px-4 pb-6 pt-1">
+      <div className="relative flex items-center justify-center py-2">
+        <button
+          type="button"
+          onClick={onBack}
+          className="absolute left-0 flex h-7 w-7 items-center justify-center text-ink-soft"
+          aria-label={t("common_cancel")}
+        >
+          <ChevronRight size={18} className="rotate-180" strokeWidth={1.8} />
+        </button>
+        <h2 className="text-[15px] font-bold">{t("settings_install")}</h2>
+      </div>
+
+      <Group>
+        <div className="border-b border-border px-3.5 py-3 last:border-none">
+          <div className="text-[11.5px] font-bold text-ink-soft">{t("settings_install_ios_label")}</div>
+          <div className="mt-1 text-[12px] font-medium leading-relaxed">{t("settings_install_ios_body")}</div>
+        </div>
+        <div className="px-3.5 py-3">
+          <div className="text-[11.5px] font-bold text-ink-soft">{t("settings_install_android_label")}</div>
+          <div className="mt-1 text-[12px] font-medium leading-relaxed">{t("settings_install_android_body")}</div>
+        </div>
+      </Group>
+    </div>
+  )
+}
+
+const LICENSE_ENTRIES = [
+  { name: "Pretendard", license: "SIL OFL 1.1", descKey: "settings_license_pretendard_desc" as const },
+  { name: "Lucide Icons", license: "ISC", descKey: "settings_license_lucide_desc" as const },
+  { name: "Tabler Icons", license: "MIT", descKey: "settings_license_tabler_desc" as const },
+  { name: "vaul", license: "MIT", descKey: "settings_license_vaul_desc" as const },
+]
+
+function LicenseList({ onBack }: { onBack: () => void }) {
+  const t = useT()
+  return (
+    <div className="flex h-full flex-col px-4 pb-6 pt-1">
+      <div className="relative flex items-center justify-center py-2">
+        <button
+          type="button"
+          onClick={onBack}
+          className="absolute left-0 flex h-7 w-7 items-center justify-center text-ink-soft"
+          aria-label={t("common_cancel")}
+        >
+          <ChevronRight size={18} className="rotate-180" strokeWidth={1.8} />
+        </button>
+        <h2 className="text-[15px] font-bold">{t("settings_license")}</h2>
+      </div>
+
+      <Group>
+        {LICENSE_ENTRIES.map((entry) => (
+          <div key={entry.name} className="border-b border-border px-3.5 py-3 last:border-none">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[12.5px] font-bold">{entry.name}</span>
+              <span className="rounded-full bg-secondary px-2 py-0.5 text-[9.5px] font-bold text-ink-soft">
+                {entry.license}
+              </span>
+            </div>
+            <div className="mt-1 text-[11px] font-medium text-ink-faint">{t(entry.descKey)}</div>
+          </div>
+        ))}
+      </Group>
     </div>
   )
 }

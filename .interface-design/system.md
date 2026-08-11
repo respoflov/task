@@ -29,7 +29,12 @@
 - **RESPOFLOV 각인** — `.respoflov-mark` 유틸리티 클래스(index.css) 재사용. 9.5px/600/letter-spacing .32em, 스플래시 하단 및 설정 화면 맨 아래에 배치.
 
 ## 아이콘
-기본은 Lucide(`lucide-react`, ISC). 예외적으로 Lucide에 없는 아이콘(농구공)은 Tabler Icons(MIT)에서 같은 규격(24x24 viewBox, stroke-width 2, round cap/join)의 SVG를 그대로 가져와 컴포넌트로 감쌌다 — 다른 라이브러리를 섞을 땐 반드시 이 규격이 맞는지 먼저 확인한다. 할 일 아이콘 화이트리스트는 `src/lib/icons.tsx`의 `TASK_ICONS`에 고정 — 임의로 추가하지 말고 여기서 관리한다.
+기본은 Lucide(`lucide-react`, ISC). 예외적으로 Lucide에 없는 아이콘(농구공)은 Tabler Icons(MIT)에서 같은 규격(24x24 viewBox, stroke-width 2, round cap/join)의 SVG를 그대로 가져와 컴포넌트로 감쌌다 — 다른 라이브러리를 섞을 땐 반드시 이 규격이 맞는지 먼저 확인한다. `LucideIcon` 타입(`ForwardRefExoticComponent`)에 맞춰야 하므로 커스텀 아이콘 컴포넌트는 반드시 `forwardRef`로 감싼다(안 그러면 `TASK_ICONS: Record<string, LucideIcon>` 타입체크가 깨진다). 할 일 아이콘 화이트리스트는 `src/lib/icons.tsx`의 `TASK_ICONS`에 고정 — 임의로 추가하지 말고 여기서 관리한다. 하트·별은 v1.3.0에서 노트북(`laptop`)·금지(`ban`)로 교체했다(둘 다 Lucide).
+
+## 오늘 탭 — 섹션 접힘/드래그, 항목 인라인 편집
+- **두 섹션(고정/오늘만) 순서 바꾸기**(`src/screens/TodayScreen.tsx`의 `useSectionReorder`): 섹션이 딱 2개뿐이라 "정렬"이 아니라 "맞바꾸기"로 구현했다. 드래그 중인 섹션만 `transform: translateY()`로 손가락을 따라가고, 상대 섹션은 드래그된 섹션 높이의 절반을 넘어오면 자기 자리로 `transform`해 비켜준다. 실제 DOM 순서(= `settings.todaySectionOrder`)는 손을 뗄 때만 커밋한다 — 드래그 중에는 transform만 바뀌므로 리플로우 없이 부드럽다. `setPointerCapture`는 브라우저에 따라 예외를 던질 수 있어 반드시 `try/catch`로 감싼다.
+- **길게 누르기 삭제**(`useLongPress`): 8px 넘게 움직이면 스크롤 의도로 보고 취소한다. 삭제 확인은 `src/components/ui/dialog.tsx`(Base UI Dialog, `--popover`/`--popover-foreground` 토큰이 카드 색과 이미 맞춰져 있어 커스텀 스타일 없이도 앱 톤과 어울린다)를 그대로 쓴다.
+- **이름 탭 = 인라인 편집, 아이콘 탭 = 아이콘 변경 시트.** 완료 버튼은 별도 원형 버튼이라 이 둘과 히트 영역이 겹치지 않는다. 아이콘 그리드는 `src/components/IconPicker.tsx`로 분리해 `TaskAddSheet`와 오늘 탭의 "아이콘 변경" 시트가 공유한다.
 
 ## 참고한 외부 레퍼런스
 - Superhuman, Notion, Cal.com, Linear/Raycast의 `Claude/_references/awesome-design-md` DESIGN.md — 초기 방향 탐색(v2)에서 색·타이포·깊이 전략을 비교하는 데 참고.

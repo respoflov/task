@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Daily Task Check — 시안 v13 (탭 헤더 통일)</title>
+<style>
+  :root{
+    --bg:#FBF9F5; --card:#FFFFFF; --surface:#F4EFE6; --hair:#E8E2D6;
+    --ink:#2A2826; --ink-soft:#6E6F63; --ink-faint:#9C9C8C;
+    --accent:#4D6152; --accent-bg:#E7ECE6;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Pretendard',-apple-system,'Malgun Gothic',sans-serif;
+    background:#EDEAE2; color:var(--ink); padding:32px 20px 80px;
+  }
+  h1.page{font-size:18px; font-weight:800; margin:0 0 4px;}
+  p.lead{font-size:12.5px; color:var(--ink-soft); margin:0 0 24px; line-height:1.6; max-width:640px;}
+  .changelog{background:#fff; border:1px solid var(--hair); border-radius:12px; padding:14px 16px; margin-bottom:28px; max-width:640px; font-size:11.5px; line-height:1.75; color:var(--ink-soft);}
+  .changelog b{color:var(--ink);}
+  .row{display:flex; gap:22px; flex-wrap:wrap; align-items:flex-start;}
+  .phone-wrap{display:flex; flex-direction:column; align-items:center; gap:10px;}
+  .phone-label{font-size:11px; font-weight:800; color:var(--ink-soft); letter-spacing:.02em;}
+  .phone{
+    width:224px; height:340px; background:var(--bg); border-radius:26px;
+    border:6px solid #1c1c1c; overflow:hidden; position:relative;
+    box-shadow:0 10px 24px rgba(0,0,0,.18);
+  }
+  .notch{position:absolute; top:0; left:50%; transform:translateX(-50%); width:70px; height:16px; background:#1c1c1c; border-radius:0 0 10px 10px; z-index:5;}
+  .screen{padding:26px 15px 12px;}
+
+  .subtitle{
+    font-size:10px; font-weight:700; color:var(--ink-faint);
+    letter-spacing:.14em; text-transform:uppercase; margin-bottom:3px;
+  }
+  .title{font-size:17px; font-weight:800; letter-spacing:-.01em; margin:0;}
+  .summary{font-size:9.5px; font-weight:600; color:var(--ink-faint); margin-top:5px;}
+
+  .fake-row{display:flex; align-items:center; gap:8px; padding:9px 0; border-bottom:1px solid var(--hair);}
+  .fake-icon{width:22px; height:22px; border-radius:7px; background:var(--surface); flex-shrink:0;}
+  .fake-text{flex:1; height:8px; background:var(--surface); border-radius:4px;}
+  .fake-text.w60{width:60%;}
+  .fake-text.w40{width:40%;}
+  .fake-check{width:16px; height:16px; border-radius:99px; border:1.4px solid #D8D2C4; flex-shrink:0;}
+
+  .seg{display:flex; background:var(--surface); border-radius:8px; padding:2px; margin-top:14px; gap:2px;}
+  .seg span{flex:1; text-align:center; font-size:9px; font-weight:700; padding:5px 0; border-radius:6px; color:var(--ink-faint);}
+  .seg span.active{background:#fff; color:var(--accent); box-shadow:0 1px 2px rgba(0,0,0,.06);}
+
+  .chip-row{display:flex; gap:6px; margin-top:14px;}
+  .chip{font-size:9px; font-weight:700; padding:6px 10px; border-radius:99px; background:var(--surface); color:var(--ink-soft);}
+  .chip.active{background:var(--accent); color:#fff;}
+
+  .quote-card{margin-top:16px; background:#5B3A28; border-radius:14px; padding:20px 14px; text-align:center;}
+  .quote-card .q{color:#F3E8DE; font-size:22px; opacity:.6; font-weight:800; font-family:serif;}
+  .quote-card .t{color:#F3E8DE; font-size:11px; font-weight:700; line-height:1.6; margin-top:2px;}
+
+  .note-box{margin-top:14px; background:var(--accent-bg); border-radius:9px; padding:8px 9px; font-size:8px; font-weight:600; color:#3E4E41; line-height:1.5;}
+
+  .callout{max-width:640px; background:#fff; border:1px solid var(--hair); border-radius:12px; padding:14px 16px; margin-top:28px; font-size:11.5px; line-height:1.75; color:var(--ink-soft);}
+  .callout b{color:var(--ink);}
+  .lang-demo{display:flex; gap:16px; margin-top:10px;}
+  .lang-demo .box{flex:1; background:var(--surface); border-radius:10px; padding:12px 14px;}
+  .lang-demo .box .tag{font-size:9px; font-weight:800; color:var(--accent); margin-bottom:8px;}
+</style>
+</head>
+<body>
+
+  <h1 class="page">Daily Task Check — 디자인 시안 v13</h1>
+  <p class="lead">5번 항목: 탭 5개의 최상단 헤더(부제목+제목+요약) 구조를 통일하는 시안입니다. 이번 라운드는 헤더 부분만 다룹니다 (접힘/펼침·드래그 순서·삭제 방식 등 나머지 항목은 목업 없이 바로 구현합니다).</p>
+
+  <div class="changelog">
+    <b>v13 변경사항</b><br>
+    · 5개 탭 모두 [부제목 → 제목 → (선택) 요약] 3단 구조로 통일<br>
+    · 부제목·제목 간 간격은 기존 '오늘' 탭의 날짜-제목 간격을 기준값으로 삼음<br>
+    · 부제목: '오늘' 탭만 기존처럼 실제 날짜 표시(고유 기능이라 유지) / 나머지 4개 탭은 영어 탭명(RECORD·MINDSET·PROJECT·SETTINGS), 언어가 English일 때는 반대로 한국어 표시<br>
+    · '기록' 탭의 '전체 보기'·항목명 표시는 기존 19px 큰 제목에서 '오늘' 탭 요약 문구와 같은 크기의 작은 글자로 축소 (제목 역할은 '기록'이라는 고정 텍스트가 대신 맡음)<br>
+    · '마음가짐'·'프로젝트'·'설정' 탭에 없던 제목/부제목을 새로 추가
+  </div>
+
+  <div class="row">
+
+    <div class="phone-wrap">
+      <span class="phone-label">오늘 (기준)</span>
+      <div class="phone"><div class="notch"></div>
+        <div class="screen">
+          <div class="subtitle" style="text-transform:none; letter-spacing:.02em;">8월 11일 화요일</div>
+          <div class="title">오늘의 할 일</div>
+          <div class="summary">오늘 2개 중 2개 완료</div>
+          <div class="fake-row"><div class="fake-icon"></div><div class="fake-text w60"></div><div class="fake-check"></div></div>
+          <div class="fake-row"><div class="fake-icon"></div><div class="fake-text w40"></div><div class="fake-check"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone-wrap">
+      <span class="phone-label">기록</span>
+      <div class="phone"><div class="notch"></div>
+        <div class="screen">
+          <div class="subtitle">RECORD</div>
+          <div class="title">기록</div>
+          <div class="summary">전체 보기</div>
+          <div class="seg"><span class="active">전체</span><span>프로젝트별</span><span>고정 항목별</span></div>
+          <div class="note-box">달력 그리드 영역</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone-wrap">
+      <span class="phone-label">마음가짐</span>
+      <div class="phone"><div class="notch"></div>
+        <div class="screen">
+          <div class="subtitle">MINDSET</div>
+          <div class="title">마음가짐</div>
+          <div class="quote-card">
+            <div class="q">"</div>
+            <div class="t">오늘도 작게라도<br>시작해보기.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone-wrap">
+      <span class="phone-label">프로젝트</span>
+      <div class="phone"><div class="notch"></div>
+        <div class="screen">
+          <div class="subtitle">PROJECT</div>
+          <div class="title">프로젝트</div>
+          <div class="chip-row"><span class="chip active">이사 준비</span><span class="chip">자격증</span></div>
+          <div class="note-box" style="margin-top:14px;">마일스톤 스테퍼 영역</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone-wrap">
+      <span class="phone-label">설정</span>
+      <div class="phone"><div class="notch"></div>
+        <div class="screen">
+          <div class="subtitle">SETTINGS</div>
+          <div class="title">설정</div>
+          <div class="fake-row" style="margin-top:14px;"><div class="fake-text w40"></div></div>
+          <div class="fake-row"><div class="fake-text w60"></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="callout">
+    <b>언어가 English로 설정된 경우</b> — '오늘' 탭을 제외한 나머지 탭은 부제목/제목이 서로 반대 언어로 뒤집힙니다 (제목은 원래 영어 문구로, 부제목은 한국어로).
+    <div class="lang-demo">
+      <div class="box">
+        <div class="tag">한국어 설정</div>
+        <div class="subtitle">RECORD</div>
+        <div class="title" style="font-size:15px;">기록</div>
+      </div>
+      <div class="box">
+        <div class="tag">English 설정</div>
+        <div class="subtitle">기록</div>
+        <div class="title" style="font-size:15px;">Record</div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

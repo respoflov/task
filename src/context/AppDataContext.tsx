@@ -1,11 +1,12 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react"
 import type { AppData, FixedTask, Milestone, MilestoneStatus, Project, RepeatRule } from "@/lib/types"
-import { loadData, saveData, newId, emptyData, isValidAppData } from "@/lib/storage"
+import { loadData, saveData, newId, emptyData, isValidAppData, normalizeData } from "@/lib/storage"
 import { todayStr } from "@/lib/date"
 
 interface AppDataContextValue {
   data: AppData
   addTask: (input: { name: string; icon: string; repeat: RepeatRule; projectId: string | null }) => void
+  updateTask: (taskId: string, patch: Partial<Pick<FixedTask, "name" | "icon">>) => void
   removeTask: (taskId: string) => void
   toggleCompletion: (taskId: string, date: string) => void
   isTaskCompleted: (taskId: string, date: string) => boolean
@@ -38,17 +39,27 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       repeat,
       projectId,
       createdAt: todayStr(),
+      deletedAt: null,
       order: data.tasks.length,
     }
     setData((d) => ({ ...d, tasks: [...d.tasks, task] }))
   }
 
+  const updateTask: AppDataContextValue["updateTask"] = (taskId, patch) => {
+    setData((d) => ({ ...d, tasks: d.tasks.map((t) => (t.id === taskId ? { ...t, ...patch } : t)) }))
+  }
+
+  // 완료 기록이 하나라도 있으면 deletedAt만 오늘 날짜로 표시해 소프트 삭제한다 — 오늘부터
+  // 목록에서 사라지지만 그 이전 완료 기록은 그대로 남아 기록 탭에서 계속 보인다.
+  // 완료 기록이 전혀 없는 항목(예: 아직 오지 않은 미래 예약)은 남길 기록이 없으므로 그냥 지운다.
   const removeTask: AppDataContextValue["removeTask"] = (taskId) => {
-    setData((d) => ({
-      ...d,
-      tasks: d.tasks.filter((t) => t.id !== taskId),
-      completions: d.completions.filter((c) => c.taskId !== taskId),
-    }))
+    setData((d) => {
+      const hasHistory = d.completions.some((c) => c.taskId === taskId)
+      if (!hasHistory) {
+        return { ...d, tasks: d.tasks.filter((t) => t.id !== taskId) }
+      }
+      return { ...d, tasks: d.tasks.map((t) => (t.id === taskId ? { ...t, deletedAt: todayStr() } : t)) }
+    })
   }
 
   const isTaskCompleted: AppDataContextValue["isTaskCompleted"] = (taskId, date) =>
@@ -149,7 +160,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       return false
     }
     if (!isValidAppData(parsed)) return false
-    setData((d) => ({ ...d, ...parsed }))
+    setData((d) => normalizeData({ ...d, ...parsed }))
     return true
   }
 
@@ -161,6 +172,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     () => ({
       data,
       addTask,
+      updateTask,
       removeTask,
       toggleCompletion,
       isTaskCompleted,

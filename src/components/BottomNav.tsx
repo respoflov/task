@@ -6,9 +6,9 @@ export type TabKey = "today" | "record" | "mindset" | "project" | "settings"
 
 const TABS: { key: TabKey; labelKey: TKey; icon: LucideIcon }[] = [
   { key: "today", labelKey: "nav_today", icon: CheckCircle2 },
+  { key: "project", labelKey: "nav_project", icon: Flag },
   { key: "record", labelKey: "nav_record", icon: LayoutGrid },
   { key: "mindset", labelKey: "nav_mindset", icon: Leaf },
-  { key: "project", labelKey: "nav_project", icon: Flag },
   { key: "settings", labelKey: "nav_settings", icon: Settings2 },
 ]
 

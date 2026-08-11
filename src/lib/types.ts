@@ -10,6 +10,7 @@ export interface FixedTask {
   repeat: RepeatRule
   projectId: string | null
   createdAt: string // yyyy-mm-dd — 이 날짜 이전은 완료율 분모에서 제외
+  deletedAt: string | null // yyyy-mm-dd — 이 날짜부터는 오늘 탭/미래에서 제외, 이전 기록은 보존
   order: number
 }
 
@@ -49,12 +50,15 @@ export interface MindsetQuote {
   text: string
 }
 
+export type TodaySection = "recurring" | "adhoc"
+
 export interface AppSettings {
   theme: "light" | "dark" | "system"
   language: "ko" | "ja" | "en"
   mindsetOrder: "random" | "sequential"
   lastMindsetShownDate: string | null
   lastSequentialIndex: number
+  todaySectionOrder: TodaySection[] // ["recurring","adhoc"] 순서로 오늘 탭 섹션 배치
 }
 
 export interface AppData {
