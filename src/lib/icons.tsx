@@ -1,3 +1,4 @@
+import { forwardRef } from "react"
 import {
   Dumbbell,
   BookOpen,
@@ -38,9 +39,10 @@ export const NONE_ICON = "none"
 // Lucide에는 농구공 아이콘이 없다(lucide.dev 검색으로 직접 확인, "ball" 검색 결과 4개 중에도 없음).
 // Tabler Icons(MIT, 오픈소스)의 ball-basketball을 그대로 가져왔다 — viewBox 24x24, stroke-width 2,
 // round cap/join까지 Lucide와 동일한 규격이라 다른 아이콘들과 톤이 어긋나지 않는다.
-function BallBasketball({ size = 24, strokeWidth = 2, color = "currentColor", className, ...rest }: LucideProps) {
-  return (
+const BallBasketball: LucideIcon = forwardRef<SVGSVGElement, LucideProps>(
+  ({ size = 24, strokeWidth = 2, color = "currentColor", className, ...rest }, ref) => (
     <svg
+      ref={ref}
       xmlns="http://www.w3.org/2000/svg"
       width={size}
       height={size}
@@ -59,8 +61,8 @@ function BallBasketball({ size = 24, strokeWidth = 2, color = "currentColor", cl
       <path d="M12 3a9 9 0 0 0 9 9" />
       <path d="M3 12a9 9 0 0 1 9 9" />
     </svg>
-  )
-}
+  ),
+) as LucideIcon
 
 // Lucide(ISC) 29종 + Tabler(MIT) 1종 + "아이콘 없음" — 할 일 추가 시 선택 가능한 세트.
 export const TASK_ICONS: Record<string, LucideIcon> = {
