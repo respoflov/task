@@ -169,3 +169,12 @@
   text-indent: 0.32em;
   color: var(--ink-faint);
 }
+
+/* 년/월 스크롤 휠 피커처럼 스크롤은 되지만 막대는 안 보여야 하는 곳에 쓴다. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

@@ -98,6 +98,8 @@ const dict = {
     ja: "ここで追加したタスクは今日タブには表示されず、その日になると表示されます。",
     en: "Tasks added here won't show on Today until that date arrives.",
   },
+  record_month_picker_title: { ko: "년·월 이동", ja: "年・月へ移動", en: "Jump to month" },
+  record_month_picker_year: { ko: "{year}년", ja: "{year}年", en: "{year}" },
 
   // project
   project_title: { ko: "프로젝트", ja: "プロジェクト", en: "Project" },

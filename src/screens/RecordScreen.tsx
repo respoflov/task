@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react"
-import { ChevronLeft, ChevronRight, Check, Plus, X } from "lucide-react"
+import { ChevronLeft, ChevronRight, ChevronDown, Check, Plus, X } from "lucide-react"
 import { useAppData } from "@/context/AppDataContext"
 import { buildMonthGrid, type CalendarCell } from "@/lib/calendar"
 import { computeDayStats, scheduledOnceCount, tasksForDate } from "@/lib/record"
@@ -15,6 +15,7 @@ import {
 import { appliesToDate } from "@/lib/tasks"
 import { useT, useLang, useSubtitle } from "@/lib/i18n"
 import { RatioRingCell } from "@/components/RatioRingCell"
+import { YearMonthPicker } from "@/components/YearMonthPicker"
 import { NONE_ICON } from "@/lib/icons"
 import type { AppData } from "@/lib/types"
 
@@ -119,6 +120,7 @@ export function RecordScreen() {
   const [projectId, setProjectId] = useState<string | null>(data.projects[0]?.id ?? null)
   const [taskId, setTaskId] = useState<string | null>(data.tasks[0]?.id ?? null)
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  const [pickerOpen, setPickerOpen] = useState(false)
 
   const weekStart = data.settings.weekStart
   const cells = useMemo(() => buildMonthGrid(year, month0, weekStart), [year, month0, weekStart])
@@ -135,6 +137,12 @@ export function RecordScreen() {
     const d = new Date(year, month0 + delta, 1)
     setYear(d.getFullYear())
     setMonth0(d.getMonth())
+    setSelectedDate(null)
+  }
+
+  function goToMonth(y: number, m0: number) {
+    setYear(y)
+    setMonth0(m0)
     setSelectedDate(null)
   }
 
@@ -275,6 +283,7 @@ export function RecordScreen() {
                 onSelectDate={(d) => setSelectedDate((cur) => (cur === d ? null : d))}
                 onPrevMonth={() => goMonth(-1)}
                 onNextMonth={() => goMonth(1)}
+                onOpenPicker={() => setPickerOpen(true)}
               />
             </div>
           ))}
@@ -313,6 +322,14 @@ export function RecordScreen() {
           onRemove={removeTask}
         />
       )}
+
+      <YearMonthPicker
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        year={year}
+        month0={month0}
+        onConfirm={goToMonth}
+      />
     </div>
   )
 }
@@ -336,6 +353,7 @@ function CalendarCard({
   onSelectDate,
   onPrevMonth,
   onNextMonth,
+  onOpenPicker,
 }: {
   panelMode: Mode
   year: number
@@ -352,6 +370,7 @@ function CalendarCard({
   onSelectDate: (date: string) => void
   onPrevMonth: () => void
   onNextMonth: () => void
+  onOpenPicker: () => void
 }) {
   const filterFn = useMemo(() => {
     if (panelMode === "project" && projectId)
@@ -365,7 +384,14 @@ function CalendarCard({
   return (
     <div className="mb-3 rounded-[14px] border border-border bg-card px-2.5 py-3.5">
       <div className="mb-2.5 flex items-center justify-between px-0.5">
-        <h4 className="text-[11px] font-bold text-ink-soft">{formatMonthLabel(year, month0, lang)}</h4>
+        <button
+          type="button"
+          onClick={onOpenPicker}
+          className="flex items-center gap-0.5 text-[11px] font-bold text-ink-soft"
+        >
+          {formatMonthLabel(year, month0, lang)}
+          <ChevronDown size={12} strokeWidth={2.4} />
+        </button>
         <div className="flex items-center gap-1">
           <button
             type="button"
