@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react"
+import { Fragment, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react"
 import { ChevronDown, GripVertical, Plus } from "lucide-react"
 import { useAppData } from "@/context/AppDataContext"
 import { NONE_ICON, getTaskIcon } from "@/lib/icons"
@@ -88,69 +88,73 @@ export function TodayScreen() {
           {t("today_add_task")}
         </button>
 
+        <div className="mb-3 border-t border-dashed border-border" />
+
         {totalCount === 0 && (
           <div className="py-10 text-center text-[12.5px] font-medium text-ink-faint">{t("today_empty")}</div>
         )}
 
-        {order.map((key) => (
-          <div
-            key={key}
-            ref={(el) => {
-              reorder.elRefs.current[key] = el
-            }}
-            style={reorder.styleFor(key)}
-            className="mb-3"
-          >
-            <div className="mb-1 flex items-center gap-1">
-              <button
-                type="button"
-                onPointerDown={(e) => reorder.handlePointerDown(key, e)}
-                onPointerMove={reorder.handlePointerMove}
-                onPointerUp={reorder.handlePointerUp}
-                onPointerCancel={reorder.handlePointerUp}
-                aria-label={t("today_reorder_aria")}
-                className="flex h-6 w-6 shrink-0 touch-none items-center justify-center text-ink-faint"
-              >
-                <GripVertical size={14} strokeWidth={2} />
-              </button>
-              <button
-                type="button"
-                onClick={() => toggleCollapse(key)}
-                className="flex flex-1 items-center gap-1 py-0.5 text-left"
-              >
-                <ChevronDown
-                  size={12}
-                  strokeWidth={2.4}
-                  className={`text-ink-faint transition-transform ${collapsed[key] ? "-rotate-90" : ""}`}
-                />
-                <span className="text-[10.5px] font-bold uppercase tracking-wide text-ink-faint">
-                  {key === "recurring" ? t("today_section_recurring") : t("today_adhoc_section")}
-                </span>
-              </button>
-              {key === "adhoc" && (
+        {order.map((key, index) => (
+          <Fragment key={key}>
+            <div
+              ref={(el) => {
+                reorder.elRefs.current[key] = el
+              }}
+              style={reorder.styleFor(key)}
+              className="mb-3"
+            >
+              <div className="mb-1 flex items-center gap-1">
                 <button
                   type="button"
-                  onClick={() => openAdd("once")}
-                  aria-label={t("today_add_adhoc_aria")}
-                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-ink-soft"
+                  onPointerDown={(e) => reorder.handlePointerDown(key, e)}
+                  onPointerMove={reorder.handlePointerMove}
+                  onPointerUp={reorder.handlePointerUp}
+                  onPointerCancel={reorder.handlePointerUp}
+                  aria-label={t("today_reorder_aria")}
+                  className="flex h-6 w-6 shrink-0 touch-none items-center justify-center text-ink-faint"
                 >
-                  <Plus size={14} strokeWidth={2.2} />
+                  <GripVertical size={14} strokeWidth={2} />
                 </button>
-              )}
-            </div>
+                <button
+                  type="button"
+                  onClick={() => toggleCollapse(key)}
+                  className="flex flex-1 items-center gap-1 py-0.5 text-left"
+                >
+                  <ChevronDown
+                    size={12}
+                    strokeWidth={2.4}
+                    className={`text-ink-faint transition-transform ${collapsed[key] ? "-rotate-90" : ""}`}
+                  />
+                  <span className="text-[10.5px] font-bold uppercase tracking-wide text-ink-faint">
+                    {key === "recurring" ? t("today_section_recurring") : t("today_adhoc_section")}
+                  </span>
+                </button>
+                {key === "adhoc" && (
+                  <button
+                    type="button"
+                    onClick={() => openAdd("once")}
+                    aria-label={t("today_add_adhoc_aria")}
+                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-ink-soft"
+                  >
+                    <Plus size={14} strokeWidth={2.2} />
+                  </button>
+                )}
+              </div>
 
-            {!collapsed[key] &&
-              (key === "recurring" ? (
-                <TaskList tasks={recurring} {...sectionProps} />
-              ) : (
-                <>
-                  <TaskList tasks={adhoc} {...sectionProps} />
-                  {adhoc.length === 0 && (
-                    <div className="px-1 py-2 text-[11px] font-medium text-ink-faint">{t("today_adhoc_empty")}</div>
-                  )}
-                </>
-              ))}
-          </div>
+              {!collapsed[key] &&
+                (key === "recurring" ? (
+                  <TaskList tasks={recurring} {...sectionProps} />
+                ) : (
+                  <>
+                    <TaskList tasks={adhoc} {...sectionProps} />
+                    {adhoc.length === 0 && (
+                      <div className="px-1 py-2 text-[11px] font-medium text-ink-faint">{t("today_adhoc_empty")}</div>
+                    )}
+                  </>
+                ))}
+            </div>
+            {index === 0 && <div className="mb-3 border-t border-dashed border-border" />}
+          </Fragment>
         ))}
       </div>
 

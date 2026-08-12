@@ -1,5 +1,6 @@
 import { useAppData } from "@/context/AppDataContext"
 import { pickMindsetQuote } from "@/lib/mindset"
+import { mindsetBgVar } from "@/lib/mindsetColors"
 import { useT } from "@/lib/i18n"
 
 export function MindsetPopup({ onDismiss }: { onDismiss: () => void }) {
@@ -12,7 +13,7 @@ export function MindsetPopup({ onDismiss }: { onDismiss: () => void }) {
       type="button"
       onClick={onDismiss}
       className="flex h-full w-full flex-col items-center justify-center px-7 text-center"
-      style={{ background: "var(--mind-bg)" }}
+      style={{ background: mindsetBgVar(data.settings.mindsetColor) }}
     >
       <div className="mb-1 font-serif text-4xl font-bold opacity-70" style={{ color: "var(--mind-ink)" }}>
         “

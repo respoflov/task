@@ -206,16 +206,17 @@ export function RecordScreen() {
                 className="flex flex-col items-center gap-1"
               >
                 {node}
-                <span
-                  className="text-[7.5px] font-semibold"
-                  style={{
-                    color: isToday ? "var(--primary)" : "var(--ink-faint)",
-                    opacity: cell.inMonth ? 1 : 0.4,
-                    fontWeight: isToday ? 800 : 600,
-                  }}
-                >
-                  {cell.day}
-                </span>
+                {cell.inMonth && (
+                  <span
+                    className="text-[7.5px] font-semibold"
+                    style={{
+                      color: isToday ? "var(--primary)" : "var(--ink-faint)",
+                      fontWeight: isToday ? 800 : 600,
+                    }}
+                  >
+                    {cell.day}
+                  </span>
+                )}
               </button>
             )
           })}

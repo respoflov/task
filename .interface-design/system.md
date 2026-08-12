@@ -27,6 +27,7 @@
 - **기록 히트맵 셀**(`src/components/RatioRingCell.tsx`) — 26px 원, 완료율만큼 도넛 링(stroke, `stroke-linecap round`, -90deg 시작), 100%는 꽉 찬 원 + 흰 숫자, 그 외는 잉크색 숫자. "오늘" 표시는 날짜 숫자를 굵게+액센트 색으로만 하고 별도 테두리 링을 겹치지 않는다(v11에서 이중 테두리 버그를 이렇게 고쳤다). 그날 적용 대상 항목이 하나도 없으면(`total===0`) 채워진 링 대신 점선 원(`empty` variant, future-count와 같은 "표시할 게 없는 날" 계열)을 그린다 — "기록 없음"과 "0%로 실패"를 섞지 않으면서도(v1.4.0까지는 아예 안 그려서 다른 달 칸과 구분이 안 됐다가, v1.4.1에서 점선으로 바꿔 "달력에 있는 날"이라는 건 알 수 있게 고쳤다).
 - **마일스톤 스테퍼**(`src/screens/ProjectScreen.tsx`) — 완료 처리 시 같은 프로젝트의 다음 "예정" 단계를 자동으로 "진행 중"으로 승격한다.
 - **RESPOFLOV 각인** — `.respoflov-mark` 유틸리티 클래스(index.css) 재사용. 9.5px/600/letter-spacing .32em, 스플래시 하단 및 설정 화면 맨 아래에 배치.
+- **색상 스와치 피커**(마음가짐 배경색, v1.6.0) — 36px(`h-9 w-9`) 원, `gap-3`(12px) 한 줄 배치. 6개를 골랐다: 콘텐츠 폭(~343px, 좌우 16px 패딩 기준)에서 36px 원 6개+간격이 286px로 여유 있게 들어가고(8개부터는 36px에서 줄을 넘긴다), 탭하기 편한 최소 크기(32px 이상)를 지키면서도 "한 줄에 훑어보고 고르는" 색상 피커로는 6~8개가 흔한 상한선이라 그 안에서 딱 떨어지는 수로 정했다. 선택 표시는 체크 아이콘(크림색, 배경이 전부 어두운 톤이라 항상 대비가 확보됨) + 옅은 링(`box-shadow`로 카드색 갭 + ink-soft 테두리, 다른 선택 표시들과 톤을 맞춤).
 
 ## 아이콘
 기본은 Lucide(`lucide-react`, ISC). 예외적으로 Lucide에 없는 아이콘(농구공)은 Tabler Icons(MIT)에서 같은 규격(24x24 viewBox, stroke-width 2, round cap/join)의 SVG를 그대로 가져와 컴포넌트로 감쌌다 — 다른 라이브러리를 섞을 땐 반드시 이 규격이 맞는지 먼저 확인한다. `LucideIcon` 타입(`ForwardRefExoticComponent`)에 맞춰야 하므로 커스텀 아이콘 컴포넌트는 반드시 `forwardRef`로 감싼다(안 그러면 `TASK_ICONS: Record<string, LucideIcon>` 타입체크가 깨진다). 할 일 아이콘 화이트리스트는 `src/lib/icons.tsx`의 `TASK_ICONS`에 고정 — 임의로 추가하지 말고 여기서 관리한다. 하트·별은 v1.3.0에서 노트북(`laptop`)·금지(`ban`)로 교체했다(둘 다 Lucide).

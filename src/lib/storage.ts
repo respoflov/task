@@ -23,6 +23,7 @@ export function emptyData(): AppData {
       lastSequentialIndex: -1,
       todaySectionOrder: ["recurring", "adhoc"],
       weekStart: "mon",
+      mindsetColor: "terracotta",
       syncCode: null,
       syncUpdatedAt: null,
       syncIntroSeen: false,

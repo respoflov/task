@@ -1,6 +1,7 @@
 import { Pencil } from "lucide-react"
 import { useAppData } from "@/context/AppDataContext"
 import { pickMindsetQuote } from "@/lib/mindset"
+import { mindsetBgVar } from "@/lib/mindsetColors"
 import { useT, useSubtitle } from "@/lib/i18n"
 import type { TabKey } from "@/components/BottomNav"
 
@@ -19,7 +20,7 @@ export function MindsetScreen({ onNavigate }: { onNavigate: (tab: TabKey) => voi
 
       <div
         className="flex min-h-[150px] flex-col justify-center rounded-[16px] px-5 py-5 text-center"
-        style={{ background: "var(--mind-bg)" }}
+        style={{ background: mindsetBgVar(data.settings.mindsetColor) }}
       >
         <div className="mb-1 font-serif text-[26px] font-bold opacity-65" style={{ color: "var(--mind-ink)" }}>
           “

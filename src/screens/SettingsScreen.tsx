@@ -16,9 +16,19 @@ import {
   Check,
 } from "lucide-react"
 import { useAppData } from "@/context/AppDataContext"
-import { useT, useSubtitle } from "@/lib/i18n"
+import { useT, useSubtitle, type TKey } from "@/lib/i18n"
 import { isSyncConfigured } from "@/lib/sync"
+import { MINDSET_COLOR_KEYS, mindsetBgVar, type MindsetColorKey } from "@/lib/mindsetColors"
 import type { AppSettings } from "@/lib/types"
+
+const MINDSET_COLOR_LABEL_KEY: Record<MindsetColorKey, TKey> = {
+  terracotta: "mindset_color_terracotta",
+  indigo: "mindset_color_indigo",
+  plum: "mindset_color_plum",
+  deepgreen: "mindset_color_deepgreen",
+  olive: "mindset_color_olive",
+  charcoal: "mindset_color_charcoal",
+}
 
 export function SettingsScreen() {
   const { data, updateSettings, exportData, importData, resetAllData } = useAppData()
@@ -276,6 +286,32 @@ function MindsetQuoteSettings({ onBack }: { onBack: () => void }) {
         >
           {t("common_add")}
         </button>
+      </div>
+
+      <SectionLabel>{t("mindset_color_section")}</SectionLabel>
+      <div className="flex gap-3 px-1">
+        {MINDSET_COLOR_KEYS.map((key) => {
+          const selected = data.settings.mindsetColor === key
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => updateSettings({ mindsetColor: key })}
+              aria-label={t(MINDSET_COLOR_LABEL_KEY[key])}
+              className="relative h-9 w-9 shrink-0 rounded-full"
+              style={{
+                background: mindsetBgVar(key),
+                boxShadow: selected ? "0 0 0 2px var(--card), 0 0 0 3.5px var(--ink-soft)" : undefined,
+              }}
+            >
+              {selected && (
+                <span className="absolute inset-0 flex items-center justify-center">
+                  <Check size={15} strokeWidth={3} color="#F3EADD" />
+                </span>
+              )}
+            </button>
+          )
+        })}
       </div>
     </div>
   )

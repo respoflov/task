@@ -309,6 +309,13 @@ const dict = {
     ja: "例：今日も小さく始める",
     en: "e.g. Start small today too",
   },
+  mindset_color_section: { ko: "배경색", ja: "背景色", en: "Background color" },
+  mindset_color_terracotta: { ko: "테라코타", ja: "テラコッタ", en: "Terracotta" },
+  mindset_color_indigo: { ko: "인디고", ja: "インディゴ", en: "Indigo" },
+  mindset_color_plum: { ko: "자두", ja: "プラム", en: "Plum" },
+  mindset_color_deepgreen: { ko: "딥그린", ja: "ディープグリーン", en: "Deep green" },
+  mindset_color_olive: { ko: "올리브", ja: "オリーブ", en: "Olive" },
+  mindset_color_charcoal: { ko: "차콜", ja: "チャコール", en: "Charcoal" },
 } as const
 
 export type TKey = keyof typeof dict

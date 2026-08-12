@@ -1,3 +1,5 @@
+import type { MindsetColorKey } from "./mindsetColors"
+
 export type RepeatRule =
   | { kind: "daily" }
   | { kind: "weekdays"; days: number[] } // 0=Sun..6=Sat (Date#getDay 기준)
@@ -60,6 +62,7 @@ export interface AppSettings {
   lastSequentialIndex: number
   todaySectionOrder: TodaySection[] // ["recurring","adhoc"] 순서로 오늘 탭 섹션 배치
   weekStart: "mon" | "sun" // 기록 탭 달력이 월요일/일요일 중 어디부터 시작하는지
+  mindsetColor: MindsetColorKey // 마음가짐 팝업/탭 배경색
   // 아래 세 값은 "이 기기"의 동기화 연결 상태를 나타내는 로컬 전용 값이다 —
   // 다른 기기와 주고받는 동기화 페이로드에는 포함되지 않는다 (src/lib/sync.ts 참고).
   syncCode: string | null // 이 기기가 페어링된 동기화 코드
