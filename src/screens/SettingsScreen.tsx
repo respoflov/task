@@ -12,12 +12,13 @@ import {
   ChevronRight,
 } from "lucide-react"
 import { useAppData } from "@/context/AppDataContext"
-import { useT } from "@/lib/i18n"
+import { useT, useSubtitle } from "@/lib/i18n"
 import type { AppSettings } from "@/lib/types"
 
 export function SettingsScreen() {
   const { data, updateSettings, exportData, importData, resetAllData } = useAppData()
   const t = useT()
+  const subtitle = useSubtitle("nav_settings")
   const [quoteView, setQuoteView] = useState(false)
   const [installView, setInstallView] = useState(false)
   const [licenseView, setLicenseView] = useState(false)
@@ -31,7 +32,10 @@ export function SettingsScreen() {
 
   return (
     <div className="h-full overflow-y-auto px-4 pb-6 pt-1">
-      <h1 className="py-2 text-[19px] font-bold tracking-tight">{t("settings_title")}</h1>
+      <div className="relative py-1.5 pb-3">
+        <div className="mb-0.5 text-[11.5px] font-medium text-ink-soft">{subtitle}</div>
+        <h1 className="text-[21px] font-bold tracking-tight">{t("settings_title")}</h1>
+      </div>
 
       <SectionLabel>{t("settings_section_display")}</SectionLabel>
       <Group>

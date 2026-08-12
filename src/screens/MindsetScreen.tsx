@@ -1,17 +1,21 @@
 import { Pencil } from "lucide-react"
 import { useAppData } from "@/context/AppDataContext"
 import { pickMindsetQuote } from "@/lib/mindset"
-import { useT } from "@/lib/i18n"
+import { useT, useSubtitle } from "@/lib/i18n"
 import type { TabKey } from "@/components/BottomNav"
 
 export function MindsetScreen({ onNavigate }: { onNavigate: (tab: TabKey) => void }) {
   const { data } = useAppData()
   const t = useT()
+  const subtitle = useSubtitle("nav_mindset")
   const quote = pickMindsetQuote(data.mindsetQuotes, data.settings)
 
   return (
     <div className="h-full overflow-y-auto px-4 pb-4 pt-1">
-      <div className="py-1.5 pb-3 text-[11.5px] font-medium text-ink-soft">{t("mindset_label")}</div>
+      <div className="relative py-1.5 pb-3">
+        <div className="mb-0.5 text-[11.5px] font-medium text-ink-soft">{subtitle}</div>
+        <h1 className="text-[21px] font-bold tracking-tight">{t("mindset_label")}</h1>
+      </div>
 
       <div
         className="flex min-h-[150px] flex-col justify-center rounded-[16px] px-5 py-5 text-center"

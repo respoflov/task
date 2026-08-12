@@ -3,13 +3,14 @@ import { Check, Plus } from "lucide-react"
 import { useAppData } from "@/context/AppDataContext"
 import { ProjectCreateSheet } from "@/components/ProjectCreateSheet"
 import { MilestoneAddSheet } from "@/components/MilestoneAddSheet"
-import { useT, useLang } from "@/lib/i18n"
+import { useT, useLang, useSubtitle } from "@/lib/i18n"
 import { formatMonthDay } from "@/lib/date"
 import type { Milestone } from "@/lib/types"
 
 export function ProjectScreen() {
   const { data } = useAppData()
   const t = useT()
+  const subtitle = useSubtitle("nav_project")
   const [activeProjectId, setActiveProjectId] = useState<string | null>(data.projects[0]?.id ?? null)
   const [createOpen, setCreateOpen] = useState(false)
   const [milestoneOpen, setMilestoneOpen] = useState(false)
@@ -21,7 +22,10 @@ export function ProjectScreen() {
 
   return (
     <div className="h-full overflow-y-auto px-4 pb-4 pt-1">
-      <h1 className="py-2 text-[19px] font-bold tracking-tight">{t("project_title")}</h1>
+      <div className="relative py-1.5 pb-3">
+        <div className="mb-0.5 text-[11.5px] font-medium text-ink-soft">{subtitle}</div>
+        <h1 className="text-[21px] font-bold tracking-tight">{t("project_title")}</h1>
+      </div>
 
       <div className="mb-2 flex gap-1.5 overflow-x-auto pb-0.5">
         {data.projects.map((p) => (

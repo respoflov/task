@@ -4,7 +4,7 @@ import { useAppData } from "@/context/AppDataContext"
 import { buildMonthGrid } from "@/lib/calendar"
 import { computeDayStats, scheduledOnceCount, tasksForDate } from "@/lib/record"
 import { isFuture, isPastOrToday, todayStr, formatMonthLabel, formatDateShort, WEEKDAY_HEADER } from "@/lib/date"
-import { useT, useLang } from "@/lib/i18n"
+import { useT, useLang, useSubtitle } from "@/lib/i18n"
 import { RatioRingCell } from "@/components/RatioRingCell"
 import { NONE_ICON } from "@/lib/icons"
 import type { AppData } from "@/lib/types"
@@ -15,6 +15,7 @@ export function RecordScreen() {
   const { data, isTaskCompleted, toggleCompletion, addTask, removeTask } = useAppData()
   const t = useT()
   const lang = useLang()
+  const subtitle = useSubtitle("nav_record")
   const today = todayStr()
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
@@ -45,14 +46,17 @@ export function RecordScreen() {
 
   return (
     <div className="h-full overflow-y-auto px-4 pb-4 pt-1">
-      <div className="py-1.5 pb-3 text-[11.5px] font-medium text-ink-soft">{t("record_title")}</div>
-      <h1 className="mb-3 text-[19px] font-bold tracking-tight">
-        {mode === "item" && selectedTask
-          ? selectedTask.name + (selectedTask.deletedAt ? t("record_item_deleted_suffix") : "")
-          : mode === "project" && projectId
-            ? data.projects.find((p) => p.id === projectId)?.name
-            : t("record_all_title")}
-      </h1>
+      <div className="relative py-1.5 pb-3">
+        <div className="mb-0.5 text-[11.5px] font-medium text-ink-soft">{subtitle}</div>
+        <h1 className="text-[21px] font-bold tracking-tight">{t("record_title")}</h1>
+        <div className="mt-1 text-[11px] font-medium text-ink-faint">
+          {mode === "item" && selectedTask
+            ? selectedTask.name + (selectedTask.deletedAt ? t("record_item_deleted_suffix") : "")
+            : mode === "project" && projectId
+              ? data.projects.find((p) => p.id === projectId)?.name
+              : t("record_all_title")}
+        </div>
+      </div>
 
       <div className="mb-3 flex rounded-[10px] bg-secondary p-[3px]">
         {(

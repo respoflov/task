@@ -252,6 +252,13 @@ export function useT() {
   return (key: TKey, vars?: Record<string, string | number>) => translate(key, lang, vars)
 }
 
+// 탭 헤더의 작은 부제목: 평소엔 영어 탭명, 언어가 English면 반대로 한국어 탭명을 보여준다
+// (오늘 탭만 예외 — 날짜를 부제목으로 쓰므로 이 훅을 쓰지 않는다).
+export function useSubtitle(navKey: TKey): string {
+  const lang = useLang()
+  return lang === "en" ? translate(navKey, "ko") : translate(navKey, "en")
+}
+
 export function useLang(): Lang {
   const { data } = useAppData()
   return data.settings.language

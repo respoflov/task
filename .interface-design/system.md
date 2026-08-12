@@ -36,6 +36,13 @@
 - **길게 누르기 삭제**(`useLongPress`): 8px 넘게 움직이면 스크롤 의도로 보고 취소한다. 삭제 확인은 `src/components/ui/dialog.tsx`(Base UI Dialog, `--popover`/`--popover-foreground` 토큰이 카드 색과 이미 맞춰져 있어 커스텀 스타일 없이도 앱 톤과 어울린다)를 그대로 쓴다.
 - **이름 탭 = 인라인 편집, 아이콘 탭 = 아이콘 변경 시트.** 완료 버튼은 별도 원형 버튼이라 이 둘과 히트 영역이 겹치지 않는다. 아이콘 그리드는 `src/components/IconPicker.tsx`로 분리해 `TaskAddSheet`와 오늘 탭의 "아이콘 변경" 시트가 공유한다.
 
+## 탭 헤더 구조 (5탭 공통)
+모든 탭이 [부제목 → 제목 → (선택) 요약] 3단 구조를 공유한다(`mockup/design-mockup-v13.html`에서 승인, v1.3.1 구현).
+- 부제목: `text-[11.5px] font-medium text-ink-soft`, `mb-0.5`. 오늘 탭만 실제 날짜(고유 기능이라 예외), 나머지는 `useSubtitle(navKey)` 훅으로 영어/한국어를 언어 설정에 따라 반전해서 보여준다.
+- 제목: `text-[21px] font-bold tracking-tight`. 5탭 전부 이 크기로 통일(이전엔 오늘 탭만 21px, 나머지 19px이었다).
+- 요약(선택): `text-[11px] font-medium text-ink-faint`, `mt-1`. 오늘 탭의 "오늘 n개 중 n개 완료", 기록 탭의 "전체 보기"/프로젝트명/항목명이 여기 해당 — 기록 탭에서는 이전에 19px 큰 제목이었던 걸 이 크기로 낮추고, "기록"이라는 고정 텍스트가 제목 역할을 대신 맡게 했다.
+- 감싸는 wrapper는 `relative py-1.5 pb-3` 하나로 통일 — 부제목·제목·요약 사이 간격은 각각의 `mb-0.5`/`mt-1`로만 주고, 다음 섹션과의 간격은 wrapper의 `pb-3` 하나로 처리한다(이전엔 요소마다 따로 마진을 줘서 탭마다 간격이 미묘하게 달랐다).
+
 ## 참고한 외부 레퍼런스
 - Superhuman, Notion, Cal.com, Linear/Raycast의 `Claude/_references/awesome-design-md` DESIGN.md — 초기 방향 탐색(v2)에서 색·타이포·깊이 전략을 비교하는 데 참고.
 - wwit.design(방문했으나 검색 UI 이슈로 실질적 참고는 못함).
