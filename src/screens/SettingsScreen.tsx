@@ -10,9 +10,13 @@ import {
   ShieldCheck,
   Info,
   ChevronRight,
+  RefreshCw,
+  Copy,
+  Check,
 } from "lucide-react"
 import { useAppData } from "@/context/AppDataContext"
 import { useT, useSubtitle } from "@/lib/i18n"
+import { isSyncConfigured } from "@/lib/sync"
 import type { AppSettings } from "@/lib/types"
 
 export function SettingsScreen() {
@@ -22,6 +26,7 @@ export function SettingsScreen() {
   const [quoteView, setQuoteView] = useState(false)
   const [installView, setInstallView] = useState(false)
   const [licenseView, setLicenseView] = useState(false)
+  const [syncView, setSyncView] = useState(false)
   const [confirmReset, setConfirmReset] = useState(false)
   const [importMsg, setImportMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -29,6 +34,7 @@ export function SettingsScreen() {
   if (quoteView) return <MindsetQuoteSettings onBack={() => setQuoteView(false)} />
   if (installView) return <InstallGuide onBack={() => setInstallView(false)} />
   if (licenseView) return <LicenseList onBack={() => setLicenseView(false)} />
+  if (syncView) return <SyncSettings onBack={() => setSyncView(false)} />
 
   return (
     <div className="h-full overflow-y-auto px-4 pb-6 pt-1">
@@ -78,6 +84,22 @@ export function SettingsScreen() {
           label={t("settings_mindset_edit")}
           preview={data.mindsetQuotes[0]?.text ? `"${data.mindsetQuotes[0].text.slice(0, 16)}…"` : undefined}
           onClick={() => setQuoteView(true)}
+        />
+      </Group>
+
+      <SectionLabel>{t("settings_section_sync")}</SectionLabel>
+      <Group>
+        <ClickRow
+          icon={RefreshCw}
+          label={t("settings_sync_row")}
+          preview={
+            !isSyncConfigured()
+              ? t("settings_sync_status_unavailable")
+              : data.settings.syncCode
+                ? t("settings_sync_status_on")
+                : t("settings_sync_status_off")
+          }
+          onClick={() => setSyncView(true)}
         />
       </Group>
 
@@ -153,7 +175,7 @@ export function SettingsScreen() {
         <ClickRow
           icon={ShieldCheck}
           label={t("settings_license")}
-          preview="Pretendard · Lucide Icons · Tabler Icons · vaul"
+          preview="Pretendard · Lucide Icons · Tabler Icons · vaul · Supabase JS"
           onClick={() => setLicenseView(true)}
         />
         <Row icon={Info} label={t("settings_version")} right={<span className="text-[11.5px] font-medium text-ink-faint">{__APP_VERSION__}</span>} />
@@ -244,6 +266,168 @@ function MindsetQuoteSettings({ onBack }: { onBack: () => void }) {
   )
 }
 
+function SyncSettings({ onBack }: { onBack: () => void }) {
+  const { data, syncStatus, syncError, createSyncCode, pairWithSyncCode, syncNow, disableSync } = useAppData()
+  const t = useT()
+  const lang = data.settings.language
+  const [enterOpen, setEnterOpen] = useState(false)
+  const [codeInput, setCodeInput] = useState("")
+  const [copied, setCopied] = useState(false)
+  const [confirmDisable, setConfirmDisable] = useState(false)
+  const busy = syncStatus === "syncing"
+
+  const localeMap = { ko: "ko-KR", ja: "ja-JP", en: "en-US" } as const
+  const lastSyncedLabel = data.settings.syncUpdatedAt
+    ? new Date(data.settings.syncUpdatedAt).toLocaleString(localeMap[lang])
+    : t("sync_last_synced_never")
+
+  return (
+    <div className="flex h-full flex-col px-4 pb-6 pt-1">
+      <div className="relative flex items-center justify-center py-2">
+        <button
+          type="button"
+          onClick={onBack}
+          className="absolute left-0 flex h-7 w-7 items-center justify-center text-ink-soft"
+          aria-label={t("common_cancel")}
+        >
+          <ChevronRight size={18} className="rotate-180" strokeWidth={1.8} />
+        </button>
+        <h2 className="text-[15px] font-bold">{t("settings_sync_row")}</h2>
+      </div>
+
+      {!isSyncConfigured() && (
+        <div className="mt-2 rounded-[10px] bg-secondary px-3.5 py-3 text-[11.5px] font-medium leading-relaxed text-ink-soft">
+          {t("sync_unavailable_notice")}
+        </div>
+      )}
+
+      {isSyncConfigured() && !data.settings.syncCode && (
+        <>
+          <p className="mt-2 px-1 text-[11.5px] font-medium leading-relaxed text-ink-soft">{t("sync_explain")}</p>
+          <Group>
+            <ClickRow
+              icon={RefreshCw}
+              label={t("sync_create_button")}
+              onClick={async () => {
+                try {
+                  await createSyncCode()
+                } catch {
+                  // syncError 상태로 이미 반영됨
+                }
+              }}
+            />
+            <ClickRow icon={Copy} label={t("sync_enter_button")} onClick={() => setEnterOpen((v) => !v)} />
+          </Group>
+
+          {enterOpen && (
+            <div className="mt-2 rounded-[12px] bg-secondary px-3.5 py-3">
+              <input
+                value={codeInput}
+                onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
+                placeholder={t("sync_enter_placeholder")}
+                className="w-full rounded-lg border border-input bg-card px-3 py-2 text-center text-[15px] font-bold tracking-[0.15em] placeholder:font-medium placeholder:tracking-normal placeholder:text-ink-faint focus:outline-none"
+              />
+              <div className="mt-2 text-[10.5px] font-medium leading-relaxed text-ink-faint">
+                {t("sync_enter_warning")}
+              </div>
+              <button
+                type="button"
+                disabled={!codeInput.trim() || busy}
+                onClick={async () => {
+                  const ok = await pairWithSyncCode(codeInput.trim())
+                  if (ok) {
+                    setEnterOpen(false)
+                    setCodeInput("")
+                  }
+                }}
+                className="mt-2.5 w-full rounded-lg bg-primary py-2 text-[12px] font-bold text-primary-foreground disabled:opacity-40"
+              >
+                {busy ? t("sync_syncing") : t("common_save")}
+              </button>
+            </div>
+          )}
+        </>
+      )}
+
+      {isSyncConfigured() && data.settings.syncCode && (
+        <>
+          <SectionLabel>{t("sync_code_label")}</SectionLabel>
+          <Group>
+            <div className="flex items-center gap-2.5 px-3.5 py-3">
+              <div className="flex-1 text-[17px] font-bold tracking-[0.15em]">{data.settings.syncCode}</div>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(data.settings.syncCode ?? "")
+                  setCopied(true)
+                  setTimeout(() => setCopied(false), 1500)
+                }}
+                className="flex items-center gap-1 rounded-lg bg-secondary px-2.5 py-1.5 text-[10.5px] font-bold text-ink-soft"
+              >
+                {copied ? <Check size={12} /> : <Copy size={12} />}
+                {copied ? t("sync_copied") : t("sync_copy")}
+              </button>
+            </div>
+          </Group>
+
+          <div className="mb-1.5 mt-4 px-1 text-[10.5px] font-bold uppercase tracking-wide text-ink-faint">
+            {t("sync_last_synced")}
+          </div>
+          <div className="px-1 text-[11.5px] font-medium text-ink-soft">{lastSyncedLabel}</div>
+
+          <Group>
+            <ClickRow
+              icon={RefreshCw}
+              label={busy ? t("sync_syncing") : t("sync_now_button")}
+              onClick={() => syncNow()}
+            />
+            <ClickRow
+              icon={Trash2}
+              label={t("sync_disable_button")}
+              danger
+              onClick={() => setConfirmDisable(true)}
+            />
+          </Group>
+
+          {confirmDisable && (
+            <div className="mt-2 rounded-[12px] border border-destructive/30 bg-destructive/10 px-3.5 py-3">
+              <div className="text-[12px] font-bold text-destructive">{t("sync_disable_confirm_title")}</div>
+              <div className="mt-1 text-[10.5px] font-medium leading-relaxed text-ink-soft">
+                {t("sync_disable_confirm_body")}
+              </div>
+              <div className="mt-2.5 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    disableSync()
+                    setConfirmDisable(false)
+                  }}
+                  className="rounded-lg bg-destructive px-3 py-1.5 text-[11px] font-bold text-white"
+                >
+                  {t("sync_disable_button")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmDisable(false)}
+                  className="rounded-lg bg-secondary px-3 py-1.5 text-[11px] font-bold text-ink-soft"
+                >
+                  {t("common_cancel")}
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {syncError && (
+        <div className="mt-2 rounded-[10px] bg-destructive/10 px-3.5 py-2.5 text-[11px] font-semibold text-destructive">
+          {syncError === "decrypt-failed" ? t("sync_error_decrypt") : t("sync_error_generic")}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function InstallGuide({ onBack }: { onBack: () => void }) {
   const t = useT()
   return (
@@ -279,6 +463,7 @@ const LICENSE_ENTRIES = [
   { name: "Lucide Icons", license: "ISC", descKey: "settings_license_lucide_desc" as const },
   { name: "Tabler Icons", license: "MIT", descKey: "settings_license_tabler_desc" as const },
   { name: "vaul", license: "MIT", descKey: "settings_license_vaul_desc" as const },
+  { name: "Supabase JS", license: "MIT", descKey: "settings_license_supabase_desc" as const },
 ]
 
 function LicenseList({ onBack }: { onBack: () => void }) {

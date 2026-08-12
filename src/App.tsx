@@ -4,6 +4,7 @@ import { useThemeEffect } from "@/lib/useThemeEffect"
 import { todayStr } from "@/lib/date"
 import { Splash } from "@/components/Splash"
 import { MindsetPopup } from "@/components/MindsetPopup"
+import { SyncIntroPopup } from "@/components/SyncIntroPopup"
 import { BottomNav, type TabKey } from "@/components/BottomNav"
 import { TodayScreen } from "@/screens/TodayScreen"
 import { RecordScreen } from "@/screens/RecordScreen"
@@ -11,7 +12,7 @@ import { MindsetScreen } from "@/screens/MindsetScreen"
 import { ProjectScreen } from "@/screens/ProjectScreen"
 import { SettingsScreen } from "@/screens/SettingsScreen"
 
-type Phase = "splash" | "mindset-popup" | "app"
+type Phase = "splash" | "sync-intro" | "mindset-popup" | "app"
 
 function Shell() {
   const { data, updateSettings } = useAppData()
@@ -20,16 +21,40 @@ function Shell() {
   const [phase, setPhase] = useState<Phase>("splash")
   const [tab, setTab] = useState<TabKey>("today")
 
+  function goToMindsetOrApp() {
+    const shownToday = data.settings.lastMindsetShownDate === todayStr()
+    setPhase(shownToday || data.mindsetQuotes.length === 0 ? "app" : "mindset-popup")
+  }
+
   useEffect(() => {
     const t = setTimeout(() => {
-      const shownToday = data.settings.lastMindsetShownDate === todayStr()
-      setPhase(shownToday || data.mindsetQuotes.length === 0 ? "app" : "mindset-popup")
+      if (!data.settings.syncIntroSeen) {
+        setPhase("sync-intro")
+        return
+      }
+      goToMindsetOrApp()
     }, 900)
     return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   if (phase === "splash") return <Splash />
+
+  if (phase === "sync-intro") {
+    return (
+      <SyncIntroPopup
+        onLater={() => {
+          updateSettings({ syncIntroSeen: true })
+          goToMindsetOrApp()
+        }}
+        onGoSettings={() => {
+          updateSettings({ syncIntroSeen: true })
+          setTab("settings")
+          setPhase("app")
+        }}
+      />
+    )
+  }
 
   if (phase === "mindset-popup") {
     return (

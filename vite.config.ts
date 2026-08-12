@@ -5,8 +5,12 @@ import tailwindcss from "@tailwindcss/vite"
 import { VitePWA } from "vite-plugin-pwa"
 import pkg from "./package.json" with { type: "json" }
 
+// GitHub Pages: https://respoflov.github.io/task/
+const BASE = "/task/"
+
 // https://vite.dev/config/
 export default defineConfig({
+  base: BASE,
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
   },
@@ -20,8 +24,8 @@ export default defineConfig({
         name: "Daily Task Check",
         short_name: "Task Check",
         description: "매일의 고정 할 일을 체크하고, 기록하고, 프로젝트를 관리하는 앱",
-        start_url: "./",
-        scope: "./",
+        start_url: BASE,
+        scope: BASE,
         display: "standalone",
         background_color: "#fbf9f5",
         theme_color: "#4d6152",
