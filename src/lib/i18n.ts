@@ -79,6 +79,8 @@ const dict = {
   record_no_tasks: { ko: "등록된 할 일이 없습니다.", ja: "登録されたタスクがありません。", en: "No tasks yet." },
   record_legend_0: { ko: "0%", ja: "0%", en: "0%" },
   record_legend_100: { ko: "100% 전부 완료", ja: "100% すべて完了", en: "100% all done" },
+  record_legend_undone: { ko: "미완료", ja: "未完了", en: "Not done" },
+  record_legend_done: { ko: "완료", ja: "完了", en: "Done" },
   record_date_done_count: { ko: "{done} / {total} 완료", ja: "{done} / {total} 完了", en: "{done} / {total} done" },
   record_date_empty: { ko: "그날 해당하는 할 일이 없습니다.", ja: "その日に該当するタスクがありません。", en: "No tasks for that day." },
   record_tap_undo: { ko: "탭하여 취소", ja: "タップで取り消し", en: "Tap to undo" },

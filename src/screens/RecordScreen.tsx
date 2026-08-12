@@ -212,13 +212,30 @@ export function RecordScreen() {
           })}
         </div>
 
-        {mode !== "item" && (
-          <div className="mt-3 flex items-center gap-3.5 border-t border-border pt-2.5">
-            <Legend variant={{ kind: "empty" }} label={t("record_legend_0")} />
-            <Legend variant={{ kind: "ratio", pct: 100 }} label={t("record_legend_100")} />
-          </div>
-        )}
+        <div className="mt-3 flex items-center gap-3.5 border-t border-border pt-2.5">
+          {mode === "item" ? (
+            <>
+              <Legend variant={{ kind: "binary", done: false }} label={t("record_legend_undone")} />
+              <Legend variant={{ kind: "binary", done: true }} label={t("record_legend_done")} />
+            </>
+          ) : (
+            <>
+              <Legend variant={{ kind: "empty" }} label={t("record_legend_0")} />
+              <Legend variant={{ kind: "ratio", pct: 100 }} label={t("record_legend_100")} />
+            </>
+          )}
+        </div>
       </div>
+
+      {selectedDate && mode === "item" && selectedTask && !selectedIsFuture && (
+        <DateDetail
+          key={selectedDate}
+          date={selectedDate}
+          tasks={selectedTask.createdAt > selectedDate ? [] : [selectedTask]}
+          isTaskCompleted={isTaskCompleted}
+          toggleCompletion={toggleCompletion}
+        />
+      )}
 
       {selectedDate && mode !== "item" && !selectedIsFuture && (
         <DateDetail
