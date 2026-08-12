@@ -5,8 +5,9 @@ const R = 11
 const C = 2 * Math.PI * R
 
 type RingVariant =
-  | { kind: "blank" }
-  | { kind: "future-empty" }
+  | { kind: "blank" } // 달력에 아예 없는 날(다른 달) — 아무것도 그리지 않는다
+  | { kind: "empty" } // 이 날은 있지만 표시할 게 없는 날(아직 안 온 미래, 또는 그날 적용되는 항목이 없던 과거) — 점선 원
+  | { kind: "future-count"; count: number }
   | { kind: "future-count"; count: number }
   | { kind: "ratio"; pct: number }
   | { kind: "binary"; done: boolean }
@@ -21,7 +22,7 @@ export function RatioRingCell({ variant, selected }: { variant: RingVariant; sel
     return <svg width={SIZE} height={SIZE} />
   }
 
-  if (variant.kind === "future-empty") {
+  if (variant.kind === "empty") {
     return (
       <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`}>
         <circle

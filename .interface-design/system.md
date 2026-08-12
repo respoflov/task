@@ -24,7 +24,7 @@
 - **체크(완료) 버튼** — 22px 원, 미완료는 `border-input` 1.6px 아웃라인, 완료는 `bg-primary` 풀 + 흰 체크 아이콘. 항목명에는 동시에 취소선(`line-through` + `text-ink-faint`).
 - **바텀시트** — `vaul`(MIT) 사용, 직접 구현 금지. 핸들 36×4px pill, 헤더에 닫기(X)/제목/저장 고정. `src/components/BottomSheet.tsx`가 공용 래퍼.
 - **세그먼트 컨트롤** — `bg-secondary` 트랙 + `bg-card` 활성 pill(그림자 아주 옅게).
-- **기록 히트맵 셀**(`src/components/RatioRingCell.tsx`) — 26px 원, 완료율만큼 도넛 링(stroke, `stroke-linecap round`, -90deg 시작), 100%는 꽉 찬 원 + 흰 숫자, 그 외는 잉크색 숫자. "오늘" 표시는 날짜 숫자를 굵게+액센트 색으로만 하고 별도 테두리 링을 겹치지 않는다(v11에서 이중 테두리 버그를 이렇게 고쳤다). 그날 적용 대상 항목이 하나도 없으면(`total===0`) 링 자체를 그리지 않고 비운다 — "기록 없음"과 "0%로 실패"를 섞지 않기 위함(실제 구현 중 재발견).
+- **기록 히트맵 셀**(`src/components/RatioRingCell.tsx`) — 26px 원, 완료율만큼 도넛 링(stroke, `stroke-linecap round`, -90deg 시작), 100%는 꽉 찬 원 + 흰 숫자, 그 외는 잉크색 숫자. "오늘" 표시는 날짜 숫자를 굵게+액센트 색으로만 하고 별도 테두리 링을 겹치지 않는다(v11에서 이중 테두리 버그를 이렇게 고쳤다). 그날 적용 대상 항목이 하나도 없으면(`total===0`) 채워진 링 대신 점선 원(`empty` variant, future-count와 같은 "표시할 게 없는 날" 계열)을 그린다 — "기록 없음"과 "0%로 실패"를 섞지 않으면서도(v1.4.0까지는 아예 안 그려서 다른 달 칸과 구분이 안 됐다가, v1.4.1에서 점선으로 바꿔 "달력에 있는 날"이라는 건 알 수 있게 고쳤다).
 - **마일스톤 스테퍼**(`src/screens/ProjectScreen.tsx`) — 완료 처리 시 같은 프로젝트의 다음 "예정" 단계를 자동으로 "진행 중"으로 승격한다.
 - **RESPOFLOV 각인** — `.respoflov-mark` 유틸리티 클래스(index.css) 재사용. 9.5px/600/letter-spacing .32em, 스플래시 하단 및 설정 화면 맨 아래에 배치.
 

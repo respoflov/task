@@ -165,13 +165,13 @@ export function RecordScreen() {
               const count = mode === "all" ? scheduledOnceCount(data.tasks, cell.date) : 0
               node = (
                 <RatioRingCell
-                  variant={count > 0 ? { kind: "future-count", count } : { kind: "future-empty" }}
+                  variant={count > 0 ? { kind: "future-count", count } : { kind: "empty" }}
                   selected={cell.date === selectedDate}
                 />
               )
             } else if (mode === "item" && selectedTask) {
               node = selectedTask.createdAt > cell.date ? (
-                <RatioRingCell variant={{ kind: "blank" }} />
+                <RatioRingCell variant={{ kind: "empty" }} />
               ) : (
                 <RatioRingCell
                   variant={{ kind: "binary", done: isTaskCompleted(selectedTask.id, cell.date) }}
@@ -182,7 +182,7 @@ export function RecordScreen() {
               const stats = computeDayStats(data.tasks, data.completions, cell.date, filterFn)
               node =
                 stats.total === 0 ? (
-                  <RatioRingCell variant={{ kind: "blank" }} />
+                  <RatioRingCell variant={{ kind: "empty" }} />
                 ) : (
                   <RatioRingCell variant={{ kind: "ratio", pct: stats.pct }} selected={cell.date === selectedDate} />
                 )
@@ -214,7 +214,7 @@ export function RecordScreen() {
 
         {mode !== "item" && (
           <div className="mt-3 flex items-center gap-3.5 border-t border-border pt-2.5">
-            <Legend variant={{ kind: "future-empty" }} label={t("record_legend_0")} />
+            <Legend variant={{ kind: "empty" }} label={t("record_legend_0")} />
             <Legend variant={{ kind: "ratio", pct: 100 }} label={t("record_legend_100")} />
           </div>
         )}

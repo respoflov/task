@@ -77,6 +77,17 @@ export function TodayScreen() {
           )}
         </div>
 
+        <button
+          type="button"
+          onClick={() => openAdd("daily")}
+          className="mb-3 flex w-full items-center gap-2.5 px-1 py-2.5 text-[12.5px] font-semibold text-ink-faint"
+        >
+          <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full border-[1.4px] border-dashed border-input">
+            <Plus size={13} />
+          </span>
+          {t("today_add_task")}
+        </button>
+
         {totalCount === 0 && (
           <div className="py-10 text-center text-[12.5px] font-medium text-ink-faint">{t("today_empty")}</div>
         )}
@@ -130,19 +141,7 @@ export function TodayScreen() {
 
             {!collapsed[key] &&
               (key === "recurring" ? (
-                <>
-                  <TaskList tasks={recurring} {...sectionProps} />
-                  <button
-                    type="button"
-                    onClick={() => openAdd("daily")}
-                    className="flex w-full items-center gap-2.5 px-1 py-2.5 text-[12.5px] font-semibold text-ink-faint"
-                  >
-                    <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full border-[1.4px] border-dashed border-input">
-                      <Plus size={13} />
-                    </span>
-                    {t("today_add_task")}
-                  </button>
-                </>
+                <TaskList tasks={recurring} {...sectionProps} />
               ) : (
                 <>
                   <TaskList tasks={adhoc} {...sectionProps} />
