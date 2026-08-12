@@ -22,6 +22,7 @@ export function emptyData(): AppData {
       lastMindsetShownDate: null,
       lastSequentialIndex: -1,
       todaySectionOrder: ["recurring", "adhoc"],
+      weekStart: "mon",
       syncCode: null,
       syncUpdatedAt: null,
       syncIntroSeen: false,

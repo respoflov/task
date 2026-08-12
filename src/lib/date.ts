@@ -71,3 +71,17 @@ export function isPastOrToday(dateStr: string): boolean {
 export function mondayIndex(getDay: number): number {
   return (getDay + 6) % 7
 }
+
+export type WeekStart = "mon" | "sun"
+
+// 기록 탭 달력의 주 시작 요일 설정에 맞춘 인덱스 변환 (0=그 주의 첫 칸 ... 6=마지막 칸).
+export function weekStartIndex(getDay: number, weekStart: WeekStart): number {
+  return weekStart === "sun" ? getDay : mondayIndex(getDay)
+}
+
+// 기록 탭 달력 헤더 전용 — weekStart에 따라 요일 순서를 바꾼다.
+// TaskAddSheet의 "요일 선택" 피커는 이 설정과 무관하게 항상 월요일 시작을 유지하므로
+// 거기서는 이 함수 대신 기존 WEEKDAY_HEADER를 그대로 쓴다.
+export function weekdayHeaderFor(lang: Lang, weekStart: WeekStart): string[] {
+  return weekStart === "sun" ? WEEKDAY[lang] : WEEKDAY_HEADER[lang]
+}

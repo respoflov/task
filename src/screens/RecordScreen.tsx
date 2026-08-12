@@ -3,13 +3,13 @@ import { ChevronLeft, ChevronRight, Check, Plus, X } from "lucide-react"
 import { useAppData } from "@/context/AppDataContext"
 import { buildMonthGrid } from "@/lib/calendar"
 import { computeDayStats, scheduledOnceCount, tasksForDate } from "@/lib/record"
-import { isFuture, isPastOrToday, todayStr, formatMonthLabel, formatDateShort, WEEKDAY_HEADER } from "@/lib/date"
+import { isFuture, isPastOrToday, todayStr, formatMonthLabel, formatDateShort, weekdayHeaderFor } from "@/lib/date"
 import { useT, useLang, useSubtitle } from "@/lib/i18n"
 import { RatioRingCell } from "@/components/RatioRingCell"
 import { NONE_ICON } from "@/lib/icons"
 import type { AppData } from "@/lib/types"
 
-type Mode = "all" | "project" | "item"
+type Mode = "all" | "project" | "once" | "item"
 
 export function RecordScreen() {
   const { data, isTaskCompleted, toggleCompletion, addTask, removeTask } = useAppData()
@@ -25,10 +25,12 @@ export function RecordScreen() {
   const [taskId, setTaskId] = useState<string | null>(data.tasks[0]?.id ?? null)
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
 
-  const cells = useMemo(() => buildMonthGrid(year, month0), [year, month0])
+  const weekStart = data.settings.weekStart
+  const cells = useMemo(() => buildMonthGrid(year, month0, weekStart), [year, month0, weekStart])
 
   const filterFn = useMemo(() => {
     if (mode === "project" && projectId) return (task: (typeof data.tasks)[number]) => task.projectId === projectId
+    if (mode === "once") return (task: (typeof data.tasks)[number]) => task.repeat.kind === "once"
     return undefined
   }, [mode, projectId])
 
@@ -54,7 +56,9 @@ export function RecordScreen() {
             ? selectedTask.name + (selectedTask.deletedAt ? t("record_item_deleted_suffix") : "")
             : mode === "project" && projectId
               ? data.projects.find((p) => p.id === projectId)?.name
-              : t("record_all_title")}
+              : mode === "once"
+                ? t("record_once_title")
+                : t("record_all_title")}
         </div>
       </div>
 
@@ -63,6 +67,7 @@ export function RecordScreen() {
           [
             { key: "all" as const, label: t("record_mode_all") },
             { key: "project" as const, label: t("record_mode_project") },
+            { key: "once" as const, label: t("record_mode_once") },
             { key: "item" as const, label: t("record_mode_item") },
           ]
         ).map((opt) => (
@@ -143,15 +148,19 @@ export function RecordScreen() {
         </div>
 
         <div className="mb-1.5 grid grid-cols-7">
-          {WEEKDAY_HEADER[lang].map((w, i) => (
-            <span
-              key={w}
-              className="text-center text-[9px] font-bold"
-              style={{ color: i === 5 ? "var(--sat)" : i === 6 ? "var(--sun)" : "var(--ink-faint)" }}
-            >
-              {w}
-            </span>
-          ))}
+          {weekdayHeaderFor(lang, weekStart).map((w, i) => {
+            const satIndex = weekStart === "sun" ? 6 : 5
+            const sunIndex = weekStart === "sun" ? 0 : 6
+            return (
+              <span
+                key={w}
+                className="text-center text-[9px] font-bold"
+                style={{ color: i === satIndex ? "var(--sat)" : i === sunIndex ? "var(--sun)" : "var(--ink-faint)" }}
+              >
+                {w}
+              </span>
+            )
+          })}
         </div>
 
         <div className="grid grid-cols-7 gap-y-1.5">
@@ -162,7 +171,7 @@ export function RecordScreen() {
             if (!cell.inMonth) {
               node = <RatioRingCell variant={{ kind: "blank" }} />
             } else if (isFuture(cell.date)) {
-              const count = mode === "all" ? scheduledOnceCount(data.tasks, cell.date) : 0
+              const count = mode === "all" || mode === "once" ? scheduledOnceCount(data.tasks, cell.date) : 0
               node = (
                 <RatioRingCell
                   variant={count > 0 ? { kind: "future-count", count } : { kind: "empty" }}

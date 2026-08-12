@@ -2,6 +2,7 @@ import { useRef, useState } from "react"
 import {
   Sun,
   Globe,
+  CalendarDays,
   Feather,
   Download,
   Upload,
@@ -72,6 +73,20 @@ export function SettingsScreen() {
                 { value: "en", label: t("settings_lang_en") },
               ]}
               onChange={(v) => updateSettings({ language: v as AppSettings["language"] })}
+            />
+          }
+        />
+        <Row
+          icon={CalendarDays}
+          label={t("settings_week_start")}
+          right={
+            <Segmented
+              value={data.settings.weekStart}
+              options={[
+                { value: "mon", label: t("settings_week_start_mon") },
+                { value: "sun", label: t("settings_week_start_sun") },
+              ]}
+              onChange={(v) => updateSettings({ weekStart: v as AppSettings["weekStart"] })}
             />
           }
         />
