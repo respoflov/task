@@ -53,8 +53,12 @@ function render(svg, size, outPath) {
 
 const base = "../public/"
 
-render(buildSvg({ size: 192, cornerRatio: 0.45, bgPad: 0, iconScale: 1, roundedBg: true }), 192, base + "icon-192.png")
-render(buildSvg({ size: 512, cornerRatio: 0.45, bgPad: 0, iconScale: 1, roundedBg: true }), 512, base + "icon-512.png")
+// 홈 화면에서는 OS(iOS 스퀴클, Android 런처 등)가 아이콘 PNG 위에 자기 마스크를 또 씌운다.
+// 여기서 rounded-2xl(비율 0.45, 거의 원)로 배경까지 직접 그려버리면 OS가 씌우는 프레임과
+// 우리가 그린 원이 겹쳐 보여 어색해진다 — 그래서 192/512는 각지지 않은 순정 사각형으로 채우고
+// 모양은 OS 마스크에게 완전히 맡긴다(마스커블 아이콘과 동일한 방식).
+render(buildSvg({ size: 192, cornerRatio: 0, bgPad: 0, iconScale: 1, roundedBg: false }), 192, base + "icon-192.png")
+render(buildSvg({ size: 512, cornerRatio: 0, bgPad: 0, iconScale: 1, roundedBg: false }), 512, base + "icon-512.png")
 // maskable: OS가 알아서 마스킹하므로 배경은 코너 없이 꽉 채우고, 안전 영역(가장자리 ~12%)을 비워 아이콘을 더 작게
 render(buildSvg({ size: 512, cornerRatio: 0, bgPad: 0, iconScale: 0.72, roundedBg: false }), 512, base + "icon-512-maskable.png")
 
