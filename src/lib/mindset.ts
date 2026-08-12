@@ -5,9 +5,10 @@ export function pickMindsetQuote(
   settings: Pick<AppSettings, "mindsetOrder" | "lastSequentialIndex">
 ): MindsetQuote | null {
   if (quotes.length === 0) return null
+  const sorted = [...quotes].sort((a, b) => a.order - b.order)
   if (settings.mindsetOrder === "random") {
-    return quotes[Math.floor(Math.random() * quotes.length)]
+    return sorted[Math.floor(Math.random() * sorted.length)]
   }
-  const next = (settings.lastSequentialIndex + 1) % quotes.length
-  return quotes[next]
+  const next = (settings.lastSequentialIndex + 1) % sorted.length
+  return sorted[next]
 }

@@ -4,6 +4,7 @@ import { useAppData } from "@/context/AppDataContext"
 import { buildMonthGrid } from "@/lib/calendar"
 import { computeDayStats, scheduledOnceCount, tasksForDate } from "@/lib/record"
 import { isFuture, isPastOrToday, todayStr, formatMonthLabel, formatDateShort, weekdayHeaderFor } from "@/lib/date"
+import { appliesToDate } from "@/lib/tasks"
 import { useT, useLang, useSubtitle } from "@/lib/i18n"
 import { RatioRingCell } from "@/components/RatioRingCell"
 import { NONE_ICON } from "@/lib/icons"
@@ -170,20 +171,31 @@ export function RecordScreen() {
 
             if (!cell.inMonth) {
               node = <RatioRingCell variant={{ kind: "blank" }} />
+            } else if (mode === "item" && selectedTask) {
+              if (isFuture(cell.date)) {
+                // 요일 반복·매일 반복 항목도 "오늘만" 항목처럼 앞으로 적용될 날짜를 미리 보여준다.
+                const applies = appliesToDate(selectedTask, cell.date)
+                node = (
+                  <RatioRingCell
+                    variant={applies ? { kind: "future-count", count: 1 } : { kind: "empty" }}
+                    selected={cell.date === selectedDate}
+                  />
+                )
+              } else {
+                node = selectedTask.createdAt > cell.date ? (
+                  <RatioRingCell variant={{ kind: "empty" }} />
+                ) : (
+                  <RatioRingCell
+                    variant={{ kind: "binary", done: isTaskCompleted(selectedTask.id, cell.date) }}
+                    selected={cell.date === selectedDate}
+                  />
+                )
+              }
             } else if (isFuture(cell.date)) {
               const count = mode === "all" || mode === "once" ? scheduledOnceCount(data.tasks, cell.date) : 0
               node = (
                 <RatioRingCell
                   variant={count > 0 ? { kind: "future-count", count } : { kind: "empty" }}
-                  selected={cell.date === selectedDate}
-                />
-              )
-            } else if (mode === "item" && selectedTask) {
-              node = selectedTask.createdAt > cell.date ? (
-                <RatioRingCell variant={{ kind: "empty" }} />
-              ) : (
-                <RatioRingCell
-                  variant={{ kind: "binary", done: isTaskCompleted(selectedTask.id, cell.date) }}
                   selected={cell.date === selectedDate}
                 />
               )
@@ -221,20 +233,6 @@ export function RecordScreen() {
             )
           })}
         </div>
-
-        <div className="mt-3 flex items-center gap-3.5 border-t border-border pt-2.5">
-          {mode === "item" ? (
-            <>
-              <Legend variant={{ kind: "binary", done: false }} label={t("record_legend_undone")} />
-              <Legend variant={{ kind: "binary", done: true }} label={t("record_legend_done")} />
-            </>
-          ) : (
-            <>
-              <Legend variant={{ kind: "empty" }} label={t("record_legend_0")} />
-              <Legend variant={{ kind: "ratio", pct: 100 }} label={t("record_legend_100")} />
-            </>
-          )}
-        </div>
       </div>
 
       {selectedDate && mode === "item" && selectedTask && !selectedIsFuture && (
@@ -269,17 +267,6 @@ export function RecordScreen() {
           onRemove={removeTask}
         />
       )}
-    </div>
-  )
-}
-
-function Legend({ variant, label }: { variant: Parameters<typeof RatioRingCell>[0]["variant"]; label: string }) {
-  return (
-    <div className="flex items-center gap-1.5 text-[9.5px] font-semibold text-ink-soft">
-      <div className="scale-[0.6] origin-left">
-        <RatioRingCell variant={variant} />
-      </div>
-      {label}
     </div>
   )
 }

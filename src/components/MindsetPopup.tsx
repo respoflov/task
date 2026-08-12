@@ -13,7 +13,7 @@ export function MindsetPopup({ onDismiss }: { onDismiss: () => void }) {
       type="button"
       onClick={onDismiss}
       className="flex h-full w-full flex-col items-center justify-center px-7 text-center"
-      style={{ background: mindsetBgVar(data.settings.mindsetColor) }}
+      style={{ background: mindsetBgVar(quote?.color ?? "terracotta") }}
     >
       <div className="mb-1 font-serif text-4xl font-bold opacity-70" style={{ color: "var(--mind-ink)" }}>
         “

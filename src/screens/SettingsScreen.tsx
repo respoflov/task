@@ -14,6 +14,7 @@ import {
   RefreshCw,
   Copy,
   Check,
+  GripVertical,
 } from "lucide-react"
 import { useAppData } from "@/context/AppDataContext"
 import { useT, useSubtitle, type TKey } from "@/lib/i18n"
@@ -211,10 +212,111 @@ export function SettingsScreen() {
   )
 }
 
+// N개 항목의 자유 순서 드래그. Today 탭의 2개짜리 스왑 훅과 달리 임의 개수를 다룬다.
+// 드래그 시작 시 모든 항목의 위치를 스냅샷으로 저장해 두고, 드래그 중에는 그 스냅샷 기준으로
+// 다른 항목들의 이동 여부만 계산한다(레이아웃을 매 프레임 다시 읽지 않기 위함).
+function useListReorder(ids: string[], onCommit: (orderedIds: string[]) => void) {
+  const elRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const rectsRef = useRef<Record<string, DOMRect>>({})
+  const [dragId, setDragId] = useState<string | null>(null)
+  const [dragY, setDragY] = useState(0)
+  const startYRef = useRef(0)
+
+  const setRef = (id: string) => (el: HTMLDivElement | null) => {
+    elRefs.current[id] = el
+  }
+
+  const handlePointerDown = (id: string) => (e: React.PointerEvent) => {
+    ids.forEach((iid) => {
+      const el = elRefs.current[iid]
+      if (el) rectsRef.current[iid] = el.getBoundingClientRect()
+    })
+    startYRef.current = e.clientY
+    setDragId(id)
+    setDragY(0)
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId)
+    } catch {
+      // 일부 환경에서 포인터 캡처가 무의미한 상태일 때 발생 — 무해함
+    }
+  }
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!dragId) return
+    setDragY(e.clientY - startYRef.current)
+  }
+
+  const handlePointerUp = () => {
+    if (!dragId) return
+    const draggedRect = rectsRef.current[dragId]
+    if (draggedRect) {
+      const draggedCenter = draggedRect.top + draggedRect.height / 2 + dragY
+      const ordered = ids
+        .map((id) => {
+          if (id === dragId) return { id, c: draggedCenter }
+          const r = rectsRef.current[id]
+          return { id, c: r ? r.top + r.height / 2 : 0 }
+        })
+        .sort((a, b) => a.c - b.c)
+        .map((x) => x.id)
+      onCommit(ordered)
+    }
+    setDragId(null)
+    setDragY(0)
+  }
+
+  const shiftFor = (id: string): number => {
+    if (!dragId || id === dragId) return 0
+    const draggedRect = rectsRef.current[dragId]
+    const itemRect = rectsRef.current[id]
+    if (!draggedRect || !itemRect) return 0
+    const draggedOrigCenter = draggedRect.top + draggedRect.height / 2
+    const draggedCurCenter = draggedOrigCenter + dragY
+    const itemCenter = itemRect.top + itemRect.height / 2
+    if (draggedOrigCenter < itemCenter) {
+      return draggedCurCenter > itemCenter ? -draggedRect.height : 0
+    }
+    return draggedCurCenter < itemCenter ? draggedRect.height : 0
+  }
+
+  const styleFor = (id: string): React.CSSProperties => {
+    if (id === dragId) {
+      return { transform: `translateY(${dragY}px)`, position: "relative", zIndex: 10 }
+    }
+    const shift = shiftFor(id)
+    return { transform: shift !== 0 ? `translateY(${shift}px)` : undefined, transition: "transform 150ms ease" }
+  }
+
+  return { setRef, handlePointerDown, handlePointerMove, handlePointerUp, styleFor }
+}
+
 function MindsetQuoteSettings({ onBack }: { onBack: () => void }) {
-  const { data, addMindsetQuote, removeMindsetQuote, updateSettings } = useAppData()
+  const { data, addMindsetQuote, updateMindsetQuote, removeMindsetQuote, reorderMindsetQuotes, updateSettings } =
+    useAppData()
   const t = useT()
   const [text, setText] = useState("")
+  const [newColor, setNewColor] = useState<MindsetColorKey>("terracotta")
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editText, setEditText] = useState("")
+  const [colorEditId, setColorEditId] = useState<string | null>(null)
+
+  const sortedQuotes = [...data.mindsetQuotes].sort((a, b) => a.order - b.order)
+  const reorder = useListReorder(
+    sortedQuotes.map((q) => q.id),
+    reorderMindsetQuotes
+  )
+
+  const startEdit = (id: string, currentText: string) => {
+    setColorEditId(null)
+    setEditingId(id)
+    setEditText(currentText)
+  }
+
+  const commitEdit = (id: string) => {
+    const trimmed = editText.trim()
+    if (trimmed) updateMindsetQuote(id, { text: trimmed })
+    setEditingId(null)
+  }
 
   return (
     <div className="flex h-full flex-col px-4 pb-6 pt-1">
@@ -248,21 +350,97 @@ function MindsetQuoteSettings({ onBack }: { onBack: () => void }) {
         />
       </Group>
 
-      <SectionLabel>{t("mindset_quotes_list_section", { n: data.mindsetQuotes.length })}</SectionLabel>
+      <SectionLabel>{t("mindset_quotes_list_section", { n: sortedQuotes.length })}</SectionLabel>
       <Group>
-        {data.mindsetQuotes.length === 0 && (
+        {sortedQuotes.length === 0 && (
           <div className="px-3 py-4 text-[11.5px] font-medium text-ink-faint">{t("mindset_empty")}</div>
         )}
-        {data.mindsetQuotes.map((q) => (
-          <div key={q.id} className="flex items-center gap-2.5 border-b border-border px-3 py-2.5 last:border-none">
-            <div className="flex-1 text-[11.5px] font-semibold leading-relaxed">{q.text}</div>
-            <button
-              type="button"
-              onClick={() => removeMindsetQuote(q.id)}
-              className="shrink-0 text-[11px] font-bold text-destructive"
-            >
-              {t("common_delete")}
-            </button>
+        {sortedQuotes.map((q) => (
+          <div
+            key={q.id}
+            ref={reorder.setRef(q.id)}
+            style={reorder.styleFor(q.id)}
+            className="border-b border-border bg-card last:border-none"
+          >
+            <div className="flex items-center gap-2 px-2.5 py-2.5">
+              <button
+                type="button"
+                onPointerDown={reorder.handlePointerDown(q.id)}
+                onPointerMove={reorder.handlePointerMove}
+                onPointerUp={reorder.handlePointerUp}
+                onPointerCancel={reorder.handlePointerUp}
+                aria-label={t("today_reorder_aria")}
+                className="flex h-7 w-6 shrink-0 items-center justify-center text-ink-faint"
+                style={{ touchAction: "none" }}
+              >
+                <GripVertical size={15} strokeWidth={1.8} />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingId(null)
+                  setColorEditId((cur) => (cur === q.id ? null : q.id))
+                }}
+                aria-label={t(MINDSET_COLOR_LABEL_KEY[q.color])}
+                className="h-6 w-6 shrink-0 rounded-full"
+                style={{ background: mindsetBgVar(q.color) }}
+              />
+              {editingId === q.id ? (
+                <input
+                  autoFocus
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                  onBlur={() => commitEdit(q.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") e.currentTarget.blur()
+                    if (e.key === "Escape") setEditingId(null)
+                  }}
+                  className="flex-1 rounded-lg border border-input bg-card px-2 py-1 text-[11.5px] font-semibold focus:outline-none focus:ring-2 focus:ring-ring/40"
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => startEdit(q.id, q.text)}
+                  className="flex-1 truncate text-left text-[11.5px] font-semibold"
+                >
+                  {q.text}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => removeMindsetQuote(q.id)}
+                aria-label={t("common_delete")}
+                className="shrink-0 p-1 text-ink-faint"
+              >
+                <Trash2 size={14} strokeWidth={1.8} />
+              </button>
+            </div>
+            {colorEditId === q.id && (
+              <div className="flex flex-wrap gap-2.5 px-3 pb-3 pl-11">
+                {MINDSET_COLOR_KEYS.map((key) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => {
+                      updateMindsetQuote(q.id, { color: key })
+                      setColorEditId(null)
+                    }}
+                    aria-label={t(MINDSET_COLOR_LABEL_KEY[key])}
+                    className="relative h-7 w-7 shrink-0 rounded-full"
+                    style={{
+                      background: mindsetBgVar(key),
+                      boxShadow: q.color === key ? "0 0 0 2px var(--card), 0 0 0 3.5px var(--ink-soft)" : undefined,
+                    }}
+                  >
+                    {q.color === key && (
+                      <span className="absolute inset-0 flex items-center justify-center">
+                        <Check size={12} strokeWidth={3} color="#F3EADD" />
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </Group>
@@ -278,7 +456,7 @@ function MindsetQuoteSettings({ onBack }: { onBack: () => void }) {
           type="button"
           onClick={() => {
             if (!text.trim()) return
-            addMindsetQuote(text.trim())
+            addMindsetQuote(text.trim(), newColor)
             setText("")
           }}
           className="rounded-xl bg-primary px-4 text-[12.5px] font-bold text-primary-foreground disabled:opacity-40"
@@ -291,12 +469,12 @@ function MindsetQuoteSettings({ onBack }: { onBack: () => void }) {
       <SectionLabel>{t("mindset_color_section")}</SectionLabel>
       <div className="flex gap-3 px-1">
         {MINDSET_COLOR_KEYS.map((key) => {
-          const selected = data.settings.mindsetColor === key
+          const selected = newColor === key
           return (
             <button
               key={key}
               type="button"
-              onClick={() => updateSettings({ mindsetColor: key })}
+              onClick={() => setNewColor(key)}
               aria-label={t(MINDSET_COLOR_LABEL_KEY[key])}
               className="relative h-9 w-9 shrink-0 rounded-full"
               style={{

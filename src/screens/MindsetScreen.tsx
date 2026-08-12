@@ -20,7 +20,7 @@ export function MindsetScreen({ onNavigate }: { onNavigate: (tab: TabKey) => voi
 
       <div
         className="flex min-h-[150px] flex-col justify-center rounded-[16px] px-5 py-5 text-center"
-        style={{ background: mindsetBgVar(data.settings.mindsetColor) }}
+        style={{ background: mindsetBgVar(quote?.color ?? "terracotta") }}
       >
         <div className="mb-1 font-serif text-[26px] font-bold opacity-65" style={{ color: "var(--mind-ink)" }}>
           “

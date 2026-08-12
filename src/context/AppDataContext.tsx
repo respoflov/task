@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
-import type { AppData, FixedTask, Milestone, MilestoneStatus, Project, RepeatRule } from "@/lib/types"
+import type { AppData, FixedTask, Milestone, MilestoneStatus, MindsetQuote, Project, RepeatRule } from "@/lib/types"
+import type { MindsetColorKey } from "@/lib/mindsetColors"
 import { loadData, saveData, newId, emptyData, isValidAppData, normalizeData } from "@/lib/storage"
 import { todayStr } from "@/lib/date"
 import { generateSyncCode, pushToCloud, pullFromCloud, toPayload, SyncError, type SyncPayload } from "@/lib/sync"
@@ -13,8 +14,10 @@ interface AppDataContextValue {
   removeTask: (taskId: string) => void
   toggleCompletion: (taskId: string, date: string) => void
   isTaskCompleted: (taskId: string, date: string) => boolean
-  addMindsetQuote: (text: string) => void
+  addMindsetQuote: (text: string, color: MindsetColorKey) => void
+  updateMindsetQuote: (id: string, patch: Partial<Pick<MindsetQuote, "text" | "color">>) => void
   removeMindsetQuote: (id: string) => void
+  reorderMindsetQuotes: (orderedIds: string[]) => void
   updateSettings: (patch: Partial<AppData["settings"]>) => void
   addProject: (input: { name: string; startDate: string }) => string
   addMilestone: (input: { projectId: string; title: string; targetLabel: string }) => void
@@ -146,12 +149,33 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     })
   }
 
-  const addMindsetQuote: AppDataContextValue["addMindsetQuote"] = (text) => {
-    setData((d) => ({ ...d, mindsetQuotes: [...d.mindsetQuotes, { id: newId(), text }] }))
+  const addMindsetQuote: AppDataContextValue["addMindsetQuote"] = (text, color) => {
+    setData((d) => ({
+      ...d,
+      mindsetQuotes: [...d.mindsetQuotes, { id: newId(), text, color, order: d.mindsetQuotes.length }],
+    }))
+  }
+
+  const updateMindsetQuote: AppDataContextValue["updateMindsetQuote"] = (id, patch) => {
+    setData((d) => ({
+      ...d,
+      mindsetQuotes: d.mindsetQuotes.map((q) => (q.id === id ? { ...q, ...patch } : q)),
+    }))
   }
 
   const removeMindsetQuote: AppDataContextValue["removeMindsetQuote"] = (id) => {
     setData((d) => ({ ...d, mindsetQuotes: d.mindsetQuotes.filter((q) => q.id !== id) }))
+  }
+
+  // 드래그로 정해진 새 순서(id 배열)를 받아 각 문구의 order를 다시 매긴다.
+  const reorderMindsetQuotes: AppDataContextValue["reorderMindsetQuotes"] = (orderedIds) => {
+    setData((d) => ({
+      ...d,
+      mindsetQuotes: d.mindsetQuotes.map((q) => {
+        const newOrder = orderedIds.indexOf(q.id)
+        return newOrder === -1 ? q : { ...q, order: newOrder }
+      }),
+    }))
   }
 
   const updateSettings: AppDataContextValue["updateSettings"] = (patch) => {
@@ -316,7 +340,9 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       toggleCompletion,
       isTaskCompleted,
       addMindsetQuote,
+      updateMindsetQuote,
       removeMindsetQuote,
+      reorderMindsetQuotes,
       updateSettings,
       addProject,
       addMilestone,

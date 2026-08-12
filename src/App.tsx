@@ -20,6 +20,15 @@ function Shell() {
 
   const [phase, setPhase] = useState<Phase>("splash")
   const [tab, setTab] = useState<TabKey>("today")
+  const [settingsKey, setSettingsKey] = useState(0)
+  const [mindsetClosing, setMindsetClosing] = useState(false)
+
+  // 설정 탭을 누를 때마다(이미 그 탭에 있어도) SettingsScreen을 새로 마운트해
+  // 하위 화면(동기화·문구 편집 등)에 들어가 있던 상태를 최상위 목록으로 되돌린다.
+  function handleTabChange(next: TabKey) {
+    if (next === "settings") setSettingsKey((k) => k + 1)
+    setTab(next)
+  }
 
   function goToMindsetOrApp() {
     const shownToday = data.settings.lastMindsetShownDate === todayStr()
@@ -57,19 +66,30 @@ function Shell() {
   }
 
   if (phase === "mindset-popup") {
+    // 닫을 때 바로 오늘 탭으로 끊지 않고, 스플래시 위에서 서서히 사라지게 한다
+    // (진입할 때와 대칭되는 마무리 — 스플래시로 되돌아갔다가 앱으로 넘어가는 느낌).
     return (
-      <MindsetPopup
-        onDismiss={() => {
-          updateSettings({
-            lastMindsetShownDate: todayStr(),
-            lastSequentialIndex:
-              data.settings.mindsetOrder === "sequential"
-                ? (data.settings.lastSequentialIndex + 1) % Math.max(data.mindsetQuotes.length, 1)
-                : data.settings.lastSequentialIndex,
-          })
-          setPhase("app")
-        }}
-      />
+      <div className="relative h-full w-full">
+        <Splash />
+        <div className={`absolute inset-0 transition-opacity duration-500 ${mindsetClosing ? "opacity-0" : "opacity-100"}`}>
+          <MindsetPopup
+            onDismiss={() => {
+              setMindsetClosing(true)
+              setTimeout(() => {
+                updateSettings({
+                  lastMindsetShownDate: todayStr(),
+                  lastSequentialIndex:
+                    data.settings.mindsetOrder === "sequential"
+                      ? (data.settings.lastSequentialIndex + 1) % Math.max(data.mindsetQuotes.length, 1)
+                      : data.settings.lastSequentialIndex,
+                })
+                setPhase("app")
+                setMindsetClosing(false)
+              }, 500)
+            }}
+          />
+        </div>
+      </div>
     )
   }
 
@@ -80,9 +100,9 @@ function Shell() {
         {tab === "record" && <RecordScreen />}
         {tab === "mindset" && <MindsetScreen onNavigate={setTab} />}
         {tab === "project" && <ProjectScreen />}
-        {tab === "settings" && <SettingsScreen />}
+        {tab === "settings" && <SettingsScreen key={settingsKey} />}
       </div>
-      <BottomNav active={tab} onChange={setTab} />
+      <BottomNav active={tab} onChange={handleTabChange} />
     </div>
   )
 }

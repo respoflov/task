@@ -90,8 +90,8 @@ export function TodayScreen() {
 
         <div className="mb-3 border-t border-dashed border-border" />
 
-        {totalCount === 0 && (
-          <div className="py-10 text-center text-[12.5px] font-medium text-ink-faint">{t("today_empty")}</div>
+        {totalCount > 0 && (
+          <div className="mb-3 px-1 text-[10px] font-medium text-ink-faint">{t("today_delete_hint")}</div>
         )}
 
         {order.map((key, index) => (
@@ -359,11 +359,17 @@ function TaskRow({
   )
 }
 
+// 월요일(1) ... 일요일(0) 순서 — Date#getDay() 값 기준. 선택한 순서가 아니라 항상 이 순서로 보여준다.
+const WEEKDAY_DISPLAY_ORDER = [1, 2, 3, 4, 5, 6, 0]
+
 function repeatLabel(repeat: RepeatRule, t: ReturnType<typeof useT>, lang: ReturnType<typeof useLang>): string {
   if (repeat.kind === "daily") return t("common_daily")
   if (repeat.kind === "once") return t("common_once")
   const names = WEEKDAY[lang]
-  return repeat.days.map((d) => names[d]).join("·") || t("common_weekdays")
+  const sortedDays = [...repeat.days].sort(
+    (a, b) => WEEKDAY_DISPLAY_ORDER.indexOf(a) - WEEKDAY_DISPLAY_ORDER.indexOf(b)
+  )
+  return sortedDays.map((d) => names[d]).join("·") || t("common_weekdays")
 }
 
 // 길게 누르면 onLongPress를 실행한다. 손가락이 8px 넘게 움직이면(스크롤 의도로 보고) 취소한다.

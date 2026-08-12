@@ -13,6 +13,8 @@ export function emptyData(): AppData {
       {
         id: "seed-1",
         text: "완벽하지 않아도 괜찮다. 하루를 건너뛰어도 다음 날 다시 시작하면 된다.",
+        color: "terracotta",
+        order: 0,
       },
     ],
     settings: {
@@ -23,7 +25,6 @@ export function emptyData(): AppData {
       lastSequentialIndex: -1,
       todaySectionOrder: ["recurring", "adhoc"],
       weekStart: "mon",
-      mindsetColor: "terracotta",
       syncCode: null,
       syncUpdatedAt: null,
       syncIntroSeen: false,
@@ -39,6 +40,12 @@ export function normalizeData(partial: Partial<AppData>): AppData {
     ...base,
     ...partial,
     tasks: (partial.tasks ?? base.tasks).map((t) => ({ ...t, deletedAt: t.deletedAt ?? null })),
+    mindsetQuotes: (partial.mindsetQuotes ?? base.mindsetQuotes).map((q, i) => ({
+      id: q.id,
+      text: q.text,
+      color: q.color ?? "terracotta",
+      order: q.order ?? i,
+    })),
     settings: { ...base.settings, ...partial.settings },
   }
 }
