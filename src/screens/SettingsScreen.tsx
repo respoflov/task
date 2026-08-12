@@ -36,7 +36,7 @@ export function SettingsScreen() {
   const t = useT()
   const subtitle = useSubtitle("nav_settings")
   const [quoteView, setQuoteView] = useState(false)
-  const [installView, setInstallView] = useState(false)
+  const [installOpen, setInstallOpen] = useState(false)
   const [licenseView, setLicenseView] = useState(false)
   const [syncView, setSyncView] = useState(false)
   const [confirmReset, setConfirmReset] = useState(false)
@@ -44,7 +44,6 @@ export function SettingsScreen() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   if (quoteView) return <MindsetQuoteSettings onBack={() => setQuoteView(false)} />
-  if (installView) return <InstallGuide onBack={() => setInstallView(false)} />
   if (licenseView) return <LicenseList onBack={() => setLicenseView(false)} />
   if (syncView) return <SyncSettings onBack={() => setSyncView(false)} />
 
@@ -197,7 +196,40 @@ export function SettingsScreen() {
 
       <SectionLabel>{t("settings_section_info")}</SectionLabel>
       <Group>
-        <ClickRow icon={Smartphone} label={t("settings_install")} onClick={() => setInstallView(true)} />
+        <ClickRow
+          icon={Smartphone}
+          label={t("settings_install")}
+          expanded={installOpen}
+          onClick={() => setInstallOpen((v) => !v)}
+        />
+        {installOpen && (
+          <div className="border-b border-border bg-secondary/40 px-3.5 py-3 last:border-none">
+            <div>
+              <div className="text-[11.5px] font-bold text-ink-soft">{t("settings_install_ios_label")}</div>
+              <div className="mt-1 text-[11px] font-medium leading-relaxed text-ink-soft">
+                {t("settings_install_ios_intro")}
+              </div>
+              <ol className="mt-1.5 list-decimal space-y-1 pl-4 text-[11.5px] font-medium leading-relaxed">
+                <li>{t("settings_install_ios_step1")}</li>
+                <li>{t("settings_install_ios_step2")}</li>
+                <li>{t("settings_install_ios_step3")}</li>
+                <li>{t("settings_install_ios_step4")}</li>
+              </ol>
+            </div>
+            <div className="mt-3">
+              <div className="text-[11.5px] font-bold text-ink-soft">{t("settings_install_android_label")}</div>
+              <div className="mt-1 text-[11px] font-medium leading-relaxed text-ink-soft">
+                {t("settings_install_android_intro")}
+              </div>
+              <ol className="mt-1.5 list-decimal space-y-1 pl-4 text-[11.5px] font-medium leading-relaxed">
+                <li>{t("settings_install_android_step1")}</li>
+                <li>{t("settings_install_android_step2")}</li>
+                <li>{t("settings_install_android_step3")}</li>
+                <li>{t("settings_install_android_step4")}</li>
+              </ol>
+            </div>
+          </div>
+        )}
         <ClickRow
           icon={ShieldCheck}
           label={t("settings_license")}
@@ -657,36 +689,6 @@ function SyncSettings({ onBack }: { onBack: () => void }) {
   )
 }
 
-function InstallGuide({ onBack }: { onBack: () => void }) {
-  const t = useT()
-  return (
-    <div className="flex h-full flex-col px-4 pb-6 pt-1">
-      <div className="relative flex items-center justify-center py-2">
-        <button
-          type="button"
-          onClick={onBack}
-          className="absolute left-0 flex h-7 w-7 items-center justify-center text-ink-soft"
-          aria-label={t("common_cancel")}
-        >
-          <ChevronRight size={18} className="rotate-180" strokeWidth={1.8} />
-        </button>
-        <h2 className="text-[15px] font-bold">{t("settings_install")}</h2>
-      </div>
-
-      <Group>
-        <div className="border-b border-border px-3.5 py-3 last:border-none">
-          <div className="text-[11.5px] font-bold text-ink-soft">{t("settings_install_ios_label")}</div>
-          <div className="mt-1 text-[12px] font-medium leading-relaxed">{t("settings_install_ios_body")}</div>
-        </div>
-        <div className="px-3.5 py-3">
-          <div className="text-[11.5px] font-bold text-ink-soft">{t("settings_install_android_label")}</div>
-          <div className="mt-1 text-[12px] font-medium leading-relaxed">{t("settings_install_android_body")}</div>
-        </div>
-      </Group>
-    </div>
-  )
-}
-
 const LICENSE_ENTRIES = [
   { name: "Pretendard", license: "SIL OFL 1.1", descKey: "settings_license_pretendard_desc" as const },
   { name: "Lucide Icons", license: "ISC", descKey: "settings_license_lucide_desc" as const },
@@ -765,12 +767,14 @@ function ClickRow({
   label,
   preview,
   danger,
+  expanded,
   onClick,
 }: {
   icon: React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }>
   label: string
   preview?: string
   danger?: boolean
+  expanded?: boolean
   onClick: () => void
 }) {
   return (
@@ -786,7 +790,10 @@ function ClickRow({
         <div className={`text-[12.5px] font-semibold ${danger ? "text-destructive" : ""}`}>{label}</div>
         {preview && <div className="mt-0.5 text-[10px] font-medium text-ink-faint">{preview}</div>}
       </div>
-      <ChevronRight size={14} className="text-ink-faint" />
+      <ChevronRight
+        size={14}
+        className={`text-ink-faint transition-transform ${expanded ? "rotate-90" : ""}`}
+      />
     </button>
   )
 }

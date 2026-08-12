@@ -266,16 +266,56 @@ const dict = {
   settings_section_info: { ko: "정보", ja: "情報", en: "Info" },
   settings_install: { ko: "설치 방법", ja: "インストール方法", en: "How to install" },
   settings_install_ios_label: { ko: "아이폰", ja: "iPhone", en: "iPhone" },
-  settings_install_ios_body: {
-    ko: "공유 버튼(↑)을 눌러 \"홈 화면에 추가\"를 선택하세요.",
-    ja: "共有ボタン（↑）をタップして「ホーム画面に追加」を選んでください。",
-    en: 'Tap the Share button (↑), then choose "Add to Home Screen".',
+  settings_install_ios_intro: {
+    ko: "사파리 브라우저로 이 페이지를 열어야 홈 화면에 추가할 수 있습니다. (크롬 등 다른 브라우저는 지원하지 않습니다.)",
+    ja: "Safariでこのページを開いた場合のみホーム画面に追加できます。（Chromeなど他のブラウザは対応していません。）",
+    en: "Home Screen install only works when this page is open in Safari (not Chrome or other browsers).",
+  },
+  settings_install_ios_step1: {
+    ko: "화면 하단 공유 버튼(사각형 위에 ↑ 표시)을 탭합니다.",
+    ja: "画面下部の共有ボタン（四角に↑のアイコン）をタップします。",
+    en: "Tap the Share button at the bottom of the screen (square with an ↑).",
+  },
+  settings_install_ios_step2: {
+    ko: "아래로 스크롤해서 \"홈 화면에 추가\"를 찾아 탭합니다.",
+    ja: "下にスクロールして「ホーム画面に追加」を探してタップします。",
+    en: 'Scroll down and tap "Add to Home Screen".',
+  },
+  settings_install_ios_step3: {
+    ko: "이름을 확인하고 오른쪽 위 \"추가\"를 탭합니다.",
+    ja: "名前を確認し、右上の「追加」をタップします。",
+    en: 'Check the name, then tap "Add" in the top-right corner.',
+  },
+  settings_install_ios_step4: {
+    ko: "홈 화면에 생긴 아이콘을 탭하면 주소창 없이 앱처럼 열립니다.",
+    ja: "ホーム画面にできたアイコンをタップすると、アドレスバーなしでアプリのように開きます。",
+    en: "Tap the new home screen icon to open it like an app, without the browser address bar.",
   },
   settings_install_android_label: { ko: "안드로이드", ja: "Android", en: "Android" },
-  settings_install_android_body: {
-    ko: "메뉴(⋮)를 눌러 \"홈 화면에 추가\"를 선택하세요.",
-    ja: "メニュー（⋮）をタップして「ホーム画面に追加」を選んでください。",
-    en: 'Tap the menu (⋮), then choose "Add to Home Screen".',
+  settings_install_android_intro: {
+    ko: "크롬 브라우저로 이 페이지를 열어야 홈 화면에 추가할 수 있습니다.",
+    ja: "Chromeでこのページを開いた場合にホーム画面に追加できます。",
+    en: "Home Screen install works when this page is open in Chrome.",
+  },
+  settings_install_android_step1: {
+    ko: "오른쪽 위 메뉴(점 세 개, ⋮)를 탭합니다.",
+    ja: "右上のメニュー（縦の三点、⋮）をタップします。",
+    en: "Tap the menu (three dots, ⋮) in the top-right corner.",
+  },
+  settings_install_android_step2: {
+    ko: "\"홈 화면에 추가\" 또는 \"앱 설치\"를 탭합니다. (문구는 기기에 따라 다를 수 있습니다.)",
+    ja: "「ホーム画面に追加」または「アプリをインストール」をタップします。（表記は端末により異なります。）",
+    en: 'Tap "Add to Home Screen" or "Install app" (wording varies by device).',
+  },
+  settings_install_android_step3: {
+    ko: "나타나는 창에서 \"추가\" 또는 \"설치\"를 한 번 더 탭합니다.",
+    ja: "表示される画面で「追加」または「インストール」をもう一度タップします。",
+    en: 'Confirm by tapping "Add" or "Install" in the dialog that appears.',
+  },
+  settings_install_android_step4: {
+    ko: "홈 화면이나 앱 서랍에 생긴 아이콘을 탭하면 앱처럼 열립니다.",
+    ja: "ホーム画面またはアプリ一覧にできたアイコンをタップするとアプリのように開きます。",
+    en: "Tap the new icon on your home screen or app drawer to open it like an app.",
   },
   settings_license: { ko: "오픈소스 라이선스", ja: "オープンソースライセンス", en: "Open-source licenses" },
   settings_license_pretendard_desc: { ko: "한글 UI 폰트", ja: "韓国語UIフォント", en: "Korean UI font" },

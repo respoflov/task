@@ -1,9 +1,17 @@
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { ChevronLeft, ChevronRight, Check, Plus, X } from "lucide-react"
 import { useAppData } from "@/context/AppDataContext"
-import { buildMonthGrid } from "@/lib/calendar"
+import { buildMonthGrid, type CalendarCell } from "@/lib/calendar"
 import { computeDayStats, scheduledOnceCount, tasksForDate } from "@/lib/record"
-import { isFuture, isPastOrToday, todayStr, formatMonthLabel, formatDateShort, weekdayHeaderFor } from "@/lib/date"
+import {
+  isFuture,
+  isPastOrToday,
+  todayStr,
+  formatMonthLabel,
+  formatDateShort,
+  weekdayHeaderFor,
+  type WeekStart,
+} from "@/lib/date"
 import { appliesToDate } from "@/lib/tasks"
 import { useT, useLang, useSubtitle } from "@/lib/i18n"
 import { RatioRingCell } from "@/components/RatioRingCell"
@@ -11,6 +19,91 @@ import { NONE_ICON } from "@/lib/icons"
 import type { AppData } from "@/lib/types"
 
 type Mode = "all" | "project" | "once" | "item"
+const MODES: Mode[] = ["all", "project", "once", "item"]
+const SWIPE_TRANSITION = "transform 280ms cubic-bezier(0.22, 1, 0.36, 1)"
+
+// 세그먼트(전체/프로젝트별/오늘만/고정 항목별)를 좌우로 스와이프해서 넘기는 훅.
+// 가로 이동이 세로 이동보다 뚜렷할 때만(6px 이상) 가로 드래그로 확정하고, 그 전까지는
+// 페이지 세로 스크롤을 그대로 둔다. 실제 드래그가 있었으면(10px 이상) 바로 다음 탭 이벤트를
+// 한 번 삼켜서, 스와이프 끝에 손가락 아래 있던 버튼이 실수로 눌리지 않게 한다.
+function useSwipeCarousel(index: number, onChangeIndex: (i: number) => void, count: number) {
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const [dragX, setDragX] = useState(0)
+  const [dragging, setDragging] = useState(false)
+  const startX = useRef(0)
+  const startY = useRef(0)
+  const widthRef = useRef(1)
+  const axisRef = useRef<"none" | "x" | "y">("none")
+  const suppressClickRef = useRef(false)
+  // pointerup 판정은 이 ref로 한다 — dragX(state)는 리액트 렌더 배치를 거치므로,
+  // pointermove 여러 번과 pointerup이 같은 틱 안에서 연달아 오면 아직 반영 안 된 값을 읽을 수 있다.
+  const dragXRef = useRef(0)
+
+  function onPointerDown(e: React.PointerEvent) {
+    startX.current = e.clientX
+    startY.current = e.clientY
+    axisRef.current = "none"
+    widthRef.current = containerRef.current?.clientWidth || 1
+  }
+
+  function onPointerMove(e: React.PointerEvent) {
+    const dx = e.clientX - startX.current
+    const dy = e.clientY - startY.current
+    if (axisRef.current === "none") {
+      if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return
+      axisRef.current = Math.abs(dx) > Math.abs(dy) ? "x" : "y"
+      if (axisRef.current === "x") {
+        setDragging(true)
+        try {
+          ;(e.target as Element).setPointerCapture(e.pointerId)
+        } catch {
+          // 일부 환경에서 포인터 캡처가 무의미한 상태일 때 발생 — 무해함
+        }
+      }
+    }
+    if (axisRef.current !== "x") return
+    e.preventDefault()
+    let next = dx
+    if (index === 0 && next > 0) next *= 0.35
+    if (index === count - 1 && next < 0) next *= 0.35
+    dragXRef.current = next
+    setDragX(next)
+  }
+
+  function onPointerUp() {
+    if (axisRef.current === "x") {
+      const width = widthRef.current || 1
+      const threshold = width * 0.22
+      const finalDragX = dragXRef.current
+      if (Math.abs(finalDragX) > 10) suppressClickRef.current = true
+      if (finalDragX <= -threshold && index < count - 1) onChangeIndex(index + 1)
+      else if (finalDragX >= threshold && index > 0) onChangeIndex(index - 1)
+    }
+    setDragging(false)
+    setDragX(0)
+    dragXRef.current = 0
+    axisRef.current = "none"
+  }
+
+  function onClickCapture(e: React.MouseEvent) {
+    if (suppressClickRef.current) {
+      e.preventDefault()
+      e.stopPropagation()
+      suppressClickRef.current = false
+    }
+  }
+
+  return {
+    containerRef,
+    dragX,
+    dragging,
+    progress: index - dragX / (widthRef.current || 1),
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
+    onClickCapture,
+  }
+}
 
 export function RecordScreen() {
   const { data, isTaskCompleted, toggleCompletion, addTask, removeTask } = useAppData()
@@ -21,7 +114,8 @@ export function RecordScreen() {
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month0, setMonth0] = useState(now.getMonth())
-  const [mode, setMode] = useState<Mode>("all")
+  const [modeIndex, setModeIndex] = useState(0)
+  const mode = MODES[modeIndex]
   const [projectId, setProjectId] = useState<string | null>(data.projects[0]?.id ?? null)
   const [taskId, setTaskId] = useState<string | null>(data.tasks[0]?.id ?? null)
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
@@ -44,6 +138,13 @@ export function RecordScreen() {
     setSelectedDate(null)
   }
 
+  function changeMode(index: number) {
+    setModeIndex(index)
+    setSelectedDate(null)
+  }
+
+  const swipe = useSwipeCarousel(modeIndex, changeMode, MODES.length)
+
   const selectedTasks = selectedDate ? tasksForDate(data.tasks, selectedDate, filterFn) : []
   const selectedIsFuture = selectedDate ? isFuture(selectedDate) : false
 
@@ -63,7 +164,15 @@ export function RecordScreen() {
         </div>
       </div>
 
-      <div className="mb-3 flex rounded-[10px] bg-secondary p-[3px]">
+      <div className="relative mb-3 flex rounded-[10px] bg-secondary p-[3px]">
+        <div
+          className="absolute inset-y-[3px] rounded-lg bg-card shadow-sm"
+          style={{
+            width: `calc((100% - 6px) / ${MODES.length})`,
+            transform: `translateX(${swipe.progress * 100}%)`,
+            transition: swipe.dragging ? "none" : SWIPE_TRANSITION,
+          }}
+        />
         {(
           [
             { key: "all" as const, label: t("record_mode_all") },
@@ -71,16 +180,13 @@ export function RecordScreen() {
             { key: "once" as const, label: t("record_mode_once") },
             { key: "item" as const, label: t("record_mode_item") },
           ]
-        ).map((opt) => (
+        ).map((opt, i) => (
           <button
             key={opt.key}
             type="button"
-            onClick={() => {
-              setMode(opt.key)
-              setSelectedDate(null)
-            }}
-            className={`flex-1 rounded-lg py-1.5 text-[11.5px] font-bold ${
-              mode === opt.key ? "bg-card text-primary shadow-sm" : "text-ink-soft"
+            onClick={() => changeMode(i)}
+            className={`relative z-10 flex-1 rounded-lg py-1.5 text-[11.5px] font-bold ${
+              mode === opt.key ? "text-primary" : "text-ink-soft"
             }`}
           >
             {opt.label}
@@ -135,103 +241,43 @@ export function RecordScreen() {
         </div>
       )}
 
-      <div className="mb-3 rounded-[14px] border border-border bg-card px-2.5 py-3.5">
-        <div className="mb-2.5 flex items-center justify-between px-0.5">
-          <h4 className="text-[11px] font-bold text-ink-soft">{formatMonthLabel(year, month0, lang)}</h4>
-          <div className="flex items-center gap-1">
-            <button type="button" onClick={() => goMonth(-1)} className="flex h-6 w-6 items-center justify-center text-ink-faint">
-              <ChevronLeft size={15} />
-            </button>
-            <button type="button" onClick={() => goMonth(1)} className="flex h-6 w-6 items-center justify-center text-ink-faint">
-              <ChevronRight size={15} />
-            </button>
-          </div>
-        </div>
-
-        <div className="mb-1.5 grid grid-cols-7">
-          {weekdayHeaderFor(lang, weekStart).map((w, i) => {
-            const satIndex = weekStart === "sun" ? 6 : 5
-            const sunIndex = weekStart === "sun" ? 0 : 6
-            return (
-              <span
-                key={w}
-                className="text-center text-[9px] font-bold"
-                style={{ color: i === satIndex ? "var(--sat)" : i === sunIndex ? "var(--sun)" : "var(--ink-faint)" }}
-              >
-                {w}
-              </span>
-            )
-          })}
-        </div>
-
-        <div className="grid grid-cols-7 gap-y-1.5">
-          {cells.map((cell) => {
-            const isToday = cell.date === today
-            let node: React.ReactNode
-
-            if (!cell.inMonth) {
-              node = <RatioRingCell variant={{ kind: "blank" }} />
-            } else if (mode === "item" && selectedTask) {
-              if (isFuture(cell.date)) {
-                // 요일 반복·매일 반복 항목도 "오늘만" 항목처럼 앞으로 적용될 날짜를 미리 보여준다.
-                const applies = appliesToDate(selectedTask, cell.date)
-                node = (
-                  <RatioRingCell
-                    variant={applies ? { kind: "future-count", count: 1 } : { kind: "empty" }}
-                    selected={cell.date === selectedDate}
-                  />
-                )
-              } else {
-                node = selectedTask.createdAt > cell.date ? (
-                  <RatioRingCell variant={{ kind: "empty" }} />
-                ) : (
-                  <RatioRingCell
-                    variant={{ kind: "binary", done: isTaskCompleted(selectedTask.id, cell.date) }}
-                    selected={cell.date === selectedDate}
-                  />
-                )
-              }
-            } else if (isFuture(cell.date)) {
-              const count = mode === "all" || mode === "once" ? scheduledOnceCount(data.tasks, cell.date) : 0
-              node = (
-                <RatioRingCell
-                  variant={count > 0 ? { kind: "future-count", count } : { kind: "empty" }}
-                  selected={cell.date === selectedDate}
-                />
-              )
-            } else {
-              const stats = computeDayStats(data.tasks, data.completions, cell.date, filterFn)
-              node =
-                stats.total === 0 ? (
-                  <RatioRingCell variant={{ kind: "empty" }} />
-                ) : (
-                  <RatioRingCell variant={{ kind: "ratio", pct: stats.pct }} selected={cell.date === selectedDate} />
-                )
-            }
-
-            return (
-              <button
-                key={cell.date}
-                type="button"
-                disabled={!cell.inMonth}
-                onClick={() => setSelectedDate((d) => (d === cell.date ? null : cell.date))}
-                className="flex flex-col items-center gap-1"
-              >
-                {node}
-                {cell.inMonth && (
-                  <span
-                    className="text-[7.5px] font-semibold"
-                    style={{
-                      color: isToday ? "var(--primary)" : "var(--ink-faint)",
-                      fontWeight: isToday ? 800 : 600,
-                    }}
-                  >
-                    {cell.day}
-                  </span>
-                )}
-              </button>
-            )
-          })}
+      <div
+        ref={swipe.containerRef}
+        className="overflow-hidden"
+        onPointerDown={swipe.onPointerDown}
+        onPointerMove={swipe.onPointerMove}
+        onPointerUp={swipe.onPointerUp}
+        onPointerCancel={swipe.onPointerUp}
+        onClickCapture={swipe.onClickCapture}
+      >
+        <div
+          className="flex"
+          style={{
+            transform: `translateX(calc(${-modeIndex * 100}% + ${swipe.dragX}px))`,
+            transition: swipe.dragging ? "none" : SWIPE_TRANSITION,
+          }}
+        >
+          {MODES.map((panelMode) => (
+            <div key={panelMode} className="w-full shrink-0">
+              <CalendarCard
+                panelMode={panelMode}
+                year={year}
+                month0={month0}
+                cells={cells}
+                weekStart={weekStart}
+                lang={lang}
+                today={today}
+                data={data}
+                isTaskCompleted={isTaskCompleted}
+                projectId={projectId}
+                taskId={taskId}
+                selectedDate={selectedDate}
+                onSelectDate={(d) => setSelectedDate((cur) => (cur === d ? null : d))}
+                onPrevMonth={() => goMonth(-1)}
+                onNextMonth={() => goMonth(1)}
+              />
+            </div>
+          ))}
         </div>
       </div>
 
@@ -267,6 +313,162 @@ export function RecordScreen() {
           onRemove={removeTask}
         />
       )}
+    </div>
+  )
+}
+
+// 세그먼트 4개(전체/프로젝트별/오늘만/고정 항목별)가 스와이프 스트립 안에서 나란히 마운트되는
+// 달력 카드. 4개 모두 같은 cells(월 그리드)를 쓰므로 스와이프 도중에도 높이가 흔들리지 않는다 —
+// 칸의 개수·크기는 동일하고 각 칸 안의 링(RatioRingCell) 내용만 panelMode에 따라 달라진다.
+function CalendarCard({
+  panelMode,
+  year,
+  month0,
+  cells,
+  weekStart,
+  lang,
+  today,
+  data,
+  isTaskCompleted,
+  projectId,
+  taskId,
+  selectedDate,
+  onSelectDate,
+  onPrevMonth,
+  onNextMonth,
+}: {
+  panelMode: Mode
+  year: number
+  month0: number
+  cells: CalendarCell[]
+  weekStart: WeekStart
+  lang: ReturnType<typeof useLang>
+  today: string
+  data: AppData
+  isTaskCompleted: (taskId: string, date: string) => boolean
+  projectId: string | null
+  taskId: string | null
+  selectedDate: string | null
+  onSelectDate: (date: string) => void
+  onPrevMonth: () => void
+  onNextMonth: () => void
+}) {
+  const filterFn = useMemo(() => {
+    if (panelMode === "project" && projectId)
+      return (task: (typeof data.tasks)[number]) => task.projectId === projectId
+    if (panelMode === "once") return (task: (typeof data.tasks)[number]) => task.repeat.kind === "once"
+    return undefined
+  }, [panelMode, projectId])
+
+  const selectedTask = panelMode === "item" ? data.tasks.find((task) => task.id === taskId) : undefined
+
+  return (
+    <div className="mb-3 rounded-[14px] border border-border bg-card px-2.5 py-3.5">
+      <div className="mb-2.5 flex items-center justify-between px-0.5">
+        <h4 className="text-[11px] font-bold text-ink-soft">{formatMonthLabel(year, month0, lang)}</h4>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={onPrevMonth}
+            className="flex h-6 w-6 items-center justify-center text-ink-faint"
+          >
+            <ChevronLeft size={15} />
+          </button>
+          <button
+            type="button"
+            onClick={onNextMonth}
+            className="flex h-6 w-6 items-center justify-center text-ink-faint"
+          >
+            <ChevronRight size={15} />
+          </button>
+        </div>
+      </div>
+
+      <div className="mb-1.5 grid grid-cols-7">
+        {weekdayHeaderFor(lang, weekStart).map((w, i) => {
+          const satIndex = weekStart === "sun" ? 6 : 5
+          const sunIndex = weekStart === "sun" ? 0 : 6
+          return (
+            <span
+              key={w}
+              className="text-center text-[9px] font-bold"
+              style={{ color: i === satIndex ? "var(--sat)" : i === sunIndex ? "var(--sun)" : "var(--ink-faint)" }}
+            >
+              {w}
+            </span>
+          )
+        })}
+      </div>
+
+      <div className="grid grid-cols-7 gap-y-1.5">
+        {cells.map((cell) => {
+          const isToday = cell.date === today
+          let node: React.ReactNode
+
+          if (!cell.inMonth) {
+            node = <RatioRingCell variant={{ kind: "blank" }} />
+          } else if (panelMode === "item" && selectedTask) {
+            if (isFuture(cell.date)) {
+              // 요일 반복·매일 반복 항목도 "오늘만" 항목처럼 앞으로 적용될 날짜를 미리 보여준다.
+              const applies = appliesToDate(selectedTask, cell.date)
+              node = (
+                <RatioRingCell
+                  variant={applies ? { kind: "future-count", count: 1 } : { kind: "empty" }}
+                  selected={cell.date === selectedDate}
+                />
+              )
+            } else {
+              node = selectedTask.createdAt > cell.date ? (
+                <RatioRingCell variant={{ kind: "empty" }} />
+              ) : (
+                <RatioRingCell
+                  variant={{ kind: "binary", done: isTaskCompleted(selectedTask.id, cell.date) }}
+                  selected={cell.date === selectedDate}
+                />
+              )
+            }
+          } else if (isFuture(cell.date)) {
+            const count = panelMode === "all" || panelMode === "once" ? scheduledOnceCount(data.tasks, cell.date) : 0
+            node = (
+              <RatioRingCell
+                variant={count > 0 ? { kind: "future-count", count } : { kind: "empty" }}
+                selected={cell.date === selectedDate}
+              />
+            )
+          } else {
+            const stats = computeDayStats(data.tasks, data.completions, cell.date, filterFn)
+            node =
+              stats.total === 0 ? (
+                <RatioRingCell variant={{ kind: "empty" }} />
+              ) : (
+                <RatioRingCell variant={{ kind: "ratio", pct: stats.pct }} selected={cell.date === selectedDate} />
+              )
+          }
+
+          return (
+            <button
+              key={cell.date}
+              type="button"
+              disabled={!cell.inMonth}
+              onClick={() => onSelectDate(cell.date)}
+              className="flex flex-col items-center gap-1"
+            >
+              {node}
+              {cell.inMonth && (
+                <span
+                  className="text-[7.5px] font-semibold"
+                  style={{
+                    color: isToday ? "var(--primary)" : "var(--ink-faint)",
+                    fontWeight: isToday ? 800 : 600,
+                  }}
+                >
+                  {cell.day}
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
