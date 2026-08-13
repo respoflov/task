@@ -25,6 +25,7 @@ export function emptyData(): AppData {
       lastSequentialIndex: -1,
       todaySectionOrder: ["recurring", "adhoc"],
       weekStart: "mon",
+      landingTab: "today",
       syncCode: null,
       syncUpdatedAt: null,
       syncIntroSeen: false,

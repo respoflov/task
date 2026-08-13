@@ -12,6 +12,7 @@ interface AppDataContextValue {
   addTask: (input: { name: string; icon: string; repeat: RepeatRule; projectId: string | null }) => void
   updateTask: (taskId: string, patch: Partial<Pick<FixedTask, "name" | "icon">>) => void
   removeTask: (taskId: string) => void
+  reorderTasks: (orderedIds: string[]) => void
   toggleCompletion: (taskId: string, date: string) => void
   isTaskCompleted: (taskId: string, date: string) => boolean
   addMindsetQuote: (text: string, color: MindsetColorKey) => void
@@ -104,13 +105,17 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   }, [data])
 
   const addTask: AppDataContextValue["addTask"] = ({ name, icon, repeat, projectId }) => {
+    // "오늘만" 항목은 createdAt을 실제로 추가한 시각이 아니라 그 항목이 적용되는 날짜(repeat.date)로
+    // 잡는다 — appliesToDate가 dateStr < createdAt이면 무조건 false를 반환하므로, 과거 날짜에
+    // 소급으로 추가한 항목을 오늘 날짜 createdAt으로 두면 그 항목이 정작 자기 날짜에도 안 잡힌다.
+    const createdAt = repeat.kind === "once" ? repeat.date : todayStr()
     const task: FixedTask = {
       id: newId(),
       name,
       icon,
       repeat,
       projectId,
-      createdAt: todayStr(),
+      createdAt,
       deletedAt: null,
       order: data.tasks.length,
     }
@@ -119,6 +124,18 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 
   const updateTask: AppDataContextValue["updateTask"] = (taskId, patch) => {
     setData((d) => ({ ...d, tasks: d.tasks.map((t) => (t.id === taskId ? { ...t, ...patch } : t)) }))
+  }
+
+  // orderedIds에 없는 항목(다른 섹션의 항목)은 order를 그대로 둔다 — 오늘 탭의
+  // "오늘만" 목록만 드래그해도 "고정 할 일" 목록의 순서에는 영향이 없어야 한다.
+  const reorderTasks: AppDataContextValue["reorderTasks"] = (orderedIds) => {
+    setData((d) => ({
+      ...d,
+      tasks: d.tasks.map((t) => {
+        const newOrder = orderedIds.indexOf(t.id)
+        return newOrder === -1 ? t : { ...t, order: newOrder }
+      }),
+    }))
   }
 
   // 완료 기록이 하나라도 있으면 deletedAt만 오늘 날짜로 표시해 소프트 삭제한다 — 오늘부터
@@ -337,6 +354,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       addTask,
       updateTask,
       removeTask,
+      reorderTasks,
       toggleCompletion,
       isTaskCompleted,
       addMindsetQuote,

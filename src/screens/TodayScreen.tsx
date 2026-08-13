@@ -5,6 +5,7 @@ import { NONE_ICON, getTaskIcon } from "@/lib/icons"
 import { appliesToDate, isRecurring } from "@/lib/tasks"
 import { formatDateLong, todayStr, WEEKDAY } from "@/lib/date"
 import { useT, useLang } from "@/lib/i18n"
+import { useListReorder, type ListReorder } from "@/lib/useListReorder"
 import { TaskAddSheet } from "@/components/TaskAddSheet"
 import { BottomSheet } from "@/components/BottomSheet"
 import { IconPicker } from "@/components/IconPicker"
@@ -14,7 +15,8 @@ import type { FixedTask, RepeatRule, TodaySection } from "@/lib/types"
 const SECTION_GAP = 12 // px — 섹션 사이 margin-bottom(mb-3)과 맞춘 값. 드래그 시 자리 계산에 쓰인다.
 
 export function TodayScreen() {
-  const { data, toggleCompletion, isTaskCompleted, removeTask, updateTask, updateSettings } = useAppData()
+  const { data, toggleCompletion, isTaskCompleted, removeTask, updateTask, updateSettings, reorderTasks } =
+    useAppData()
   const t = useT()
   const lang = useLang()
   const today = todayStr()
@@ -43,6 +45,10 @@ export function TodayScreen() {
 
   const order = data.settings.todaySectionOrder
   const reorder = useSectionReorder(order, (next) => updateSettings({ todaySectionOrder: next }))
+  const adhocReorder = useListReorder(
+    adhoc.map((task) => task.id),
+    reorderTasks
+  )
 
   function openAdd(mode: "daily" | "once") {
     setAddDefaultMode(mode)
@@ -76,17 +82,6 @@ export function TodayScreen() {
             </div>
           )}
         </div>
-
-        <button
-          type="button"
-          onClick={() => openAdd("daily")}
-          className="mb-3 flex w-full items-center gap-2.5 px-1 py-2.5 text-[12.5px] font-semibold text-ink-faint"
-        >
-          <span className="flex h-[26px] w-[26px] items-center justify-center rounded-full border-[1.4px] border-dashed border-input">
-            <Plus size={13} />
-          </span>
-          {t("today_add_task")}
-        </button>
 
         <div className="mb-3 border-t border-dashed border-border" />
 
@@ -129,16 +124,14 @@ export function TodayScreen() {
                     {key === "recurring" ? t("today_section_recurring") : t("today_adhoc_section")}
                   </span>
                 </button>
-                {key === "adhoc" && (
-                  <button
-                    type="button"
-                    onClick={() => openAdd("once")}
-                    aria-label={t("today_add_adhoc_aria")}
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-ink-soft"
-                  >
-                    <Plus size={14} strokeWidth={2.2} />
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => openAdd(key === "adhoc" ? "once" : "daily")}
+                  aria-label={key === "adhoc" ? t("today_add_adhoc_aria") : t("today_add_recurring_aria")}
+                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-ink-soft"
+                >
+                  <Plus size={14} strokeWidth={2.2} />
+                </button>
               </div>
 
               {!collapsed[key] &&
@@ -146,7 +139,7 @@ export function TodayScreen() {
                   <TaskList tasks={recurring} {...sectionProps} />
                 ) : (
                   <>
-                    <TaskList tasks={adhoc} {...sectionProps} />
+                    <TaskList tasks={adhoc} {...sectionProps} reorder={adhocReorder} />
                     {adhoc.length === 0 && (
                       <div className="px-1 py-2 text-[11px] font-medium text-ink-faint">{t("today_adhoc_empty")}</div>
                     )}
@@ -221,6 +214,7 @@ function TaskList({
   projectName,
   onRequestDelete,
   onRequestIconChange,
+  reorder,
 }: {
   tasks: FixedTask[]
   today: string
@@ -231,6 +225,7 @@ function TaskList({
   projectName: (id: string | null) => string | undefined
   onRequestDelete: (task: FixedTask) => void
   onRequestIconChange: (task: FixedTask) => void
+  reorder?: ListReorder
 }) {
   if (tasks.length === 0) return null
   return (
@@ -246,6 +241,7 @@ function TaskList({
           pName={showProjectLabel ? projectName(task.projectId) : undefined}
           onRequestDelete={onRequestDelete}
           onRequestIconChange={onRequestIconChange}
+          reorder={reorder}
         />
       ))}
     </div>
@@ -261,6 +257,7 @@ function TaskRow({
   pName,
   onRequestDelete,
   onRequestIconChange,
+  reorder,
 }: {
   task: FixedTask
   today: string
@@ -270,6 +267,7 @@ function TaskRow({
   pName: string | undefined
   onRequestDelete: (task: FixedTask) => void
   onRequestIconChange: (task: FixedTask) => void
+  reorder?: ListReorder
 }) {
   const t = useT()
   const lang = useLang()
@@ -292,10 +290,37 @@ function TaskRow({
 
   return (
     <div
-      className="flex select-none items-center gap-3 border-b border-border py-3 last:border-none"
+      ref={reorder?.setRef(task.id)}
+      style={reorder?.styleFor(task.id)}
+      className="flex select-none items-center gap-3 border-b border-border bg-background py-3 last:border-none"
       onContextMenu={(e) => e.preventDefault()}
       {...longPress}
     >
+      {reorder && (
+        <button
+          type="button"
+          onPointerDown={(e) => {
+            e.stopPropagation()
+            reorder.handlePointerDown(task.id)(e)
+          }}
+          onPointerMove={(e) => {
+            e.stopPropagation()
+            reorder.handlePointerMove(e)
+          }}
+          onPointerUp={(e) => {
+            e.stopPropagation()
+            reorder.handlePointerUp()
+          }}
+          onPointerCancel={(e) => {
+            e.stopPropagation()
+            reorder.handlePointerUp()
+          }}
+          aria-label={t("today_reorder_aria")}
+          className="flex h-6 w-6 shrink-0 touch-none items-center justify-center text-ink-faint"
+        >
+          <GripVertical size={14} strokeWidth={2} />
+        </button>
+      )}
       {Icon && (
         <button
           type="button"

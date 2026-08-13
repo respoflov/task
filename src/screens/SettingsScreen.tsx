@@ -3,6 +3,7 @@ import {
   Sun,
   Globe,
   CalendarDays,
+  Home,
   Feather,
   Download,
   Upload,
@@ -20,6 +21,7 @@ import { useAppData } from "@/context/AppDataContext"
 import { useT, useSubtitle, type TKey } from "@/lib/i18n"
 import { isSyncConfigured } from "@/lib/sync"
 import { MINDSET_COLOR_KEYS, mindsetBgVar, type MindsetColorKey } from "@/lib/mindsetColors"
+import { useListReorder } from "@/lib/useListReorder"
 import type { AppSettings } from "@/lib/types"
 
 const MINDSET_COLOR_LABEL_KEY: Record<MindsetColorKey, TKey> = {
@@ -97,6 +99,21 @@ export function SettingsScreen() {
                 { value: "sun", label: t("settings_week_start_sun") },
               ]}
               onChange={(v) => updateSettings({ weekStart: v as AppSettings["weekStart"] })}
+            />
+          }
+        />
+        <Row
+          icon={Home}
+          label={t("settings_landing_tab")}
+          right={
+            <Segmented
+              value={data.settings.landingTab}
+              options={[
+                { value: "today", label: t("nav_today") },
+                { value: "project", label: t("nav_project") },
+                { value: "record", label: t("nav_record") },
+              ]}
+              onChange={(v) => updateSettings({ landingTab: v as AppSettings["landingTab"] })}
             />
           }
         />
@@ -242,84 +259,6 @@ export function SettingsScreen() {
       <div className="respoflov-mark mb-1 mt-6 text-center">RESPOFLOV</div>
     </div>
   )
-}
-
-// N개 항목의 자유 순서 드래그. Today 탭의 2개짜리 스왑 훅과 달리 임의 개수를 다룬다.
-// 드래그 시작 시 모든 항목의 위치를 스냅샷으로 저장해 두고, 드래그 중에는 그 스냅샷 기준으로
-// 다른 항목들의 이동 여부만 계산한다(레이아웃을 매 프레임 다시 읽지 않기 위함).
-function useListReorder(ids: string[], onCommit: (orderedIds: string[]) => void) {
-  const elRefs = useRef<Record<string, HTMLDivElement | null>>({})
-  const rectsRef = useRef<Record<string, DOMRect>>({})
-  const [dragId, setDragId] = useState<string | null>(null)
-  const [dragY, setDragY] = useState(0)
-  const startYRef = useRef(0)
-
-  const setRef = (id: string) => (el: HTMLDivElement | null) => {
-    elRefs.current[id] = el
-  }
-
-  const handlePointerDown = (id: string) => (e: React.PointerEvent) => {
-    ids.forEach((iid) => {
-      const el = elRefs.current[iid]
-      if (el) rectsRef.current[iid] = el.getBoundingClientRect()
-    })
-    startYRef.current = e.clientY
-    setDragId(id)
-    setDragY(0)
-    try {
-      e.currentTarget.setPointerCapture(e.pointerId)
-    } catch {
-      // 일부 환경에서 포인터 캡처가 무의미한 상태일 때 발생 — 무해함
-    }
-  }
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!dragId) return
-    setDragY(e.clientY - startYRef.current)
-  }
-
-  const handlePointerUp = () => {
-    if (!dragId) return
-    const draggedRect = rectsRef.current[dragId]
-    if (draggedRect) {
-      const draggedCenter = draggedRect.top + draggedRect.height / 2 + dragY
-      const ordered = ids
-        .map((id) => {
-          if (id === dragId) return { id, c: draggedCenter }
-          const r = rectsRef.current[id]
-          return { id, c: r ? r.top + r.height / 2 : 0 }
-        })
-        .sort((a, b) => a.c - b.c)
-        .map((x) => x.id)
-      onCommit(ordered)
-    }
-    setDragId(null)
-    setDragY(0)
-  }
-
-  const shiftFor = (id: string): number => {
-    if (!dragId || id === dragId) return 0
-    const draggedRect = rectsRef.current[dragId]
-    const itemRect = rectsRef.current[id]
-    if (!draggedRect || !itemRect) return 0
-    const draggedOrigCenter = draggedRect.top + draggedRect.height / 2
-    const draggedCurCenter = draggedOrigCenter + dragY
-    const itemCenter = itemRect.top + itemRect.height / 2
-    if (draggedOrigCenter < itemCenter) {
-      return draggedCurCenter > itemCenter ? -draggedRect.height : 0
-    }
-    return draggedCurCenter < itemCenter ? draggedRect.height : 0
-  }
-
-  const styleFor = (id: string): React.CSSProperties => {
-    if (id === dragId) {
-      return { transform: `translateY(${dragY}px)`, position: "relative", zIndex: 10 }
-    }
-    const shift = shiftFor(id)
-    return { transform: shift !== 0 ? `translateY(${shift}px)` : undefined, transition: "transform 150ms ease" }
-  }
-
-  return { setRef, handlePointerDown, handlePointerMove, handlePointerUp, styleFor }
 }
 
 function MindsetQuoteSettings({ onBack }: { onBack: () => void }) {

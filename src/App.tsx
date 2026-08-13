@@ -27,7 +27,8 @@ function Shell() {
 
   const [phase, setPhase] = useState<Phase>("splash")
   const [visible, setVisible] = useState(true)
-  const [tab, setTab] = useState<TabKey>("today")
+  // 설정에서 고른 랜딩 탭으로 시작한다 — 이후에는 평범한 탭 상태라 유저가 자유롭게 오갈 수 있다.
+  const [tab, setTab] = useState<TabKey>(() => data.settings.landingTab)
   const [settingsKey, setSettingsKey] = useState(0)
 
   // 설정 탭을 누를 때마다(이미 그 탭에 있어도) SettingsScreen을 새로 마운트해

@@ -17,7 +17,7 @@ import { useT, useLang, useSubtitle } from "@/lib/i18n"
 import { RatioRingCell } from "@/components/RatioRingCell"
 import { YearMonthPicker } from "@/components/YearMonthPicker"
 import { NONE_ICON } from "@/lib/icons"
-import type { AppData } from "@/lib/types"
+import type { AppData, FixedTask } from "@/lib/types"
 
 type Mode = "all" | "project" | "once" | "item"
 const MODES: Mode[] = ["all", "project", "once", "item"]
@@ -107,7 +107,7 @@ function useSwipeCarousel(index: number, onChangeIndex: (i: number) => void, cou
 }
 
 export function RecordScreen() {
-  const { data, isTaskCompleted, toggleCompletion, addTask, removeTask } = useAppData()
+  const { data, isTaskCompleted, toggleCompletion, addTask, removeTask, updateTask } = useAppData()
   const t = useT()
   const lang = useLang()
   const subtitle = useSubtitle("nav_record")
@@ -297,6 +297,7 @@ export function RecordScreen() {
           tasks={selectedTask.createdAt > selectedDate ? [] : [selectedTask]}
           isTaskCompleted={isTaskCompleted}
           toggleCompletion={toggleCompletion}
+          updateTask={updateTask}
         />
       )}
 
@@ -307,6 +308,11 @@ export function RecordScreen() {
           tasks={selectedTasks}
           isTaskCompleted={isTaskCompleted}
           toggleCompletion={toggleCompletion}
+          updateTask={updateTask}
+          projects={data.projects}
+          onAdd={(name, pid) =>
+            addTask({ name, icon: NONE_ICON, repeat: { kind: "once", date: selectedDate }, projectId: pid })
+          }
         />
       )}
 
@@ -598,17 +604,38 @@ function DateDetail({
   tasks,
   isTaskCompleted,
   toggleCompletion,
+  updateTask,
+  projects,
+  onAdd,
 }: {
   date: string
-  tasks: ReturnType<typeof useAppData>["data"]["tasks"]
+  tasks: FixedTask[]
   isTaskCompleted: (taskId: string, date: string) => boolean
   toggleCompletion: (taskId: string, date: string) => void
+  updateTask: (taskId: string, patch: Partial<Pick<FixedTask, "name" | "icon">>) => void
+  projects?: AppData["projects"]
+  onAdd?: (name: string, projectId: string | null) => void
 }) {
   const t = useT()
   const lang = useLang()
   const label = formatDateShort(date, lang)
   const doneCount = tasks.filter((task) => isTaskCompleted(task.id, date)).length
   const canToggle = isPastOrToday(date)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editText, setEditText] = useState("")
+  const [addName, setAddName] = useState("")
+  const [addPid, setAddPid] = useState<string | null>(null)
+
+  function startEdit(id: string, name: string) {
+    setEditingId(id)
+    setEditText(name)
+  }
+
+  function commitEdit(id: string) {
+    const trimmed = editText.trim()
+    if (trimmed) updateTask(id, { name: trimmed })
+    setEditingId(null)
+  }
 
   return (
     <div className="rounded-[12px] bg-secondary px-3.5 py-3">
@@ -627,27 +654,98 @@ function DateDetail({
         tasks.map((task) => {
           const done = isTaskCompleted(task.id, date)
           return (
-            <button
-              key={task.id}
-              type="button"
-              onClick={() => toggleCompletion(task.id, date)}
-              className="flex w-full items-center gap-2.5 rounded-lg px-1 py-1.5 text-left active:bg-card"
-            >
-              <span
+            <div key={task.id} className="flex items-center gap-2.5 rounded-lg px-1 py-1.5">
+              <button
+                type="button"
+                onClick={() => toggleCompletion(task.id, date)}
+                aria-label={done ? t("record_tap_undo") : t("record_tap_done")}
                 className={`relative flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${
                   done ? "bg-primary" : "border-[1.4px] border-input"
                 }`}
               >
                 {done && <Check size={10} strokeWidth={3} className="text-primary-foreground" />}
-              </span>
-              <span className={`flex-1 text-[12px] font-semibold ${done ? "text-ink-soft" : ""}`}>{task.name}</span>
-              <span className="text-[9px] font-semibold text-ink-faint">
+              </button>
+              {editingId === task.id ? (
+                <input
+                  autoFocus
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                  onBlur={() => commitEdit(task.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") e.currentTarget.blur()
+                    if (e.key === "Escape") setEditingId(null)
+                  }}
+                  className="flex-1 rounded-lg border border-input bg-card px-2 py-1 text-[12px] font-semibold focus:outline-none focus:ring-2 focus:ring-ring/40"
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => startEdit(task.id, task.name)}
+                  className={`flex-1 truncate text-left text-[12px] font-semibold ${done ? "text-ink-soft" : ""}`}
+                >
+                  {task.name}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => toggleCompletion(task.id, date)}
+                className="shrink-0 text-[9px] font-semibold text-ink-faint"
+              >
                 {done ? t("record_tap_undo") : t("record_tap_done")}
-              </span>
-            </button>
+              </button>
+            </div>
           )
         })}
-      {canToggle && <div className="mt-1 text-[10px] font-medium text-ink-faint">{t("record_toggle_hint")}</div>}
+      {canToggle && onAdd && (
+        <div className={tasks.length > 0 ? "mt-2 border-t border-border pt-2.5" : "mt-1"}>
+          <div className="flex gap-1.5">
+            <input
+              value={addName}
+              onChange={(e) => setAddName(e.target.value)}
+              placeholder={t("record_future_add_placeholder")}
+              className="min-w-0 flex-1 rounded-lg border border-input bg-card px-2.5 py-2 text-[12px] font-semibold placeholder:font-medium placeholder:text-ink-faint focus:outline-none"
+            />
+            <button
+              type="button"
+              disabled={!addName.trim()}
+              onClick={() => {
+                if (!addName.trim()) return
+                onAdd(addName.trim(), addPid)
+                setAddName("")
+              }}
+              className="flex shrink-0 items-center gap-1 rounded-lg bg-primary px-2.5 text-[11.5px] font-bold text-primary-foreground disabled:opacity-40"
+            >
+              <Plus size={13} strokeWidth={2.4} />
+              {t("common_add")}
+            </button>
+          </div>
+          {projects && projects.length >= 2 && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              <button
+                type="button"
+                onClick={() => setAddPid(null)}
+                className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                  addPid === null ? "bg-primary text-primary-foreground" : "bg-card text-ink-soft"
+                }`}
+              >
+                {t("common_none_project")}
+              </button>
+              {projects.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setAddPid(p.id)}
+                  className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                    addPid === p.id ? "bg-primary text-primary-foreground" : "bg-card text-ink-soft"
+                  }`}
+                >
+                  {p.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

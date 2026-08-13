@@ -24,7 +24,6 @@ const dict = {
 
   // today
   today_title: { ko: "오늘의 할 일", ja: "今日のタスク", en: "Today's Tasks" },
-  today_add_task: { ko: "할 일 추가", ja: "タスクを追加", en: "Add task" },
   today_delete_hint: {
     ko: "항목을 길게 누르면 삭제할 수 있어요.",
     ja: "項目を長押しすると削除できます。",
@@ -41,6 +40,11 @@ const dict = {
     ko: "오늘만 할 일 추가",
     ja: "今日だけのタスクを追加",
     en: "Add a one-time task",
+  },
+  today_add_recurring_aria: {
+    ko: "고정 할 일 추가",
+    ja: "固定タスクを追加",
+    en: "Add a fixed task",
   },
   today_reorder_aria: { ko: "순서 변경", ja: "並び替え", en: "Reorder" },
   today_change_icon_aria: { ko: "아이콘 변경", ja: "アイコンを変更", en: "Change icon" },
@@ -84,14 +88,9 @@ const dict = {
   record_no_projects: { ko: "등록된 프로젝트가 없습니다.", ja: "登録されたプロジェクトがありません。", en: "No projects yet." },
   record_no_tasks: { ko: "등록된 할 일이 없습니다.", ja: "登録されたタスクがありません。", en: "No tasks yet." },
   record_date_done_count: { ko: "{done} / {total} 완료", ja: "{done} / {total} 完了", en: "{done} / {total} done" },
-  record_date_empty: { ko: "그날 해당하는 할 일이 없습니다.", ja: "その日に該当するタスクがありません。", en: "No tasks for that day." },
+  record_date_empty: { ko: "해당 일에는 태스크 기록이 없습니다.", ja: "この日にはタスクの記録がありません。", en: "No task records for this day." },
   record_tap_undo: { ko: "탭하여 취소", ja: "タップで取り消し", en: "Tap to undo" },
   record_tap_done: { ko: "탭하여 완료", ja: "タップで完了", en: "Tap to complete" },
-  record_toggle_hint: {
-    ko: "탭해서 완료 상태를 바로 바꿀 수 있습니다",
-    ja: "タップして完了状態をすぐに変更できます",
-    en: "Tap to toggle completion right here",
-  },
   record_future_add_placeholder: { ko: "예: 치과 예약 전화", ja: "例：歯医者の予約電話", en: "e.g. Call the dentist" },
   record_future_add_note: {
     ko: "여기서 추가한 할 일은 오늘 탭에는 보이지 않고, 그 날짜가 되어야 나타납니다.",
@@ -173,6 +172,7 @@ const dict = {
   settings_week_start: { ko: "기록 탭 주 시작", ja: "記録タブの週の始まり", en: "Record tab week starts on" },
   settings_week_start_mon: { ko: "월요일", ja: "月曜日", en: "Monday" },
   settings_week_start_sun: { ko: "일요일", ja: "日曜日", en: "Sunday" },
+  settings_landing_tab: { ko: "시작 화면", ja: "起動時の画面", en: "Landing screen" },
   settings_section_mindset: { ko: "마음가짐", ja: "心がけ", en: "Mindset" },
   settings_mindset_edit: { ko: "문구 편집", ja: "文言編集", en: "Edit phrases" },
   settings_section_sync: { ko: "동기화", ja: "同期", en: "Sync" },
