@@ -12,7 +12,7 @@ import {
   weekdayHeaderFor,
   type WeekStart,
 } from "@/lib/date"
-import { appliesToDate } from "@/lib/tasks"
+import { appliesToDate, isRecurring } from "@/lib/tasks"
 import { useT, useLang, useSubtitle } from "@/lib/i18n"
 import { RatioRingCell } from "@/components/RatioRingCell"
 import { YearMonthPicker } from "@/components/YearMonthPicker"
@@ -118,7 +118,8 @@ export function RecordScreen() {
   const [modeIndex, setModeIndex] = useState(0)
   const mode = MODES[modeIndex]
   const [projectId, setProjectId] = useState<string | null>(data.projects[0]?.id ?? null)
-  const [taskId, setTaskId] = useState<string | null>(data.tasks[0]?.id ?? null)
+  // "고정 항목별"은 고정(반복) 항목만 다루는 모드다 — "오늘만"(once) 항목은 대상에서 제외한다.
+  const [taskId, setTaskId] = useState<string | null>(data.tasks.find(isRecurring)?.id ?? null)
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [pickerOpen, setPickerOpen] = useState(false)
 
@@ -227,25 +228,27 @@ export function RecordScreen() {
 
       {mode === "item" && (
         <div className="mb-3 flex gap-1.5 overflow-x-auto pb-0.5">
-          {data.tasks.length === 0 && (
+          {data.tasks.filter(isRecurring).length === 0 && (
             <div className="text-[11.5px] font-medium text-ink-faint">{t("record_no_tasks")}</div>
           )}
-          {data.tasks.map((task) => (
-            <button
-              key={task.id}
-              type="button"
-              onClick={() => {
-                setTaskId(task.id)
-                setSelectedDate(null)
-              }}
-              className={`shrink-0 rounded-full px-3 py-1.5 text-[10.5px] font-bold ${
-                taskId === task.id ? "bg-primary text-primary-foreground" : "bg-secondary text-ink-soft"
-              } ${task.deletedAt ? "opacity-60" : ""}`}
-            >
-              {task.name}
-              {task.deletedAt ? t("record_item_deleted_suffix") : ""}
-            </button>
-          ))}
+          {data.tasks
+            .filter(isRecurring)
+            .map((task) => (
+              <button
+                key={task.id}
+                type="button"
+                onClick={() => {
+                  setTaskId(task.id)
+                  setSelectedDate(null)
+                }}
+                className={`shrink-0 rounded-full px-3 py-1.5 text-[10.5px] font-bold ${
+                  taskId === task.id ? "bg-primary text-primary-foreground" : "bg-secondary text-ink-soft"
+                } ${task.deletedAt ? "opacity-60" : ""}`}
+              >
+                {task.name}
+                {task.deletedAt ? t("record_item_deleted_suffix") : ""}
+              </button>
+            ))}
         </div>
       )}
 
