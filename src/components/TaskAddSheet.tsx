@@ -72,6 +72,12 @@ export function TaskAddSheet({
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault()
+            handleSave()
+          }
+        }}
         placeholder={t("task_add_name_placeholder")}
         className="w-full rounded-xl border border-input bg-card px-3.5 py-2.5 text-[14px] font-semibold text-foreground placeholder:font-medium placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-ring/40"
       />
@@ -130,7 +136,7 @@ export function TaskAddSheet({
       <div className="mb-2 mt-4 text-[11px] font-bold text-ink-soft">{t("task_add_icon_label")}</div>
       <IconPicker value={icon} onChange={setIcon} />
 
-      {data.projects.length >= 2 && (
+      {data.projects.length >= 1 && (
         <>
           <div className="mb-2 mt-4 text-[11px] font-bold text-ink-soft">
             {t("task_add_project_label")} <span className="font-medium text-ink-faint">{t("common_optional")}</span>

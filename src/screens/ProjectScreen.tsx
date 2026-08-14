@@ -5,6 +5,7 @@ import { ProjectCreateSheet } from "@/components/ProjectCreateSheet"
 import { MilestoneAddSheet } from "@/components/MilestoneAddSheet"
 import { useT, useLang, useSubtitle } from "@/lib/i18n"
 import { formatMonthDay } from "@/lib/date"
+import { mindsetBgVar } from "@/lib/mindsetColors"
 import type { Milestone } from "@/lib/types"
 
 export function ProjectScreen() {
@@ -141,7 +142,18 @@ function MilestoneRow({ milestone, isLast }: { milestone: Milestone; isLast: boo
             <div className="ml-0.5 mt-2 flex flex-col gap-2 border-l-[1.4px] border-border pl-3.5">
               {notes.map((n) => (
                 <div key={n.id}>
-                  <div className="text-[11px] font-bold text-ink-soft">{formatMonthDay(n.date, lang)}</div>
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-ink-soft">
+                    <span>{formatMonthDay(n.date, lang)}</span>
+                    {n.authorLabel && (
+                      <span className="flex items-center gap-1 text-[10px] font-semibold text-ink-faint">
+                        <span
+                          className="h-[6px] w-[6px] shrink-0 rounded-full"
+                          style={{ background: mindsetBgVar(n.authorColor ?? "terracotta") }}
+                        />
+                        {n.authorLabel}
+                      </span>
+                    )}
+                  </div>
                   <div className="text-[11px] font-medium leading-relaxed">{n.text}</div>
                 </div>
               ))}

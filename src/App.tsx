@@ -101,7 +101,7 @@ function Shell() {
         <div className="min-h-0 flex-1">
           {tab === "today" && <TodayScreen />}
           {tab === "record" && <RecordScreen />}
-          {tab === "mindset" && <MindsetScreen onNavigate={setTab} />}
+          {tab === "mindset" && <MindsetScreen />}
           {tab === "project" && <ProjectScreen />}
           {tab === "settings" && <SettingsScreen key={settingsKey} />}
         </div>

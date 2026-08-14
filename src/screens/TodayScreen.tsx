@@ -6,6 +6,7 @@ import { appliesToDate, isRecurring } from "@/lib/tasks"
 import { formatDateLong, todayStr, WEEKDAY } from "@/lib/date"
 import { useT, useLang } from "@/lib/i18n"
 import { useListReorder, type ListReorder } from "@/lib/useListReorder"
+import { mindsetBgVar } from "@/lib/mindsetColors"
 import { TaskAddSheet } from "@/components/TaskAddSheet"
 import { BottomSheet } from "@/components/BottomSheet"
 import { IconPicker } from "@/components/IconPicker"
@@ -321,16 +322,20 @@ function TaskRow({
           <GripVertical size={14} strokeWidth={2} />
         </button>
       )}
-      {Icon && (
-        <button
-          type="button"
-          onClick={() => onRequestIconChange(task)}
-          aria-label={t("today_change_icon_aria")}
-          className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-[9px] bg-secondary"
-        >
+      <button
+        type="button"
+        onClick={() => onRequestIconChange(task)}
+        aria-label={t("today_change_icon_aria")}
+        className={`flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-[9px] ${
+          Icon ? "bg-secondary" : "border-[1.4px] border-dashed border-input"
+        }`}
+      >
+        {Icon ? (
           <Icon size={16} strokeWidth={1.7} className="text-ink-soft" />
-        </button>
-      )}
+        ) : (
+          <Plus size={13} strokeWidth={2.2} className="text-ink-faint" />
+        )}
+      </button>
       <div className="min-w-0 flex-1">
         {editing ? (
           <input
@@ -349,14 +354,28 @@ function TaskRow({
           />
         ) : (
           <button type="button" onClick={() => setEditing(true)} className="block max-w-full text-left">
-            <span className={`truncate text-[13.5px] font-semibold ${done ? "text-ink-faint line-through" : ""}`}>
+            <span
+              className={`block truncate text-[13.5px] font-semibold ${done ? "text-ink-faint line-through" : ""}`}
+            >
               {task.name}
             </span>
           </button>
         )}
-        <div className="mt-0.5 text-[10px] font-medium text-ink-faint">
-          {repeatLabel(task.repeat, t, lang)}
-          {pName ? ` · ${pName}` : ""}
+        <div className="mt-0.5 flex items-center gap-1 text-[10px] font-medium text-ink-faint">
+          <span className="truncate">
+            {repeatLabel(task.repeat, t, lang)}
+            {pName ? ` · ${pName}` : ""}
+          </span>
+          {task.authorLabel && (
+            <span className="flex shrink-0 items-center gap-1">
+              <span>·</span>
+              <span
+                className="h-[7px] w-[7px] shrink-0 rounded-full"
+                style={{ background: mindsetBgVar(task.authorColor ?? "terracotta") }}
+              />
+              <span className="max-w-[64px] truncate">{task.authorLabel}</span>
+            </span>
+          )}
         </div>
       </div>
       <button

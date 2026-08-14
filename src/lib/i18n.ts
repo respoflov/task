@@ -99,6 +99,8 @@ const dict = {
   },
   record_month_picker_title: { ko: "년·월 이동", ja: "年・月へ移動", en: "Jump to month" },
   record_month_picker_year: { ko: "{year}년", ja: "{year}年", en: "{year}" },
+  date_picker_title: { ko: "날짜 선택", ja: "日付を選択", en: "Choose a date" },
+  date_picker_day: { ko: "{day}일", ja: "{day}日", en: "{day}" },
 
   // project
   project_title: { ko: "프로젝트", ja: "プロジェクト", en: "Project" },
@@ -150,7 +152,7 @@ const dict = {
   // mindset
   mindset_label: { ko: "마음가짐", ja: "心がけ", en: "Mindset" },
   mindset_empty: { ko: "아직 등록한 문구가 없습니다.", ja: "まだ登録した文言がありません。", en: "No phrases added yet." },
-  mindset_edit_link: { ko: "설정에서 문구 수정하기", ja: "設定で文言を編集する", en: "Edit phrases in Settings" },
+  mindset_edit_link: { ko: "문구 수정하기", ja: "文言を編集する", en: "Edit phrases" },
   mindset_popup_hint: { ko: "화면을 탭하면 사라집니다", ja: "画面をタップすると消えます", en: "Tap anywhere to dismiss" },
   mindset_popup_fallback: {
     ko: "오늘도 작게라도 시작해보기.",
@@ -173,8 +175,13 @@ const dict = {
   settings_week_start_mon: { ko: "월요일", ja: "月曜日", en: "Monday" },
   settings_week_start_sun: { ko: "일요일", ja: "日曜日", en: "Sunday" },
   settings_landing_tab: { ko: "시작 화면", ja: "起動時の画面", en: "Landing screen" },
-  settings_section_mindset: { ko: "마음가짐", ja: "心がけ", en: "Mindset" },
-  settings_mindset_edit: { ko: "문구 편집", ja: "文言編集", en: "Edit phrases" },
+  settings_section_identity: { ko: "내 이름표", ja: "自分のラベル", en: "My label" },
+  settings_identity_name_placeholder: { ko: "이름 (예: 민수)", ja: "名前（例：ミンス）", en: "Name (e.g. Alex)" },
+  settings_identity_hint: {
+    ko: "이 이름과 색은 이 기기에만 저장되고 다른 기기와 동기화되지 않습니다. 이름을 넣어두면, 같은 동기화 코드를 여러 명이 함께 쓸 때 \"오늘만\" 항목이나 프로젝트 메모에 자동으로 붙어 누가 남겼는지 알아보기 쉬워집니다.",
+    ja: "この名前と色はこの端末にのみ保存され、他の端末とは同期されません。名前を入れておくと、同じ同期コードを複数人で使うときに「今日だけ」の項目やプロジェクトのメモに自動で付き、誰が残したか分かりやすくなります。",
+    en: 'This name and color are stored only on this device and aren\'t synced. Once set, they\'re automatically attached to "just today" items and project notes, so it\'s easy to tell who added what when several people share the same sync code.',
+  },
   settings_section_sync: { ko: "동기화", ja: "同期", en: "Sync" },
   settings_sync_row: { ko: "기기간 동기화", ja: "端末間の同期", en: "Sync across devices" },
   settings_sync_status_off: { ko: "연결 안 됨", ja: "未接続", en: "Not connected" },

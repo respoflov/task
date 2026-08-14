@@ -4,7 +4,7 @@ import {
   Globe,
   CalendarDays,
   Home,
-  Feather,
+  UserRound,
   Download,
   Upload,
   Trash2,
@@ -15,29 +15,19 @@ import {
   RefreshCw,
   Copy,
   Check,
-  GripVertical,
 } from "lucide-react"
 import { useAppData } from "@/context/AppDataContext"
-import { useT, useSubtitle, type TKey } from "@/lib/i18n"
+import { useT, useSubtitle } from "@/lib/i18n"
 import { isSyncConfigured } from "@/lib/sync"
-import { MINDSET_COLOR_KEYS, mindsetBgVar, type MindsetColorKey } from "@/lib/mindsetColors"
-import { useListReorder } from "@/lib/useListReorder"
+import { MINDSET_COLOR_KEYS, mindsetBgVar, MINDSET_COLOR_LABEL_KEY } from "@/lib/mindsetColors"
+import { CodeBoxInput } from "@/components/CodeBoxInput"
+import { SectionLabel, Group, Row, ClickRow, Segmented } from "@/components/SettingsUI"
 import type { AppSettings } from "@/lib/types"
-
-const MINDSET_COLOR_LABEL_KEY: Record<MindsetColorKey, TKey> = {
-  terracotta: "mindset_color_terracotta",
-  indigo: "mindset_color_indigo",
-  plum: "mindset_color_plum",
-  deepgreen: "mindset_color_deepgreen",
-  olive: "mindset_color_olive",
-  charcoal: "mindset_color_charcoal",
-}
 
 export function SettingsScreen() {
   const { data, updateSettings, exportData, importData, resetAllData } = useAppData()
   const t = useT()
   const subtitle = useSubtitle("nav_settings")
-  const [quoteView, setQuoteView] = useState(false)
   const [installOpen, setInstallOpen] = useState(false)
   const [licenseView, setLicenseView] = useState(false)
   const [syncView, setSyncView] = useState(false)
@@ -45,7 +35,6 @@ export function SettingsScreen() {
   const [importMsg, setImportMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  if (quoteView) return <MindsetQuoteSettings onBack={() => setQuoteView(false)} />
   if (licenseView) return <LicenseList onBack={() => setLicenseView(false)} />
   if (syncView) return <SyncSettings onBack={() => setSyncView(false)} />
 
@@ -119,15 +108,47 @@ export function SettingsScreen() {
         />
       </Group>
 
-      <SectionLabel>{t("settings_section_mindset")}</SectionLabel>
+      <SectionLabel>{t("settings_section_identity")}</SectionLabel>
       <Group>
-        <ClickRow
-          icon={Feather}
-          label={t("settings_mindset_edit")}
-          preview={data.mindsetQuotes[0]?.text ? `"${data.mindsetQuotes[0].text.slice(0, 16)}…"` : undefined}
-          onClick={() => setQuoteView(true)}
-        />
+        <div className="flex items-center gap-2.5 border-b border-border px-3 py-2.5 last:border-none">
+          <div className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-lg bg-secondary">
+            <UserRound size={14} strokeWidth={1.8} className="text-ink-soft" />
+          </div>
+          <input
+            value={data.settings.deviceLabel ?? ""}
+            onChange={(e) => updateSettings({ deviceLabel: e.target.value || null })}
+            placeholder={t("settings_identity_name_placeholder")}
+            className="flex-1 bg-transparent text-[12.5px] font-semibold text-foreground placeholder:font-medium placeholder:text-ink-faint focus:outline-none"
+          />
+        </div>
+        <div className="flex flex-wrap items-center gap-2.5 px-3.5 py-3">
+          {MINDSET_COLOR_KEYS.map((key) => {
+            const selected = data.settings.deviceColor === key
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => updateSettings({ deviceColor: key })}
+                aria-label={t(MINDSET_COLOR_LABEL_KEY[key])}
+                className="relative h-7 w-7 shrink-0 rounded-full"
+                style={{
+                  background: mindsetBgVar(key),
+                  boxShadow: selected ? "0 0 0 2px var(--card), 0 0 0 3.5px var(--ink-soft)" : undefined,
+                }}
+              >
+                {selected && (
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <Check size={12} strokeWidth={3} color="#F3EADD" />
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </div>
       </Group>
+      <p className="mt-2 px-1 text-[10.5px] font-medium leading-relaxed text-ink-faint">
+        {t("settings_identity_hint")}
+      </p>
 
       <SectionLabel>{t("settings_section_sync")}</SectionLabel>
       <Group>
@@ -261,211 +282,6 @@ export function SettingsScreen() {
   )
 }
 
-function MindsetQuoteSettings({ onBack }: { onBack: () => void }) {
-  const { data, addMindsetQuote, updateMindsetQuote, removeMindsetQuote, reorderMindsetQuotes, updateSettings } =
-    useAppData()
-  const t = useT()
-  const [text, setText] = useState("")
-  const [newColor, setNewColor] = useState<MindsetColorKey>("terracotta")
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [editText, setEditText] = useState("")
-  const [colorEditId, setColorEditId] = useState<string | null>(null)
-
-  const sortedQuotes = [...data.mindsetQuotes].sort((a, b) => a.order - b.order)
-  const reorder = useListReorder(
-    sortedQuotes.map((q) => q.id),
-    reorderMindsetQuotes
-  )
-
-  const startEdit = (id: string, currentText: string) => {
-    setColorEditId(null)
-    setEditingId(id)
-    setEditText(currentText)
-  }
-
-  const commitEdit = (id: string) => {
-    const trimmed = editText.trim()
-    if (trimmed) updateMindsetQuote(id, { text: trimmed })
-    setEditingId(null)
-  }
-
-  return (
-    <div className="flex h-full flex-col px-4 pb-6 pt-1">
-      <div className="relative flex items-center justify-center py-2">
-        <button
-          type="button"
-          onClick={onBack}
-          className="absolute left-0 flex h-7 w-7 items-center justify-center text-ink-soft"
-          aria-label={t("common_cancel")}
-        >
-          <ChevronRight size={18} className="rotate-180" strokeWidth={1.8} />
-        </button>
-        <h2 className="text-[15px] font-bold">{t("mindset_quotes_title")}</h2>
-      </div>
-
-      <SectionLabel>{t("mindset_quotes_order_section")}</SectionLabel>
-      <Group>
-        <Row
-          icon={Feather}
-          label={t("mindset_quotes_order_label")}
-          right={
-            <Segmented
-              value={data.settings.mindsetOrder}
-              options={[
-                { value: "random", label: t("mindset_quotes_random") },
-                { value: "sequential", label: t("mindset_quotes_sequential") },
-              ]}
-              onChange={(v) => updateSettings({ mindsetOrder: v as AppSettings["mindsetOrder"] })}
-            />
-          }
-        />
-      </Group>
-
-      <SectionLabel>{t("mindset_quotes_list_section", { n: sortedQuotes.length })}</SectionLabel>
-      <Group>
-        {sortedQuotes.length === 0 && (
-          <div className="px-3 py-4 text-[11.5px] font-medium text-ink-faint">{t("mindset_empty")}</div>
-        )}
-        {sortedQuotes.map((q) => (
-          <div
-            key={q.id}
-            ref={reorder.setRef(q.id)}
-            style={reorder.styleFor(q.id)}
-            className="border-b border-border bg-card last:border-none"
-          >
-            <div className="flex items-center gap-2 px-2.5 py-2.5">
-              <button
-                type="button"
-                onPointerDown={reorder.handlePointerDown(q.id)}
-                onPointerMove={reorder.handlePointerMove}
-                onPointerUp={reorder.handlePointerUp}
-                onPointerCancel={reorder.handlePointerUp}
-                aria-label={t("today_reorder_aria")}
-                className="flex h-7 w-6 shrink-0 items-center justify-center text-ink-faint"
-                style={{ touchAction: "none" }}
-              >
-                <GripVertical size={15} strokeWidth={1.8} />
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setEditingId(null)
-                  setColorEditId((cur) => (cur === q.id ? null : q.id))
-                }}
-                aria-label={t(MINDSET_COLOR_LABEL_KEY[q.color])}
-                className="h-6 w-6 shrink-0 rounded-full"
-                style={{ background: mindsetBgVar(q.color) }}
-              />
-              {editingId === q.id ? (
-                <input
-                  autoFocus
-                  value={editText}
-                  onChange={(e) => setEditText(e.target.value)}
-                  onBlur={() => commitEdit(q.id)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") e.currentTarget.blur()
-                    if (e.key === "Escape") setEditingId(null)
-                  }}
-                  className="flex-1 rounded-lg border border-input bg-card px-2 py-1 text-[11.5px] font-semibold focus:outline-none focus:ring-2 focus:ring-ring/40"
-                />
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => startEdit(q.id, q.text)}
-                  className="flex-1 truncate text-left text-[11.5px] font-semibold"
-                >
-                  {q.text}
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => removeMindsetQuote(q.id)}
-                aria-label={t("common_delete")}
-                className="shrink-0 p-1 text-ink-faint"
-              >
-                <Trash2 size={14} strokeWidth={1.8} />
-              </button>
-            </div>
-            {colorEditId === q.id && (
-              <div className="flex flex-wrap gap-2.5 px-3 pb-3 pl-11">
-                {MINDSET_COLOR_KEYS.map((key) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => {
-                      updateMindsetQuote(q.id, { color: key })
-                      setColorEditId(null)
-                    }}
-                    aria-label={t(MINDSET_COLOR_LABEL_KEY[key])}
-                    className="relative h-7 w-7 shrink-0 rounded-full"
-                    style={{
-                      background: mindsetBgVar(key),
-                      boxShadow: q.color === key ? "0 0 0 2px var(--card), 0 0 0 3.5px var(--ink-soft)" : undefined,
-                    }}
-                  >
-                    {q.color === key && (
-                      <span className="absolute inset-0 flex items-center justify-center">
-                        <Check size={12} strokeWidth={3} color="#F3EADD" />
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </Group>
-
-      <div className="mt-4 flex gap-2">
-        <input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={t("mindset_quotes_add_placeholder")}
-          className="flex-1 rounded-xl border border-input bg-card px-3.5 py-2.5 text-[13px] font-semibold placeholder:font-medium placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-ring/40"
-        />
-        <button
-          type="button"
-          onClick={() => {
-            if (!text.trim()) return
-            addMindsetQuote(text.trim(), newColor)
-            setText("")
-          }}
-          className="rounded-xl bg-primary px-4 text-[12.5px] font-bold text-primary-foreground disabled:opacity-40"
-          disabled={!text.trim()}
-        >
-          {t("common_add")}
-        </button>
-      </div>
-
-      <SectionLabel>{t("mindset_color_section")}</SectionLabel>
-      <div className="flex gap-3 px-1">
-        {MINDSET_COLOR_KEYS.map((key) => {
-          const selected = newColor === key
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setNewColor(key)}
-              aria-label={t(MINDSET_COLOR_LABEL_KEY[key])}
-              className="relative h-9 w-9 shrink-0 rounded-full"
-              style={{
-                background: mindsetBgVar(key),
-                boxShadow: selected ? "0 0 0 2px var(--card), 0 0 0 3.5px var(--ink-soft)" : undefined,
-              }}
-            >
-              {selected && (
-                <span className="absolute inset-0 flex items-center justify-center">
-                  <Check size={15} strokeWidth={3} color="#F3EADD" />
-                </span>
-              )}
-            </button>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
 function SyncSettings({ onBack }: { onBack: () => void }) {
   const { data, syncStatus, syncError, createSyncCode, pairWithSyncCode, syncNow, disableSync } = useAppData()
   const t = useT()
@@ -524,12 +340,7 @@ function SyncSettings({ onBack }: { onBack: () => void }) {
 
           {enterOpen && (
             <div className="mt-2 rounded-[12px] bg-secondary px-3.5 py-3">
-              <input
-                value={codeInput}
-                onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
-                placeholder={t("sync_enter_placeholder")}
-                className="w-full rounded-lg border border-input bg-card px-3 py-2 text-center text-[15px] font-bold tracking-[0.15em] placeholder:font-medium placeholder:tracking-normal placeholder:text-ink-faint focus:outline-none"
-              />
+              <CodeBoxInput value={codeInput} onChange={setCodeInput} length={8} autoFocus />
               <div className="mt-2 text-[10.5px] font-medium leading-relaxed text-ink-faint">
                 {t("sync_enter_warning")}
               </div>
@@ -677,101 +488,6 @@ function LicenseList({ onBack }: { onBack: () => void }) {
           </div>
         ))}
       </Group>
-    </div>
-  )
-}
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="mb-1.5 mt-4 px-1 text-[10.5px] font-bold uppercase tracking-wide text-ink-faint first:mt-0.5">
-      {children}
-    </div>
-  )
-}
-
-function Group({ children }: { children: React.ReactNode }) {
-  return <div className="overflow-hidden rounded-[13px] border border-border bg-card">{children}</div>
-}
-
-function Row({
-  icon: Icon,
-  label,
-  right,
-}: {
-  icon: React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }>
-  label: string
-  right: React.ReactNode
-}) {
-  return (
-    <div className="flex items-center gap-2.5 border-b border-border px-3 py-2.5 last:border-none">
-      <div className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-lg bg-secondary">
-        <Icon size={14} strokeWidth={1.8} className="text-ink-soft" />
-      </div>
-      <div className="flex-1 text-[12.5px] font-semibold">{label}</div>
-      {right}
-    </div>
-  )
-}
-
-function ClickRow({
-  icon: Icon,
-  label,
-  preview,
-  danger,
-  expanded,
-  onClick,
-}: {
-  icon: React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }>
-  label: string
-  preview?: string
-  danger?: boolean
-  expanded?: boolean
-  onClick: () => void
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex w-full items-center gap-2.5 border-b border-border px-3 py-2.5 text-left last:border-none"
-    >
-      <div className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-lg bg-secondary">
-        <Icon size={14} strokeWidth={1.8} className={danger ? "text-destructive" : "text-ink-soft"} />
-      </div>
-      <div className="flex-1">
-        <div className={`text-[12.5px] font-semibold ${danger ? "text-destructive" : ""}`}>{label}</div>
-        {preview && <div className="mt-0.5 text-[10px] font-medium text-ink-faint">{preview}</div>}
-      </div>
-      <ChevronRight
-        size={14}
-        className={`text-ink-faint transition-transform ${expanded ? "rotate-90" : ""}`}
-      />
-    </button>
-  )
-}
-
-function Segmented<T extends string>({
-  value,
-  options,
-  onChange,
-}: {
-  value: T
-  options: { value: T; label: string }[]
-  onChange: (v: T) => void
-}) {
-  return (
-    <div className="flex rounded-lg bg-secondary p-0.5">
-      {options.map((opt) => (
-        <button
-          key={opt.value}
-          type="button"
-          onClick={() => onChange(opt.value)}
-          className={`rounded-md px-2 py-1 text-[10px] font-semibold ${
-            value === opt.value ? "bg-card text-foreground shadow-sm" : "text-ink-faint"
-          }`}
-        >
-          {opt.label}
-        </button>
-      ))}
     </div>
   )
 }

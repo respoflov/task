@@ -1,15 +1,19 @@
+import { useState } from "react"
 import { Pencil } from "lucide-react"
 import { useAppData } from "@/context/AppDataContext"
 import { pickMindsetQuote } from "@/lib/mindset"
 import { mindsetBgVar } from "@/lib/mindsetColors"
 import { useT, useSubtitle } from "@/lib/i18n"
-import type { TabKey } from "@/components/BottomNav"
+import { MindsetQuoteEditor } from "@/components/MindsetQuoteEditor"
 
-export function MindsetScreen({ onNavigate }: { onNavigate: (tab: TabKey) => void }) {
+export function MindsetScreen() {
   const { data } = useAppData()
   const t = useT()
   const subtitle = useSubtitle("nav_mindset")
   const quote = pickMindsetQuote(data.mindsetQuotes, data.settings)
+  const [editOpen, setEditOpen] = useState(false)
+
+  if (editOpen) return <MindsetQuoteEditor onBack={() => setEditOpen(false)} />
 
   return (
     <div className="h-full overflow-y-auto px-4 pb-4 pt-1">
@@ -32,7 +36,7 @@ export function MindsetScreen({ onNavigate }: { onNavigate: (tab: TabKey) => voi
 
       <button
         type="button"
-        onClick={() => onNavigate("settings")}
+        onClick={() => setEditOpen(true)}
         className="mx-auto mt-3 flex items-center gap-1.5 text-[11.5px] font-bold text-primary"
       >
         <Pencil size={13} strokeWidth={1.8} />

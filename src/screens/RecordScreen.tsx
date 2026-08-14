@@ -17,6 +17,7 @@ import { useT, useLang, useSubtitle } from "@/lib/i18n"
 import { RatioRingCell } from "@/components/RatioRingCell"
 import { YearMonthPicker } from "@/components/YearMonthPicker"
 import { NONE_ICON } from "@/lib/icons"
+import { mindsetBgVar } from "@/lib/mindsetColors"
 import type { AppData, FixedTask } from "@/lib/types"
 
 type Mode = "all" | "project" | "once" | "item"
@@ -51,8 +52,10 @@ function useSwipeCarousel(index: number, onChangeIndex: (i: number) => void, cou
     const dx = e.clientX - startX.current
     const dy = e.clientY - startY.current
     if (axisRef.current === "none") {
-      if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return
-      axisRef.current = Math.abs(dx) > Math.abs(dy) ? "x" : "y"
+      // 날짜 셀 버튼 위에서 탭할 때 생기는 잔손떨림(몇 px)이 스와이프로 오인되지 않도록,
+      // 가로 이동이 세로보다 뚜렷하게(4px 이상) 커야만 가로축으로 확정한다.
+      if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return
+      axisRef.current = Math.abs(dx) > Math.abs(dy) + 4 ? "x" : "y"
       if (axisRef.current === "x") {
         setDragging(true)
         try {
@@ -535,6 +538,12 @@ function FutureDateAdd({
         <div className="mb-2.5 flex flex-col gap-1.5">
           {scheduled.map((task) => (
             <div key={task.id} className="flex items-center gap-2 rounded-lg bg-card px-2.5 py-1.5">
+              {task.authorColor && (
+                <span
+                  className="h-[7px] w-[7px] shrink-0 rounded-full"
+                  style={{ background: mindsetBgVar(task.authorColor) }}
+                />
+              )}
               <span className="flex-1 text-[11.5px] font-semibold">{task.name}</span>
               {task.projectId && (
                 <span className="text-[9.5px] font-medium text-ink-faint">
@@ -684,9 +693,15 @@ function DateDetail({
                 <button
                   type="button"
                   onClick={() => startEdit(task.id, task.name)}
-                  className={`flex-1 truncate text-left text-[12px] font-semibold ${done ? "text-ink-soft" : ""}`}
+                  className={`flex min-w-0 flex-1 items-center gap-1.5 text-left text-[12px] font-semibold ${done ? "text-ink-soft" : ""}`}
                 >
-                  {task.name}
+                  {task.authorColor && (
+                    <span
+                      className="h-[7px] w-[7px] shrink-0 rounded-full"
+                      style={{ background: mindsetBgVar(task.authorColor) }}
+                    />
+                  )}
+                  <span className="truncate">{task.name}</span>
                 </button>
               )}
               <button

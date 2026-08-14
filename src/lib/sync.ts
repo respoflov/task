@@ -48,14 +48,23 @@ function base64ToBuf(b64: string): ArrayBuffer {
   return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)).buffer
 }
 
-// 동기화 페이로드에서 "이 기기 전용" 값(연결된 동기화 코드 자체 등)은 제외한다 —
-// 그래야 다른 기기의 값을 그대로 덮어써도 이 기기의 연결 상태가 깨지지 않는다.
-type SyncSettings = Omit<AppSettings, "syncCode" | "syncUpdatedAt" | "syncIntroSeen">
+// 동기화 페이로드에서 "이 기기 전용" 값(연결된 동기화 코드, 기기 이름표 등)은 제외한다 —
+// 그래야 다른 기기의 값을 그대로 덮어써도 이 기기의 연결 상태·이름표가 깨지지 않는다.
+type SyncSettings = Omit<
+  AppSettings,
+  "syncCode" | "syncUpdatedAt" | "syncIntroSeen" | "deviceLabel" | "deviceColor"
+>
 export type SyncPayload = Omit<AppData, "settings"> & { settings: SyncSettings }
 
 export function toPayload(data: AppData): SyncPayload {
-  const { syncCode: _syncCode, syncUpdatedAt: _syncUpdatedAt, syncIntroSeen: _syncIntroSeen, ...rest } =
-    data.settings
+  const {
+    syncCode: _syncCode,
+    syncUpdatedAt: _syncUpdatedAt,
+    syncIntroSeen: _syncIntroSeen,
+    deviceLabel: _deviceLabel,
+    deviceColor: _deviceColor,
+    ...rest
+  } = data.settings
   return { ...data, settings: rest }
 }
 

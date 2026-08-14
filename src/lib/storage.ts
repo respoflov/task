@@ -29,6 +29,8 @@ export function emptyData(): AppData {
       syncCode: null,
       syncUpdatedAt: null,
       syncIntroSeen: false,
+      deviceLabel: null,
+      deviceColor: null,
     },
   }
 }
@@ -40,7 +42,17 @@ export function normalizeData(partial: Partial<AppData>): AppData {
   return {
     ...base,
     ...partial,
-    tasks: (partial.tasks ?? base.tasks).map((t) => ({ ...t, deletedAt: t.deletedAt ?? null })),
+    tasks: (partial.tasks ?? base.tasks).map((t) => ({
+      ...t,
+      deletedAt: t.deletedAt ?? null,
+      authorLabel: t.authorLabel ?? null,
+      authorColor: t.authorColor ?? null,
+    })),
+    milestoneNotes: (partial.milestoneNotes ?? base.milestoneNotes).map((n) => ({
+      ...n,
+      authorLabel: n.authorLabel ?? null,
+      authorColor: n.authorColor ?? null,
+    })),
     mindsetQuotes: (partial.mindsetQuotes ?? base.mindsetQuotes).map((q, i) => ({
       id: q.id,
       text: q.text,

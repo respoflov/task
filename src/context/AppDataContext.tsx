@@ -109,6 +109,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     // 잡는다 — appliesToDate가 dateStr < createdAt이면 무조건 false를 반환하므로, 과거 날짜에
     // 소급으로 추가한 항목을 오늘 날짜 createdAt으로 두면 그 항목이 정작 자기 날짜에도 안 잡힌다.
     const createdAt = repeat.kind === "once" ? repeat.date : todayStr()
+    // "오늘만" 항목에만 이 기기의 이름표를 스냅샷으로 붙인다 — 고정 할 일은 대상 밖(현재 요청 범위).
     const task: FixedTask = {
       id: newId(),
       name,
@@ -118,6 +119,8 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       createdAt,
       deletedAt: null,
       order: data.tasks.length,
+      authorLabel: repeat.kind === "once" ? data.settings.deviceLabel : null,
+      authorColor: repeat.kind === "once" ? data.settings.deviceColor : null,
     }
     setData((d) => ({ ...d, tasks: [...d.tasks, task] }))
   }
@@ -247,7 +250,17 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const addMilestoneNote: AppDataContextValue["addMilestoneNote"] = (milestoneId, text) => {
     setData((d) => ({
       ...d,
-      milestoneNotes: [...d.milestoneNotes, { id: newId(), milestoneId, date: todayStr(), text }],
+      milestoneNotes: [
+        ...d.milestoneNotes,
+        {
+          id: newId(),
+          milestoneId,
+          date: todayStr(),
+          text,
+          authorLabel: d.settings.deviceLabel,
+          authorColor: d.settings.deviceColor,
+        },
+      ],
     }))
   }
 
