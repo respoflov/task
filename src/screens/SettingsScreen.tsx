@@ -518,6 +518,9 @@ function SyncSettings({ onBack }: { onBack: () => void }) {
             />
             <ClickRow icon={Copy} label={t("sync_enter_button")} onClick={() => setEnterOpen((v) => !v)} />
           </Group>
+          <p className="mt-2 px-1 text-[10.5px] font-medium leading-relaxed text-ink-faint">
+            {t("sync_pairing_hint")}
+          </p>
 
           {enterOpen && (
             <div className="mt-2 rounded-[12px] bg-secondary px-3.5 py-3">
@@ -551,6 +554,9 @@ function SyncSettings({ onBack }: { onBack: () => void }) {
 
       {isSyncConfigured() && data.settings.syncCode && (
         <>
+          <p className="mt-2 px-1 text-[11.5px] font-medium leading-relaxed text-ink-soft">
+            {t("sync_connected_intro")}
+          </p>
           <SectionLabel>{t("sync_code_label")}</SectionLabel>
           <Group>
             <div className="flex items-center gap-2.5 px-3.5 py-3">
@@ -575,6 +581,9 @@ function SyncSettings({ onBack }: { onBack: () => void }) {
           </div>
           <div className="px-1 text-[11.5px] font-medium text-ink-soft">{lastSyncedLabel}</div>
 
+          <p className="mb-1.5 mt-3 px-1 text-[10.5px] font-medium leading-relaxed text-ink-faint">
+            {t("sync_now_explain")}
+          </p>
           <Group>
             <ClickRow
               icon={RefreshCw}
@@ -588,6 +597,9 @@ function SyncSettings({ onBack }: { onBack: () => void }) {
               onClick={() => setConfirmDisable(true)}
             />
           </Group>
+          <p className="mt-2 px-1 text-[10.5px] font-medium leading-relaxed text-ink-faint">
+            {t("sync_new_code_hint")}
+          </p>
 
           {confirmDisable && (
             <div className="mt-2 rounded-[12px] border border-destructive/30 bg-destructive/10 px-3.5 py-3">

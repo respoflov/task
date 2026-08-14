@@ -196,7 +196,12 @@ const dict = {
   sync_explain: {
     ko: "동기화 코드 하나로 여러 기기의 데이터를 하나로 맞출 수 있습니다. 코드는 이 기기에서 암호화한 데이터를 클라우드에 올리고 받아오는 데만 쓰이며, 로그인이나 계정은 필요 없습니다.",
     ja: "同期コード1つで複数端末のデータをそろえられます。コードは端末で暗号化したデータをクラウドに送受信するためだけに使われ、ログインやアカウントは不要です。",
-    en: "One sync code keeps your data the same across devices. It's only used to upload and download data your device has already encrypted — no login or account needed.",
+    en: "One sync code keeps your data the same across devices. It's only used to upload and download data your device has already encrypted. No login or account needed.",
+  },
+  sync_pairing_hint: {
+    ko: "지금 만들면 이 기기가 그 코드의 기준 데이터가 됩니다. 다른 기기에서는 위의 \"다른 기기의 코드 입력하기\"에 같은 코드를 넣으면 연결됩니다.",
+    ja: "今作成すると、この端末がそのコードの基準データになります。他の端末では上の「他の端末のコードを入力」に同じコードを入れると接続されます。",
+    en: 'Creating one now makes this device the starting data for that code. On another device, enter the same code under "Enter a code from another device" above to connect it.',
   },
   sync_create_button: { ko: "새 동기화 코드 만들기", ja: "新しい同期コードを作る", en: "Create a sync code" },
   sync_enter_button: { ko: "다른 기기의 코드 입력하기", ja: "他の端末のコードを入力", en: "Enter a code from another device" },
@@ -213,6 +218,21 @@ const dict = {
     en: "Enter this code in Settings on your other device to match this data.",
   },
   sync_code_label: { ko: "동기화 코드", ja: "同期コード", en: "Sync code" },
+  sync_connected_intro: {
+    ko: "이 코드로 클라우드와 이미 연결되어 있습니다. 다른 기기에서도 설정 탭에 같은 코드를 입력하면 데이터가 하나로 합쳐집니다.",
+    ja: "このコードでクラウドとすでに接続されています。他の端末でも設定タブに同じコードを入力すると、データが1つにまとまります。",
+    en: "This device is already connected to the cloud with this code. Enter the same code in Settings on another device to merge its data with this one.",
+  },
+  sync_now_explain: {
+    ko: "\"지금 동기화\"를 누르면 클라우드에 더 최신 데이터가 있는지 먼저 확인해 있으면 받아오고, 없으면 지금 이 기기 내용을 클라우드로 올립니다. 이 코드를 기준으로 진행됩니다. 데이터를 바꾸면 몇 초 뒤 자동으로도 조용히 동기화됩니다.",
+    ja: "「今すぐ同期」を押すと、クラウドに新しいデータがあるか先に確認し、あればそれを取り込み、なければ今のこの端末の内容をクラウドに送ります。このコードを基準に進みます。データを変更すると数秒後に自動でも同期されます。",
+    en: 'Tapping "Sync now" checks the cloud for newer data first. If there is any, it pulls it in; otherwise it uploads what\'s on this device. It always uses this code. Changes also sync automatically a few seconds after you make them.',
+  },
+  sync_new_code_hint: {
+    ko: "이미 코드가 연결되어 있어 새로 만드는 버튼은 없습니다. 다른 코드로 바꾸고 싶다면 먼저 아래에서 동기화를 해제한 뒤 다시 시작하세요.",
+    ja: "すでにコードが接続されているため、新しく作るボタンはありません。別のコードに変えたい場合は、まず下で同期を解除してから、もう一度始めてください。",
+    en: 'There\'s no "create new code" option while one is already connected. To switch to a different code, disconnect below first, then start again.',
+  },
   sync_copy: { ko: "복사", ja: "コピー", en: "Copy" },
   sync_copied: { ko: "복사됨", ja: "コピーしました", en: "Copied" },
   sync_last_synced: { ko: "마지막 동기화", ja: "最終同期", en: "Last synced" },
