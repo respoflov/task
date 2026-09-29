@@ -1,5 +1,6 @@
 from PIL import Image, ImageDraw
 import math
+import os
 
 GREEN = (77, 97, 82, 255)      # #4D6152
 CREAM = (243, 239, 230, 255)   # #F3EFE6
@@ -44,7 +45,7 @@ def save(img, path):
     img.save(path)
     print("wrote", path, img.size)
 
-base = "../public/"
+base = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "public") + os.sep
 
 save(draw_mark(192, GREEN, CREAM, 0.16), base + "icon-192.png")
 save(draw_mark(512, GREEN, CREAM, 0.16), base + "icon-512.png")

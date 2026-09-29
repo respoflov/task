@@ -1,5 +1,6 @@
 from PIL import Image, ImageDraw, ImageFont
 import math
+import os
 
 GREEN = (77, 97, 82, 255)
 CREAM = (243, 239, 230, 255)
@@ -97,6 +98,6 @@ for i, (label, fn) in enumerate(concepts):
     tw = bbox[2]-bbox[0]
     draw.text((x + TILE/2 - tw/2, y + TILE + 14), label, fill=(230,230,228,255), font=font)
 
-out = "../mockup/logo-concepts-v2.png"
+out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "mockup", "logo-concepts-v2.png")
 sheet.save(out)
 print("wrote", out, sheet.size)

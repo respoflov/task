@@ -3,6 +3,7 @@
 // CLAUDE.md 푸시 전 점검표: "앱 아이콘이... 진입(스플래시) 화면의 로고와 같은 그림이어야 한다."
 import { Resvg } from "@resvg/resvg-js"
 import { writeFileSync } from "node:fs"
+import { fileURLToPath } from "node:url"
 
 const GREEN = "#4D6152"
 const WHITE = "#FFFFFF"
@@ -51,7 +52,7 @@ function render(svg, size, outPath) {
   console.log("wrote", outPath, size)
 }
 
-const base = "../public/"
+const base = fileURLToPath(new URL("../public/", import.meta.url))
 
 // 홈 화면에서는 OS(iOS 스퀴클, Android 런처 등)가 아이콘 PNG 위에 자기 마스크를 또 씌운다.
 // 여기서 rounded-2xl(비율 0.45, 거의 원)로 배경까지 직접 그려버리면 OS가 씌우는 프레임과
