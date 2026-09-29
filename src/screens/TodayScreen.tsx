@@ -1,3 +1,4 @@
+// 오늘 탭: 고정 할 일과 오늘만 할 일을 체크하고, 섹션·항목 순서를 바꾼다
 import { Fragment, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react"
 import { ChevronDown, GripVertical, Plus } from "lucide-react"
 import { useAppData } from "@/context/AppDataContext"
@@ -15,6 +16,7 @@ import type { FixedTask, RepeatRule, TodaySection } from "@/lib/types"
 
 const SECTION_GAP = 12 // px — 섹션 사이 margin-bottom(mb-3)과 맞춘 값. 드래그 시 자리 계산에 쓰인다.
 
+// 오늘 탭 본체
 export function TodayScreen() {
   const { data, toggleCompletion, isTaskCompleted, removeTask, updateTask, updateSettings, reorderTasks } =
     useAppData()
@@ -51,11 +53,13 @@ export function TodayScreen() {
     reorderTasks
   )
 
+  // 할 일 추가 시트를 연다 (고정·오늘만 기본값)
   function openAdd(mode: "daily" | "once") {
     setAddDefaultMode(mode)
     setAddOpen(true)
   }
 
+  // 섹션을 접거나 편다
   function toggleCollapse(key: TodaySection) {
     setCollapsed((prev) => ({ ...prev, [key]: !prev[key] }))
   }
@@ -205,6 +209,7 @@ export function TodayScreen() {
   )
 }
 
+// 섹션 안의 할 일 목록
 function TaskList({
   tasks,
   today,
@@ -249,6 +254,7 @@ function TaskList({
   )
 }
 
+// 할 일 한 줄 (체크, 길게 눌러 이름 수정)
 function TaskRow({
   task,
   today,
@@ -282,6 +288,7 @@ function TaskRow({
     if (!editing) onRequestDelete(task)
   })
 
+  // 수정한 이름을 저장한다
   function commitRename() {
     const v = draft.trim()
     if (v && v !== task.name) updateTask(task.id, { name: v })
@@ -406,6 +413,7 @@ function TaskRow({
 // 월요일(1) ... 일요일(0) 순서 — Date#getDay() 값 기준. 선택한 순서가 아니라 항상 이 순서로 보여준다.
 const WEEKDAY_DISPLAY_ORDER = [1, 2, 3, 4, 5, 6, 0]
 
+// 반복 규칙을 "매일"·"하루만"·"월·수·금" 같은 글자로 바꾼다
 function repeatLabel(repeat: RepeatRule, t: ReturnType<typeof useT>, lang: ReturnType<typeof useLang>): string {
   if (repeat.kind === "daily") return t("common_daily")
   if (repeat.kind === "once") return t("common_once")
@@ -421,6 +429,7 @@ function useLongPress(onLongPress: () => void, ms = 500) {
   const timer = useRef<number | null>(null)
   const start = useRef<{ x: number; y: number } | null>(null)
 
+  // 길게 누르기 타이머와 시작 위치를 지운다
   function clear() {
     if (timer.current !== null) {
       window.clearTimeout(timer.current)
@@ -429,11 +438,13 @@ function useLongPress(onLongPress: () => void, ms = 500) {
     start.current = null
   }
 
+  // 누르기 시작: 타이머를 건다
   function down(e: ReactPointerEvent) {
     start.current = { x: e.clientX, y: e.clientY }
     timer.current = window.setTimeout(onLongPress, ms)
   }
 
+  // 8px 넘게 움직이면 길게 누르기를 취소한다
   function move(e: ReactPointerEvent) {
     if (!start.current) return
     const dx = e.clientX - start.current.x
@@ -462,10 +473,12 @@ function useSectionReorder(order: TodaySection[], onCommit: (order: TodaySection
   const selfHeight = useRef(0)
   const otherHeight = useRef(0)
 
+  // 두 섹션 중 반대편 섹션
   function otherOf(key: TodaySection): TodaySection {
     return key === "recurring" ? "adhoc" : "recurring"
   }
 
+  // 손잡이를 누르면 두 섹션의 높이를 재고 드래그를 시작한다
   function handlePointerDown(key: TodaySection, e: ReactPointerEvent<HTMLButtonElement>) {
     const selfEl = elRefs.current[key]
     const otherEl = elRefs.current[otherOf(key)]
@@ -482,6 +495,7 @@ function useSectionReorder(order: TodaySection[], onCommit: (order: TodaySection
     }
   }
 
+  // 끄는 동안 상대 섹션 높이의 절반을 넘었는지 판단한다
   function handlePointerMove(e: ReactPointerEvent<HTMLButtonElement>) {
     if (!dragKey) return
     const delta = e.clientY - startY.current
@@ -491,6 +505,7 @@ function useSectionReorder(order: TodaySection[], onCommit: (order: TodaySection
     setCrossed(selfIsFirst ? delta > threshold : delta < -threshold)
   }
 
+  // 놓았을 때 절반을 넘었으면 두 섹션 순서를 맞바꾼다
   function handlePointerUp() {
     if (!dragKey) return
     if (crossed) onCommit([...order].reverse() as TodaySection[])
@@ -499,6 +514,7 @@ function useSectionReorder(order: TodaySection[], onCommit: (order: TodaySection
     setCrossed(false)
   }
 
+  // 드래그 중인 섹션은 손가락을 따라, 상대 섹션은 비켜서도록 위치를 정한다
   function styleFor(key: TodaySection): CSSProperties {
     if (key === dragKey) {
       return { transform: `translateY(${dragY}px)`, position: "relative", zIndex: 10 }

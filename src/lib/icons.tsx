@@ -1,3 +1,4 @@
+// 할 일에 붙일 수 있는 아이콘 목록
 import { forwardRef } from "react"
 import {
   Dumbbell,
@@ -97,8 +98,10 @@ export const TASK_ICONS: Record<string, LucideIcon> = {
   "gamepad-2": Gamepad2,
 }
 
+// 아이콘 선택 격자에 보일 키 순서 (맨 앞은 "아이콘 없음")
 export const TASK_ICON_KEYS = [NONE_ICON, ...Object.keys(TASK_ICONS)]
 
+// 키에 해당하는 아이콘 컴포넌트 (없으면 기본 체크 아이콘)
 export function getTaskIcon(key: string): LucideIcon {
   return TASK_ICONS[key] ?? TASK_ICONS["check-square"]
 }

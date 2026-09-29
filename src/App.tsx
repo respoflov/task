@@ -1,3 +1,4 @@
+// 앱 최상위 화면: 스플래시 → 동기화 안내 → 마음가짐 팝업 → 5개 탭으로 이어지는 진입 흐름과 탭 전환
 import { useEffect, useState } from "react"
 import { AppDataProvider, useAppData } from "@/context/AppDataContext"
 import { useThemeEffect } from "@/lib/useThemeEffect"
@@ -12,6 +13,7 @@ import { MindsetScreen } from "@/screens/MindsetScreen"
 import { ProjectScreen } from "@/screens/ProjectScreen"
 import { SettingsScreen } from "@/screens/SettingsScreen"
 
+// 진입 흐름 단계
 type Phase = "splash" | "sync-intro" | "mindset-popup" | "app"
 
 // 진입 흐름(스플래시→팝업→랜딩)의 모든 전환은 이 크로스페이드 하나로 통일한다:
@@ -21,6 +23,7 @@ const FADE_OUT_MS = 300
 const GAP_MS = 150
 const FADE_IN_MS = 300
 
+// 진입 흐름과 탭을 관리하는 본체
 function Shell() {
   const { data, updateSettings } = useAppData()
   useThemeEffect(data.settings.theme)
@@ -38,6 +41,7 @@ function Shell() {
     setTab(next)
   }
 
+  // 페이드아웃 → 짧은 정지 → 페이드인으로 다음 단계 화면으로 넘어간다
   function goTo(next: Phase) {
     setVisible(false)
     setTimeout(() => {
@@ -46,6 +50,7 @@ function Shell() {
     }, FADE_OUT_MS)
   }
 
+  // 오늘 이미 봤거나 문구가 없으면 바로 앱으로, 아니면 마음가짐 팝업으로 넘어간다
   function goToMindsetOrApp() {
     const shownToday = data.settings.lastMindsetShownDate === todayStr()
     goTo(shownToday || data.mindsetQuotes.length === 0 ? "app" : "mindset-popup")
@@ -120,6 +125,7 @@ function Shell() {
   )
 }
 
+// 전역 데이터(AppDataProvider)로 본체를 감싼 루트 컴포넌트
 function App() {
   return (
     <AppDataProvider>

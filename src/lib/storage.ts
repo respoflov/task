@@ -1,7 +1,9 @@
+// 앱 데이터를 localStorage에 저장하고 읽는다
 import type { AppData } from "./types"
 
 const STORAGE_KEY = "daily-task-check:v1"
 
+// 처음 실행할 때의 빈 데이터 (기본 마음가짐 문구 하나 포함)
 export function emptyData(): AppData {
   return {
     tasks: [],
@@ -63,6 +65,7 @@ export function normalizeData(partial: Partial<AppData>): AppData {
   }
 }
 
+// 저장된 데이터를 읽는다. 없거나 깨져 있으면 빈 데이터로 시작한다
 export function loadData(): AppData {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -74,10 +77,12 @@ export function loadData(): AppData {
   }
 }
 
+// 데이터를 저장한다
 export function saveData(data: AppData): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
 }
 
+// 가져오기 파일이 올바른지 볼 때 반드시 배열이어야 하는 항목들
 const REQUIRED_ARRAY_KEYS = [
   "tasks",
   "completions",
@@ -105,6 +110,7 @@ export function isValidAppData(value: unknown): value is Partial<AppData> {
   return REQUIRED_ARRAY_KEYS.some((key) => key in obj) || "settings" in obj
 }
 
+// 새 항목에 붙일 고유 id
 export function newId(): string {
   return crypto.randomUUID()
 }

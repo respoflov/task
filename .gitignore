@@ -32,3 +32,6 @@ dist-ssr
 
 # 개인 백업 파일
 *.private-backup.*
+
+# 파이썬 캐시
+__pycache__/

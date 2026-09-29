@@ -1,3 +1,4 @@
+// 프로젝트 탭: 프로젝트 전환 탭과 마일스톤 스테퍼
 import { useState } from "react"
 import { Check, Plus } from "lucide-react"
 import { useAppData } from "@/context/AppDataContext"
@@ -8,6 +9,7 @@ import { formatMonthDay } from "@/lib/date"
 import { mindsetBgVar } from "@/lib/mindsetColors"
 import type { Milestone } from "@/lib/types"
 
+// 프로젝트 탭 본체
 export function ProjectScreen() {
   const { data } = useAppData()
   const t = useT()
@@ -85,6 +87,7 @@ export function ProjectScreen() {
   )
 }
 
+// 마일스톤 한 단계 (상태 전환과 메모)
 function MilestoneRow({ milestone, isLast }: { milestone: Milestone; isLast: boolean }) {
   const { data, setMilestoneStatus, addMilestoneNote } = useAppData()
   const t = useT()

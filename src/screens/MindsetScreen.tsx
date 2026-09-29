@@ -1,3 +1,4 @@
+// 마음가짐 탭: 저장한 문구 목록
 import { useState } from "react"
 import { Pencil } from "lucide-react"
 import { useAppData } from "@/context/AppDataContext"
@@ -6,6 +7,7 @@ import { mindsetBgVar } from "@/lib/mindsetColors"
 import { useT, useSubtitle } from "@/lib/i18n"
 import { MindsetQuoteEditor } from "@/components/MindsetQuoteEditor"
 
+// 마음가짐 탭 본체
 export function MindsetScreen() {
   const { data } = useAppData()
   const t = useT()

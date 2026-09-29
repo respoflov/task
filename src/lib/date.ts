@@ -1,9 +1,12 @@
+// 날짜 문자열 처리와 언어별 날짜 표기
 import type { Lang } from "./i18n"
 
+// 오늘 날짜 "YYYY-MM-DD"
 export function todayStr(): string {
   return toDateStr(new Date())
 }
 
+// Date를 "YYYY-MM-DD"로 바꾼다
 export function toDateStr(d: Date): string {
   const y = d.getFullYear()
   const m = String(d.getMonth() + 1).padStart(2, "0")
@@ -25,11 +28,13 @@ export const WEEKDAY_HEADER: Record<Lang, string[]> = {
   en: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"],
 }
 
+// 영어 월 이름
 const MONTH_EN = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
 ]
 
+// "7월 29일 수요일" 형식 (언어별)
 export function formatDateLong(dateStr: string, lang: Lang = "ko"): string {
   const d = new Date(dateStr + "T00:00:00")
   const w = WEEKDAY[lang][d.getDay()]
@@ -38,6 +43,7 @@ export function formatDateLong(dateStr: string, lang: Lang = "ko"): string {
   return `${d.getMonth() + 1}월 ${d.getDate()}일 ${w}요일`
 }
 
+// "7월 29일 (수)" 형식 (언어별)
 export function formatDateShort(dateStr: string, lang: Lang = "ko"): string {
   const d = new Date(dateStr + "T00:00:00")
   const w = WEEKDAY[lang][d.getDay()]
@@ -46,6 +52,7 @@ export function formatDateShort(dateStr: string, lang: Lang = "ko"): string {
   return `${d.getMonth() + 1}월 ${d.getDate()}일 (${w})`
 }
 
+// "7월 29일" 형식 (언어별)
 export function formatMonthDay(dateStr: string, lang: Lang = "ko"): string {
   const d = new Date(dateStr + "T00:00:00")
   if (lang === "ja") return `${d.getMonth() + 1}月${d.getDate()}日`
@@ -53,16 +60,19 @@ export function formatMonthDay(dateStr: string, lang: Lang = "ko"): string {
   return `${d.getMonth() + 1}월 ${d.getDate()}일`
 }
 
+// "2026년 7월" 형식 (언어별)
 export function formatMonthLabel(year: number, month0: number, lang: Lang = "ko"): string {
   if (lang === "ja") return `${year}年${month0 + 1}月`
   if (lang === "en") return `${MONTH_EN[month0]} ${year}`
   return `${year}년 ${month0 + 1}월`
 }
 
+// 오늘보다 뒤의 날짜인지
 export function isFuture(dateStr: string): boolean {
   return dateStr > todayStr()
 }
 
+// 오늘이거나 지난 날짜인지
 export function isPastOrToday(dateStr: string): boolean {
   return dateStr <= todayStr()
 }
@@ -72,6 +82,7 @@ export function mondayIndex(getDay: number): number {
   return (getDay + 6) % 7
 }
 
+// 달력 주 시작 요일 설정 (월요일·일요일)
 export type WeekStart = "mon" | "sun"
 
 // 기록 탭 달력의 주 시작 요일 설정에 맞춘 인덱스 변환 (0=그 주의 첫 칸 ... 6=마지막 칸).

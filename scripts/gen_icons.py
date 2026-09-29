@@ -1,3 +1,4 @@
+# (기록용, 현재 미사용) 이전 로고 시안의 앱 아이콘을 Pillow로 직접 그리던 스크립트
 from PIL import Image, ImageDraw
 import math
 import os
@@ -5,15 +6,18 @@ import os
 GREEN = (77, 97, 82, 255)      # #4D6152
 CREAM = (243, 239, 230, 255)   # #F3EFE6
 
+# 모서리가 둥근 사각형을 그린다
 def rounded_rect(draw, box, radius, **kw):
     draw.rounded_rectangle(box, radius=radius, **kw)
 
+# 점 목록을 잇는 굵은 선을 그린다 (이음새는 원으로 메운다)
 def thick_line(draw, pts, width, fill):
     draw.line(pts, fill=fill, width=width, joint="curve")
     r = width / 2
     for (x, y) in pts:
         draw.ellipse([x - r, y - r, x + r, y + r], fill=fill)
 
+# 배경색 위에 로고 표식을 그린 정사각형 아이콘 이미지를 만든다
 def draw_mark(size, bg, mark, pad_ratio):
     img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
@@ -21,6 +25,7 @@ def draw_mark(size, bg, mark, pad_ratio):
 
     s = size * (1 - pad_ratio * 2)
     off = size * pad_ratio
+    # 0~1 비율 좌표를 실제 픽셀 좌표로 바꾼다
     def pt(x, y):
         return (off + x * s, off + y * s)
 
@@ -41,6 +46,7 @@ def draw_mark(size, bg, mark, pad_ratio):
 
     return img
 
+# 이미지를 저장하고 경로와 크기를 출력한다
 def save(img, path):
     img.save(path)
     print("wrote", path, img.size)

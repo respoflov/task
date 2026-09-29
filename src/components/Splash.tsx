@@ -1,5 +1,7 @@
+// 앱을 열 때마다 나오는 진입 화면 (로고와 RESPOFLOV 각인)
 import { CalendarCheck2 } from "lucide-react"
 
+// 스플래시 화면
 export function Splash() {
   return (
     <div className="relative flex h-full w-full flex-col items-center justify-center bg-background">

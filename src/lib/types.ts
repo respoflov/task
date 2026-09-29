@@ -1,10 +1,13 @@
+// 앱 데이터 타입 정의
 import type { MindsetColorKey } from "./mindsetColors"
 
+// 반복 규칙 (매일·특정 요일·하루만)
 export type RepeatRule =
   | { kind: "daily" }
   | { kind: "weekdays"; days: number[] } // 0=Sun..6=Sat (Date#getDay 기준)
   | { kind: "once"; date: string } // yyyy-mm-dd, 오늘만/미래 예약 항목
 
+// 할 일 하나
 export interface FixedTask {
   id: string
   name: string
@@ -21,11 +24,13 @@ export interface FixedTask {
   authorColor: MindsetColorKey | null
 }
 
+// 할 일 완료 기록 (할 일 id + 날짜)
 export interface Completion {
   taskId: string
   date: string // yyyy-mm-dd
 }
 
+// 장기 프로젝트
 export interface Project {
   id: string
   name: string
@@ -33,8 +38,10 @@ export interface Project {
   order: number
 }
 
+// 마일스톤 상태 (예정·진행 중·완료)
 export type MilestoneStatus = "todo" | "active" | "done"
 
+// 프로젝트의 마일스톤
 export interface Milestone {
   id: string
   projectId: string
@@ -45,6 +52,7 @@ export interface Milestone {
   order: number
 }
 
+// 마일스톤에 남기는 메모
 export interface MilestoneNote {
   id: string
   milestoneId: string
@@ -54,6 +62,7 @@ export interface MilestoneNote {
   authorColor: MindsetColorKey | null
 }
 
+// 마음가짐 문구
 export interface MindsetQuote {
   id: string
   text: string
@@ -61,8 +70,10 @@ export interface MindsetQuote {
   order: number
 }
 
+// 오늘 탭의 두 섹션 (고정 항목·오늘만 항목)
 export type TodaySection = "recurring" | "adhoc"
 
+// 사용자 설정
 export interface AppSettings {
   theme: "light" | "dark" | "system"
   language: "ko" | "ja" | "en"
@@ -81,6 +92,7 @@ export interface AppSettings {
   deviceColor: MindsetColorKey | null
 }
 
+// localStorage에 저장하는 앱 데이터 전체
 export interface AppData {
   tasks: FixedTask[]
   completions: Completion[]

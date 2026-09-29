@@ -1,9 +1,11 @@
+// 아이폰 스타일 스크롤 휠 한 줄 (년·월·일 선택에 공용)
 import { useEffect, useRef } from "react"
 import type { Lang } from "@/lib/i18n"
 
 export const ITEM_H = 44
 const VISIBLE_COUNT = 5
 export const WHEEL_H = ITEM_H * VISIBLE_COUNT
+// 선택 줄이 가운데 오도록 위아래에 두는 여백
 const PAD = (WHEEL_H - ITEM_H) / 2
 export const YEARS_BEFORE = 10
 export const YEARS_AFTER = 10
@@ -36,6 +38,7 @@ export function WheelColumn({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // 스크롤이 멈추면 가장 가까운 칸에 맞춰 값을 정한다
   function handleScroll() {
     if (timerRef.current) window.clearTimeout(timerRef.current)
     timerRef.current = window.setTimeout(() => {
@@ -46,6 +49,7 @@ export function WheelColumn({
     }, 120)
   }
 
+  // i번째 칸으로 스크롤한다
   function jumpTo(i: number) {
     ref.current?.scrollTo({ top: i * ITEM_H, behavior: "smooth" })
   }

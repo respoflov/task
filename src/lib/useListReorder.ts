@@ -91,4 +91,5 @@ export function useListReorder(ids: string[], onCommit: (orderedIds: string[]) =
   return { setRef, handlePointerDown, handlePointerMove, handlePointerUp, styleFor }
 }
 
+// useListReorder가 돌려주는 값의 타입
 export type ListReorder = ReturnType<typeof useListReorder>

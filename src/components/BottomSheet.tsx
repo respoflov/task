@@ -1,8 +1,10 @@
+// 아래에서 올라오는 바텀시트 공용 컴포넌트 (vaul 기반, 아래로 밀면 닫힌다)
 import { Drawer } from "vaul"
 import { X } from "lucide-react"
 import type { ReactNode } from "react"
 import { useT } from "@/lib/i18n"
 
+// 시트 속성: 열림 상태, 제목, 저장 버튼 설정
 interface BottomSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void

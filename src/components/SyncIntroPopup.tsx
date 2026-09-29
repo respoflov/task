@@ -1,6 +1,8 @@
+// 처음 실행할 때 한 번 보여 주는 기기 간 동기화 안내 팝업
 import { RefreshCw } from "lucide-react"
 import { useT } from "@/lib/i18n"
 
+// 동기화 기능 소개와 「설정으로 가기」·「나중에」 버튼
 export function SyncIntroPopup({
   onLater,
   onGoSettings,

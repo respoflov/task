@@ -1,3 +1,4 @@
+// 동기화 코드 방식의 기기 간 동기화: 코드에서 키를 만들어 데이터를 암호화한 뒤 Supabase에 저장한다
 import { supabase } from "./supabaseClient"
 import type { AppData, AppSettings } from "./types"
 
@@ -9,20 +10,24 @@ const PBKDF2_ITERATIONS = 150_000
 // 0/O, 1/I/L처럼 화면에서 헷갈리는 글자는 뺐다.
 const CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
 
+// 8자리 동기화 코드를 새로 만든다
 export function generateSyncCode(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(8))
   return Array.from(bytes, (b) => CODE_CHARS[b % CODE_CHARS.length]).join("")
 }
 
+// 입력한 코드를 공백 없는 대문자로 정리한다
 function normalizeCode(code: string): string {
   return code.trim().toUpperCase().replace(/\s+/g, "")
 }
 
+// 문자열의 SHA-256 해시 (서버에는 코드 대신 이 해시만 저장한다)
 async function sha256Hex(input: string): Promise<string> {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(input))
   return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, "0")).join("")
 }
 
+// 코드에서 AES-GCM 암호화 키를 만든다 (PBKDF2)
 async function deriveKey(code: string): Promise<CryptoKey> {
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
@@ -40,6 +45,7 @@ async function deriveKey(code: string): Promise<CryptoKey> {
   )
 }
 
+// 바이트 배열과 base64 문자열을 서로 바꾼다
 function bufToBase64(buf: ArrayBuffer): string {
   return btoa(String.fromCharCode(...new Uint8Array(buf)))
 }
@@ -54,8 +60,10 @@ type SyncSettings = Omit<
   AppSettings,
   "syncCode" | "syncUpdatedAt" | "syncIntroSeen" | "deviceLabel" | "deviceColor"
 >
+// 클라우드에 올리는 데이터 모양 (기기 전용 설정은 뺀다)
 export type SyncPayload = Omit<AppData, "settings"> & { settings: SyncSettings }
 
+// 앱 데이터에서 기기 전용 설정을 빼고 올릴 데이터를 만든다
 export function toPayload(data: AppData): SyncPayload {
   const {
     syncCode: _syncCode,
@@ -68,6 +76,7 @@ export function toPayload(data: AppData): SyncPayload {
   return { ...data, settings: rest }
 }
 
+// 데이터를 암호화해 "iv.암호문" 문자열로 만든다
 async function encryptPayload(payload: SyncPayload, key: CryptoKey): Promise<string> {
   const iv = crypto.getRandomValues(new Uint8Array(12))
   const plain = new TextEncoder().encode(JSON.stringify(payload))
@@ -75,6 +84,7 @@ async function encryptPayload(payload: SyncPayload, key: CryptoKey): Promise<str
   return `${bufToBase64(iv.buffer)}.${bufToBase64(cipher)}`
 }
 
+// "iv.암호문" 문자열을 복호화해 데이터로 되돌린다
 async function decryptPayload(stored: string, key: CryptoKey): Promise<SyncPayload> {
   const [ivB64, cipherB64] = stored.split(".")
   const iv = new Uint8Array(base64ToBuf(ivB64))
@@ -82,12 +92,15 @@ async function decryptPayload(stored: string, key: CryptoKey): Promise<SyncPaylo
   return JSON.parse(new TextDecoder().decode(plain)) as SyncPayload
 }
 
+// Supabase 환경 변수가 설정돼 있는지
 export function isSyncConfigured(): boolean {
   return supabase !== null
 }
 
+// 동기화 실패를 나타내는 오류
 export class SyncError extends Error {}
 
+// 현재 데이터를 암호화해 클라우드에 올리고 저장 시각을 돌려준다
 export async function pushToCloud(code: string, data: AppData): Promise<string> {
   if (!supabase) throw new SyncError("not-configured")
   const normalized = normalizeCode(code)

@@ -1,3 +1,4 @@
+# (기록용) 로고 후보 A~D를 한 장에 나란히 그려 비교용 이미지(mockup/logo-concepts-v2.png)를 만드는 스크립트
 from PIL import Image, ImageDraw, ImageFont
 import math
 import os
@@ -9,18 +10,21 @@ PAD = 40
 CANVAS_W = TILE * 4 + PAD * 5
 CANVAS_H = TILE + PAD * 2 + 60
 
+# 둥근 모서리 초록 배경 타일을 만든다
 def rounded_bg(size):
     img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
     d.rounded_rectangle([0, 0, size, size], radius=size * 0.22, fill=GREEN)
     return img, d
 
+# 점 목록을 잇는 굵은 선을 그린다
 def thick_line(draw, pts, width, fill):
     draw.line(pts, fill=fill, width=width, joint="curve")
     r = width / 2
     for (x, y) in pts:
         draw.ellipse([x - r, y - r, x + r, y + r], fill=fill)
 
+# 로고 후보 A (데이마크)
 def concept_A_daymark(size):
     img, d = rounded_bg(size)
     s = size * 0.68; off = size * 0.16
@@ -33,6 +37,7 @@ def concept_A_daymark(size):
     thick_line(d, [(cx-r*0.42, cy+r*0.02), (cx-r*0.08, cy+r*0.38), (cx+r*0.48, cy-r*0.32)], w, GREEN)
     return img
 
+# 로고 후보 B (체크리프)
 def concept_B_checkleaf(size):
     img, d = rounded_bg(size)
     s = size * 0.72; off = size * 0.14
@@ -45,6 +50,7 @@ def concept_B_checkleaf(size):
 
     return img
 
+# 로고 후보 C (스트릭)
 def concept_C_streak(size):
     img, d = rounded_bg(size)
     s = size * 0.72; off = size * 0.14
@@ -65,6 +71,7 @@ def concept_C_streak(size):
     thick_line(d,[(cx-rr*0.4,cy+rr*0.05),(cx-rr*0.05,cy+rr*0.4),(cx+rr*0.5,cy-rr*0.35)],w,GREEN)
     return img
 
+# 로고 후보 D (스트로크)
 def concept_D_stroke(size):
     img, d = rounded_bg(size)
     s = size * 0.72; off = size * 0.14

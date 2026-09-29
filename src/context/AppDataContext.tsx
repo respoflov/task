@@ -1,3 +1,4 @@
+// 앱 전역 데이터(React Context): 할 일·완료 기록·프로젝트·마음가짐·설정과 기기 간 동기화
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import type { AppData, FixedTask, Milestone, MilestoneStatus, MindsetQuote, Project, RepeatRule } from "@/lib/types"
 import type { MindsetColorKey } from "@/lib/mindsetColors"
@@ -5,8 +6,10 @@ import { loadData, saveData, newId, emptyData, isValidAppData, normalizeData } f
 import { todayStr } from "@/lib/date"
 import { generateSyncCode, pushToCloud, pullFromCloud, toPayload, SyncError, type SyncPayload } from "@/lib/sync"
 
+// 동기화 진행 상태
 export type SyncStatus = "idle" | "syncing" | "error"
 
+// 화면에 제공하는 데이터와 동작 목록
 interface AppDataContextValue {
   data: AppData
   addTask: (input: { name: string; icon: string; repeat: RepeatRule; projectId: string | null }) => void
@@ -37,6 +40,7 @@ interface AppDataContextValue {
 
 const AppDataContext = createContext<AppDataContextValue | null>(null)
 
+// 데이터를 불러오고 바뀔 때마다 저장하며, 동기화 코드가 연결돼 있으면 클라우드와 맞추는 Provider
 export function AppDataProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<AppData>(() => loadData())
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("idle")
@@ -396,6 +400,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>
 }
 
+// 화면에서 전역 데이터를 꺼내 쓰는 훅
 export function useAppData(): AppDataContextValue {
   const ctx = useContext(AppDataContext)
   if (!ctx) throw new Error("useAppData must be used within AppDataProvider")

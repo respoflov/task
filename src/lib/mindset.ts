@@ -1,5 +1,7 @@
+// 마음가짐 문구 선택 규칙
 import type { AppSettings, MindsetQuote } from "./types"
 
+// 설정이 무작위면 아무 문구나, 순서대로면 지난번 다음 문구를 고른다
 export function pickMindsetQuote(
   quotes: MindsetQuote[],
   settings: Pick<AppSettings, "mindsetOrder" | "lastSequentialIndex">

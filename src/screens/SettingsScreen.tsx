@@ -1,3 +1,4 @@
+// 설정 탭: 테마·언어·주 시작 요일·랜딩 탭·마음가짐·동기화·백업·라이선스·버전
 import { useRef, useState } from "react"
 import {
   Sun,
@@ -24,6 +25,7 @@ import { CodeBoxInput } from "@/components/CodeBoxInput"
 import { SectionLabel, Group, Row, ClickRow, Segmented } from "@/components/SettingsUI"
 import type { AppSettings } from "@/lib/types"
 
+// 설정 탭 본체
 export function SettingsScreen() {
   const { data, updateSettings, exportData, importData, resetAllData } = useAppData()
   const t = useT()
@@ -282,6 +284,7 @@ export function SettingsScreen() {
   )
 }
 
+// 기기 간 동기화 설정 화면 (코드 만들기·입력·지금 동기화·해제)
 function SyncSettings({ onBack }: { onBack: () => void }) {
   const { data, syncStatus, syncError, createSyncCode, pairWithSyncCode, syncNow, disableSync } = useAppData()
   const t = useT()
@@ -451,6 +454,7 @@ function SyncSettings({ onBack }: { onBack: () => void }) {
   )
 }
 
+// 오픈소스 라이선스 목록 데이터
 const LICENSE_ENTRIES = [
   { name: "Pretendard", license: "SIL OFL 1.1", descKey: "settings_license_pretendard_desc" as const },
   { name: "Lucide Icons", license: "ISC", descKey: "settings_license_lucide_desc" as const },
@@ -459,6 +463,7 @@ const LICENSE_ENTRIES = [
   { name: "Supabase JS", license: "MIT", descKey: "settings_license_supabase_desc" as const },
 ]
 
+// 오픈소스 라이선스 화면
 function LicenseList({ onBack }: { onBack: () => void }) {
   const t = useT()
   return (

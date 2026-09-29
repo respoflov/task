@@ -23,6 +23,7 @@ const CALENDAR_CHECK_PATHS = [
   "M8 2v3",
 ]
 
+// 스플래시 로고 path로 아이콘 SVG 문자열을 만든다 (배경 여백·모서리·아이콘 비율 조절)
 function buildSvg({ size, cornerRatio, bgPad, iconScale, roundedBg }) {
   const r = size * cornerRatio
   const iconBoxRatio = 0.5 // Splash: 28px icon in 56px box
@@ -45,6 +46,7 @@ function buildSvg({ size, cornerRatio, bgPad, iconScale, roundedBg }) {
   </svg>`
 }
 
+// SVG를 PNG로 렌더링해 저장한다
 function render(svg, size, outPath) {
   const resvg = new Resvg(svg, { fitTo: { mode: "width", value: size } })
   const png = resvg.render().asPng()
@@ -52,6 +54,7 @@ function render(svg, size, outPath) {
   console.log("wrote", outPath, size)
 }
 
+// 결과물을 저장할 public/ 폴더 (이 스크립트 위치 기준)
 const base = fileURLToPath(new URL("../public/", import.meta.url))
 
 // 홈 화면에서는 OS(iOS 스퀴클, Android 런처 등)가 아이콘 PNG 위에 자기 마스크를 또 씌운다.
@@ -63,6 +66,7 @@ render(buildSvg({ size: 512, cornerRatio: 0, bgPad: 0, iconScale: 1, roundedBg: 
 // maskable: OS가 알아서 마스킹하므로 배경은 코너 없이 꽉 채우고, 안전 영역(가장자리 ~12%)을 비워 아이콘을 더 작게
 render(buildSvg({ size: 512, cornerRatio: 0, bgPad: 0, iconScale: 0.72, roundedBg: false }), 512, base + "icon-512-maskable.png")
 
+// 파비콘은 둥근 배경까지 직접 그린 SVG로 저장한다
 const faviconSvg = buildSvg({ size: 56, cornerRatio: 0.45, bgPad: 0, iconScale: 1, roundedBg: true })
 writeFileSync(base + "favicon.svg", faviconSvg)
 console.log("wrote", base + "favicon.svg")

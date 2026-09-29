@@ -1,3 +1,4 @@
+// 년·월·일 스크롤 휠로 날짜를 고르는 바텀시트
 import { useEffect, useState } from "react"
 import { BottomSheet } from "./BottomSheet"
 import { WheelColumn, MONTH_LABEL, YEARS_BEFORE, YEARS_AFTER } from "./WheelColumn"

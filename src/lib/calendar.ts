@@ -1,5 +1,7 @@
+// 달력 격자(주 시작 요일 설정 반영)를 만드는 계산
 import { toDateStr, weekStartIndex, type WeekStart } from "./date"
 
+// 달력 칸 하나
 export interface CalendarCell {
   date: string // yyyy-mm-dd
   day: number

@@ -1,3 +1,4 @@
+// 마음가짐 문구 편집: 추가·수정·색 지정·삭제·길게 눌러 순서 바꾸기
 import { useState } from "react"
 import { ChevronRight, Feather, Trash2, Check, GripVertical } from "lucide-react"
 import { useAppData } from "@/context/AppDataContext"

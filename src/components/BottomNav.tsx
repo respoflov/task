@@ -1,7 +1,9 @@
+// 화면 아래 5칸 탭 막대
 import { CheckCircle2, LayoutGrid, Leaf, Flag, Settings2 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useT, type TKey } from "@/lib/i18n"
 
+// 탭 이름 (오늘·기록·마음가짐·프로젝트·설정)
 export type TabKey = "today" | "record" | "mindset" | "project" | "settings"
 
 const TABS: { key: TabKey; labelKey: TKey; icon: LucideIcon }[] = [
@@ -12,6 +14,7 @@ const TABS: { key: TabKey; labelKey: TKey; icon: LucideIcon }[] = [
   { key: "settings", labelKey: "nav_settings", icon: Settings2 },
 ]
 
+// 현재 탭을 강조하고 누르면 onChange로 탭을 바꾼다
 export function BottomNav({ active, onChange }: { active: TabKey; onChange: (t: TabKey) => void }) {
   const t = useT()
   return (

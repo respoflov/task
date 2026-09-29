@@ -1,5 +1,7 @@
+// 할 일 아이콘을 고르는 격자
 import { TASK_ICON_KEYS, NONE_ICON, getTaskIcon } from "@/lib/icons"
 
+// 아이콘 목록을 보여 주고 고른 아이콘 키를 onChange로 넘긴다
 export function IconPicker({ value, onChange }: { value: string; onChange: (key: string) => void }) {
   return (
     <div className="grid grid-cols-6 gap-2">

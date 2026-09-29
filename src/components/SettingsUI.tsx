@@ -1,3 +1,4 @@
+// 설정 화면 공용 UI 조각 (그룹·행·누를 수 있는 행·세그먼트)
 import { ChevronRight } from "lucide-react"
 import type { ReactNode, ComponentType } from "react"
 
@@ -12,10 +13,12 @@ export function SectionLabel({ children }: { children: ReactNode }) {
   )
 }
 
+// 설정 항목 묶음 카드
 export function Group({ children }: { children: ReactNode }) {
   return <div className="overflow-hidden rounded-[13px] border border-border bg-card">{children}</div>
 }
 
+// 제목과 오른쪽 컨트롤이 있는 설정 한 줄
 export function Row({
   icon: Icon,
   label,
@@ -36,6 +39,7 @@ export function Row({
   )
 }
 
+// 누르면 하위 화면으로 들어가는 설정 한 줄
 export function ClickRow({
   icon: Icon,
   label,
@@ -69,6 +73,7 @@ export function ClickRow({
   )
 }
 
+// 두세 개 중 하나를 고르는 세그먼트 버튼
 export function Segmented<T extends string>({
   value,
   options,

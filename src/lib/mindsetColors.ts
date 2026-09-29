@@ -5,8 +5,10 @@ import type { TKey } from "./i18n"
 // 문구 색상뿐 아니라, "내 이름표"(기기 식별용 색)에도 같은 팔레트를 재사용한다.
 export const MINDSET_COLOR_KEYS = ["terracotta", "indigo", "plum", "deepgreen", "olive", "charcoal"] as const
 
+// 마음가짐 문구 배경색 키
 export type MindsetColorKey = (typeof MINDSET_COLOR_KEYS)[number]
 
+// 색 키에 해당하는 CSS 변수
 export function mindsetBgVar(key: MindsetColorKey): string {
   return `var(--mind-bg-${key})`
 }

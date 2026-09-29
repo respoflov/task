@@ -1,8 +1,10 @@
+// 진입할 때 하루 한 번 보여 주는 마음가짐 문구 팝업
 import { useAppData } from "@/context/AppDataContext"
 import { pickMindsetQuote } from "@/lib/mindset"
 import { mindsetBgVar } from "@/lib/mindsetColors"
 import { useT } from "@/lib/i18n"
 
+// 설정한 순서(무작위·순서대로)로 문구 하나를 골라 보여 준다
 export function MindsetPopup({ onDismiss }: { onDismiss: () => void }) {
   const { data } = useAppData()
   const t = useT()

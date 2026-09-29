@@ -17,6 +17,7 @@ export function appliesToDate(task: FixedTask, dateStr: string): boolean {
   }
 }
 
+// 반복 할 일인지 (하루만 할 일이 아닌지)
 export function isRecurring(task: FixedTask): boolean {
   return task.repeat.kind !== "once"
 }

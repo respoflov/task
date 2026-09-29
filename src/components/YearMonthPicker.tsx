@@ -1,8 +1,10 @@
+// 기록 탭 달력의 년·월 스크롤 휠 피커
 import { useEffect, useState } from "react"
 import { BottomSheet } from "./BottomSheet"
 import { WheelColumn, MONTH_LABEL, YEARS_BEFORE, YEARS_AFTER } from "./WheelColumn"
 import { useT, useLang } from "@/lib/i18n"
 
+// 년·월을 휠로 고르는 바텀시트
 export function YearMonthPicker({
   open,
   onOpenChange,

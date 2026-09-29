@@ -1,3 +1,4 @@
+// 기록 탭: 달력(완료율 링)과 날짜별 상세, 네 가지 보기(전체·프로젝트별·오늘만·고정 항목별)
 import { useMemo, useRef, useState } from "react"
 import { ChevronLeft, ChevronRight, ChevronDown, Check, Plus, X } from "lucide-react"
 import { useAppData } from "@/context/AppDataContext"
@@ -20,6 +21,7 @@ import { NONE_ICON } from "@/lib/icons"
 import { mindsetBgVar } from "@/lib/mindsetColors"
 import type { AppData, FixedTask } from "@/lib/types"
 
+// 기록 탭의 보기 방식
 type Mode = "all" | "project" | "once" | "item"
 const MODES: Mode[] = ["all", "project", "once", "item"]
 const SWIPE_TRANSITION = "transform 280ms cubic-bezier(0.22, 1, 0.36, 1)"
@@ -41,6 +43,7 @@ function useSwipeCarousel(index: number, onChangeIndex: (i: number) => void, cou
   // pointermove 여러 번과 pointerup이 같은 틱 안에서 연달아 오면 아직 반영 안 된 값을 읽을 수 있다.
   const dragXRef = useRef(0)
 
+  // 누른 위치를 기억한다 (아직 가로·세로 판정 전)
   function onPointerDown(e: React.PointerEvent) {
     startX.current = e.clientX
     startY.current = e.clientY
@@ -48,6 +51,7 @@ function useSwipeCarousel(index: number, onChangeIndex: (i: number) => void, cou
     widthRef.current = containerRef.current?.clientWidth || 1
   }
 
+  // 움직임이 가로로 뚜렷하면 가로 드래그로 확정하고 화면을 따라 움직인다
   function onPointerMove(e: React.PointerEvent) {
     const dx = e.clientX - startX.current
     const dy = e.clientY - startY.current
@@ -74,6 +78,7 @@ function useSwipeCarousel(index: number, onChangeIndex: (i: number) => void, cou
     setDragX(next)
   }
 
+  // 손을 떼면 화면 폭의 22% 넘게 밀었을 때 옆 보기로 넘긴다
   function onPointerUp() {
     if (axisRef.current === "x") {
       const width = widthRef.current || 1
@@ -89,6 +94,7 @@ function useSwipeCarousel(index: number, onChangeIndex: (i: number) => void, cou
     axisRef.current = "none"
   }
 
+  // 스와이프 직후의 클릭 한 번을 막는다 (손가락 아래 버튼이 눌리지 않게)
   function onClickCapture(e: React.MouseEvent) {
     if (suppressClickRef.current) {
       e.preventDefault()
@@ -109,6 +115,7 @@ function useSwipeCarousel(index: number, onChangeIndex: (i: number) => void, cou
   }
 }
 
+// 기록 탭 본체
 export function RecordScreen() {
   const { data, isTaskCompleted, toggleCompletion, addTask, removeTask, updateTask } = useAppData()
   const t = useT()
@@ -137,6 +144,7 @@ export function RecordScreen() {
 
   const selectedTask = mode === "item" ? data.tasks.find((task) => task.id === taskId) : undefined
 
+  // 달력을 delta개월 앞뒤로 옮긴다
   function goMonth(delta: number) {
     const d = new Date(year, month0 + delta, 1)
     setYear(d.getFullYear())
@@ -144,12 +152,14 @@ export function RecordScreen() {
     setSelectedDate(null)
   }
 
+  // 달력을 특정 년·월로 옮긴다
   function goToMonth(y: number, m0: number) {
     setYear(y)
     setMonth0(m0)
     setSelectedDate(null)
   }
 
+  // 보기 방식을 바꾼다
   function changeMode(index: number) {
     setModeIndex(index)
     setSelectedDate(null)
@@ -511,6 +521,7 @@ function CalendarCard({
   )
 }
 
+// 미래 날짜에 "하루만" 할 일을 미리 잡아 두는 영역
 function FutureDateAdd({
   date,
   projects,
@@ -611,6 +622,7 @@ function FutureDateAdd({
   )
 }
 
+// 고른 날짜의 할 일 목록 (지난 날짜는 완료 체크·이름 수정 가능)
 function DateDetail({
   date,
   tasks,
@@ -638,11 +650,13 @@ function DateDetail({
   const [addName, setAddName] = useState("")
   const [addPid, setAddPid] = useState<string | null>(null)
 
+  // 할 일 이름 수정을 시작한다
   function startEdit(id: string, name: string) {
     setEditingId(id)
     setEditText(name)
   }
 
+  // 수정한 이름을 저장한다 (비어 있으면 취소)
   function commitEdit(id: string) {
     const trimmed = editText.trim()
     if (trimmed) updateTask(id, { name: trimmed })

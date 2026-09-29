@@ -1,8 +1,11 @@
+// UI 문구 번역(한국어·일본어·영어)과 번역 훅
 import { useAppData } from "@/context/AppDataContext"
 import type { AppSettings } from "./types"
 
+// 앱 언어
 export type Lang = AppSettings["language"]
 
+// 언어별 UI 문구 사전
 const dict = {
   // nav
   nav_today: { ko: "오늘", ja: "今日", en: "Today" },
@@ -387,8 +390,10 @@ const dict = {
   mindset_color_charcoal: { ko: "차콜", ja: "チャコール", en: "Charcoal" },
 } as const
 
+// 문구 키 이름
 export type TKey = keyof typeof dict
 
+// 키에 해당하는 문구를 선택한 언어로 돌려준다. {이름} 자리에는 vars 값을 넣는다
 export function translate(key: TKey, lang: Lang, vars?: Record<string, string | number>): string {
   let s: string = dict[key][lang] ?? dict[key].ko
   if (vars) {
@@ -399,6 +404,7 @@ export function translate(key: TKey, lang: Lang, vars?: Record<string, string | 
   return s
 }
 
+// 현재 언어 설정에 맞춘 번역 함수를 돌려주는 훅
 export function useT() {
   const { data } = useAppData()
   const lang = data.settings.language
@@ -412,6 +418,7 @@ export function useSubtitle(navKey: TKey): string {
   return lang === "en" ? translate(navKey, "ko") : translate(navKey, "en")
 }
 
+// 현재 언어 설정을 돌려주는 훅
 export function useLang(): Lang {
   const { data } = useAppData()
   return data.settings.language

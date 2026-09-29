@@ -1,3 +1,4 @@
+// 할 일 추가 바텀시트: 이름·아이콘·반복(매일·요일·하루만)·프로젝트
 import { useEffect, useState } from "react"
 import { BottomSheet } from "./BottomSheet"
 import { IconPicker } from "./IconPicker"
@@ -10,6 +11,7 @@ import { useT, useLang } from "@/lib/i18n"
 // WEEKDAY_HEADER는 월요일 시작(0=월..6=일) — Date#getDay() 값(0=일..6=토)으로 매핑한다.
 const WEEKDAY_VALUES = [1, 2, 3, 4, 5, 6, 0]
 
+// 새 할 일을 입력받아 저장한다
 export function TaskAddSheet({
   open,
   onOpenChange,

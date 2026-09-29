@@ -1,8 +1,10 @@
+// 프로젝트에 마일스톤을 추가하는 바텀시트
 import { useState } from "react"
 import { BottomSheet } from "./BottomSheet"
 import { useAppData } from "@/context/AppDataContext"
 import { useT } from "@/lib/i18n"
 
+// 마일스톤 제목과 목표 시점을 입력받는다
 export function MilestoneAddSheet({
   open,
   onOpenChange,

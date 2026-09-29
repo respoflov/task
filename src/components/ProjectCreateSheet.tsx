@@ -1,3 +1,4 @@
+// 새 프로젝트를 만드는 바텀시트
 import { useState } from "react"
 import { ChevronDown } from "lucide-react"
 import { BottomSheet } from "./BottomSheet"
@@ -6,6 +7,7 @@ import { useAppData } from "@/context/AppDataContext"
 import { todayStr } from "@/lib/date"
 import { useT } from "@/lib/i18n"
 
+// 프로젝트 이름과 시작일을 입력받는다
 export function ProjectCreateSheet({
   open,
   onOpenChange,
