@@ -30,3 +30,9 @@ node scripts/gen_icons_from_splash.mjs
 ## 참고
 
 - `npm audit`에서 `vite-plugin-pwa` → `workbox-build` 경유 transitive 의존성에 high severity 권고가 뜰 수 있습니다. 빌드 타임에만 쓰이는 개발 도구 체인이라 배포 결과물에는 포함되지 않습니다.
+
+## 라이선스
+
+Copyright 2026 respoflov
+
+이 저장소의 코드는 [Apache License 2.0](LICENSE)을 따릅니다. 앱이 사용하는 외부 폰트·라이브러리는 각자의 라이선스를 따릅니다.
